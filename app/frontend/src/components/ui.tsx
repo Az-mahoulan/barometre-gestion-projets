@@ -1,10 +1,10 @@
-import { useId, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import type { Health } from "@/lib/types";
 
-import { COLOR_ICONS, DUO_ICONS, MONO_ICONS } from "./icons.generated";
+import { DUO_ICONS, MONO_ICONS } from "./icons.generated";
 
-/** Icône monochrome (Fluent, Microsoft) : prend la couleur du texte. */
+/** Icône au trait (Solar) : prend la couleur du texte. */
 export function Icon({ name, className = "h-[18px] w-[18px]" }: { name: string; className?: string }) {
   const icon = MONO_ICONS[name];
   if (!icon) return null;
@@ -12,7 +12,6 @@ export function Icon({ name, className = "h-[18px] w-[18px]" }: { name: string; 
     <svg
       viewBox={icon.viewBox}
       className={`shrink-0 ${className}`}
-      fill="currentColor"
       aria-hidden="true"
       dangerouslySetInnerHTML={{ __html: icon.body }}
     />
@@ -24,15 +23,6 @@ export function DuoIcon({ name, className = "h-10 w-10" }: { name: string; class
   const icon = DUO_ICONS[name];
   if (!icon) return null;
   return <svg viewBox={icon.viewBox} className={`shrink-0 ${className}`} aria-hidden="true" dangerouslySetInnerHTML={{ __html: icon.body }} />;
-}
-
-/** Icône en couleur (Fluent Color). Les identifiants de dégradés sont rendus uniques pour chaque occurrence. */
-export function ColorIcon({ name, className = "h-10 w-10" }: { name: string; className?: string }) {
-  const uid = useId().replace(/:/g, "");
-  const icon = COLOR_ICONS[name];
-  if (!icon) return null;
-  const body = icon.body.replace(/id="([^"]+)"/g, `id="${uid}$1"`).replace(/url\(#([^)]+)\)/g, `url(#${uid}$1)`);
-  return <svg viewBox={icon.viewBox} className={`shrink-0 ${className}`} aria-hidden="true" dangerouslySetInnerHTML={{ __html: body }} />;
 }
 
 const HEALTH: Record<Health, { label: string; className: string }> = {

@@ -1,4 +1,5 @@
-// Génère src/components/icons.generated.ts via Iconify : Fluent (Microsoft, licence MIT) et Solar (480 Design, licence CC BY 4.0).
+// Génère src/components/icons.generated.ts depuis la bibliothèque Solar (480 Design, licence CC BY 4.0) via Iconify.
+// Les icônes sont des SVG monochromes : elles prennent la couleur du texte (couleurs de la plateforme).
 // Seules les icônes listées ici sont incluses dans l'application. Relancer : node scripts/generate-icons.mjs
 import { writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -6,43 +7,32 @@ import { createRequire } from "node:module";
 import { getIconData, iconToSVG } from "@iconify/utils";
 
 const require = createRequire(import.meta.url);
-const mono = require("@iconify-json/fluent/icons.json");
-const color = require("@iconify-json/fluent-color/icons.json");
 const solar = require("@iconify-json/solar/icons.json");
 
-// Nom utilisé dans l'application → icône Fluent monochrome (suit la couleur du texte).
+// Interface (menu, recherche, actions) : version « trait ».
 const MONO = {
-  grid: "grid-24-regular",
-  folder: "folder-24-regular",
-  task: "task-list-square-ltr-24-regular",
-  calendar: "calendar-24-regular",
-  users: "people-team-24-regular",
-  chart: "data-bar-vertical-24-regular",
-  shield: "shield-24-regular",
-  gear: "settings-24-regular",
-  search: "search-24-regular",
-  bell: "alert-24-regular",
-  sparkle: "sparkle-24-regular",
-  upload: "arrow-upload-24-regular",
-  send: "send-24-regular",
-  flag: "flag-24-regular",
-  clock: "clock-24-regular",
-  check: "checkmark-24-regular",
-  chevron: "chevron-down-24-regular",
-  pin: "location-24-regular",
-  logout: "sign-out-24-regular",
+  grid: "widget-2-linear",
+  folder: "folder-linear",
+  task: "checklist-minimalistic-linear",
+  calendar: "calendar-linear",
+  users: "users-group-rounded-linear",
+  chart: "chart-2-linear",
+  shield: "shield-user-linear",
+  gear: "settings-linear",
+  search: "magnifer-linear",
+  bell: "bell-linear",
+  sparkle: "magic-stick-3-linear",
+  upload: "upload-linear",
+  send: "plain-2-linear",
+  flag: "flag-linear",
+  clock: "clock-circle-linear",
+  check: "check-circle-linear",
+  chevron: "alt-arrow-down-linear",
+  pin: "map-point-linear",
+  logout: "logout-2-linear",
 };
 
-// Nom utilisé dans l'application → icône Fluent en couleur (couleurs propres à l'icône).
-const COLOR = {
-  todo: "clipboard-text-edit-24",
-  doing: "people-sync-24",
-  done: "clipboard-task-24",
-  review: "person-feedback-24",
-  approved: "checkmark-circle-24",
-};
-
-// Nom utilisé dans l'application → icône Solar pleine à deux tons (prend la couleur du texte).
+// Tuiles de progression des tâches : version pleine à deux tons.
 const DUO = {
   todo: "inbox-bold-duotone",
   doing: "stopwatch-play-bold-duotone",
@@ -51,10 +41,10 @@ const DUO = {
   approved: "verified-check-bold-duotone",
 };
 
-function build(set, map) {
+function build(map) {
   return Object.fromEntries(
     Object.entries(map).map(([key, name]) => {
-      const data = getIconData(set, name);
+      const data = getIconData(solar, name);
       if (!data) throw new Error(`Icône introuvable : ${name}`);
       const svg = iconToSVG(data);
       return [key, { body: svg.body, viewBox: svg.attributes.viewBox }];
@@ -63,13 +53,11 @@ function build(set, map) {
 }
 
 const out = `// Fichier généré par scripts/generate-icons.mjs : ne pas modifier à la main.
-// Icônes Fluent UI System Icons (Microsoft, licence MIT) et Solar (480 Design, licence CC BY 4.0).
+// Icônes Solar (480 Design), licence CC BY 4.0.
 
-export const MONO_ICONS: Record<string, { body: string; viewBox: string }> = ${JSON.stringify(build(mono, MONO), null, 2)};
+export const MONO_ICONS: Record<string, { body: string; viewBox: string }> = ${JSON.stringify(build(MONO), null, 2)};
 
-export const COLOR_ICONS: Record<string, { body: string; viewBox: string }> = ${JSON.stringify(build(color, COLOR), null, 2)};
-
-export const DUO_ICONS: Record<string, { body: string; viewBox: string }> = ${JSON.stringify(build(solar, DUO), null, 2)};
+export const DUO_ICONS: Record<string, { body: string; viewBox: string }> = ${JSON.stringify(build(DUO), null, 2)};
 `;
 writeFileSync(new URL("../src/components/icons.generated.ts", import.meta.url), out);
 console.log("icons.generated.ts : ok");

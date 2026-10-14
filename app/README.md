@@ -74,4 +74,4 @@ Ne jamais lancer `seed_demo` en production.
 
 ## Crédits
 
-- Icônes : [Fluent UI System Icons](https://github.com/microsoft/fluentui-system-icons) (Microsoft, licence MIT) et [Solar](https://www.figma.com/community/file/1166831539721848736) (480 Design, licence CC BY 4.0), via [Iconify](https://iconify.design). Liste des icônes utilisées : `frontend/scripts/generate-icons.mjs`.
+- Icônes : [Solar](https://www.figma.com/community/file/1166831539721848736) (480 Design, licence CC BY 4.0), via [Iconify](https://iconify.design). Liste des icônes utilisées : `frontend/scripts/generate-icons.mjs`.
