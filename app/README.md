@@ -74,4 +74,4 @@ Ne jamais lancer `seed_demo` en production.
 
 ## Crédits
 
-- Icônes : [Solar](https://www.figma.com/community/file/1166831539721848736) (480 Design, licence CC BY 4.0), via [Iconify](https://iconify.design). Liste des icônes utilisées : `frontend/scripts/generate-icons.mjs`.
+- Icônes : [Solar](https://www.figma.com/community/file/1166831539721848736) (480 Design, CC BY 4.0), [Font Awesome Free](https://fontawesome.com/license/free) (CC BY 4.0) et [Material Symbols](https://fonts.google.com/icons) (Google, Apache 2.0), via [Iconify](https://iconify.design). Liste des icônes utilisées : `frontend/scripts/generate-icons.mjs`.

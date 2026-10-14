@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import type { Health } from "@/lib/types";
 
-import { DUO_ICONS, MONO_ICONS } from "./icons.generated";
+import { MONO_ICONS, TILE_ICONS } from "./icons.generated";
 
 /** Icône au trait (Solar) : prend la couleur du texte. */
 export function Icon({ name, className = "h-[18px] w-[18px]" }: { name: string; className?: string }) {
@@ -18,9 +18,9 @@ export function Icon({ name, className = "h-[18px] w-[18px]" }: { name: string; 
   );
 }
 
-/** Icône pleine à deux tons (Solar) : prend la couleur du texte, le second ton est une version atténuée. */
-export function DuoIcon({ name, className = "h-10 w-10" }: { name: string; className?: string }) {
-  const icon = DUO_ICONS[name];
+/** Icône pleine des tuiles de progression : prend la couleur du texte. */
+export function TileIcon({ name, className = "h-10 w-10" }: { name: string; className?: string }) {
+  const icon = TILE_ICONS[name];
   if (!icon) return null;
   return <svg viewBox={icon.viewBox} className={`shrink-0 ${className}`} aria-hidden="true" dangerouslySetInnerHTML={{ __html: icon.body }} />;
 }

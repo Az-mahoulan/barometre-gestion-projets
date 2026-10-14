@@ -1,4 +1,5 @@
-// Génère src/components/icons.generated.ts depuis la bibliothèque Solar (480 Design, licence CC BY 4.0) via Iconify.
+// Génère src/components/icons.generated.ts via Iconify : Solar (480 Design, CC BY 4.0), Font Awesome Free (CC BY 4.0)
+// et Material Symbols (Google, Apache 2.0).
 // Les icônes sont des SVG monochromes : elles prennent la couleur du texte (couleurs de la plateforme).
 // Seules les icônes listées ici sont incluses dans l'application. Relancer : node scripts/generate-icons.mjs
 import { writeFileSync } from "node:fs";
@@ -8,6 +9,8 @@ import { getIconData, iconToSVG } from "@iconify/utils";
 
 const require = createRequire(import.meta.url);
 const solar = require("@iconify-json/solar/icons.json");
+const fa = require("@iconify-json/fa6-solid/icons.json");
+const material = require("@iconify-json/material-symbols/icons.json");
 
 // Interface (menu, recherche, actions) : version « trait ».
 const MONO = {
@@ -32,19 +35,20 @@ const MONO = {
   logout: "logout-2-linear",
 };
 
-// Tuiles de progression des tâches : version pleine à deux tons.
-const DUO = {
-  todo: "inbox-bold-duotone",
-  doing: "stopwatch-play-bold-duotone",
-  done: "clipboard-check-bold-duotone",
-  review: "magnifer-bold-duotone",
-  approved: "verified-check-bold-duotone",
+// Tuiles de progression des tâches : icônes pleines, d'après la référence « Task Flow » fournie.
+const TILES = {
+  todo: [fa, "box-archive"],
+  doing: [fa, "users-gear"],
+  done: [fa, "flag"],
+  review: [material, "youtube-searched-for"],
+  approved: [fa, "circle-check"],
 };
 
 function build(map) {
   return Object.fromEntries(
-    Object.entries(map).map(([key, name]) => {
-      const data = getIconData(solar, name);
+    Object.entries(map).map(([key, entry]) => {
+      const [set, name] = Array.isArray(entry) ? entry : [solar, entry];
+      const data = getIconData(set, name);
       if (!data) throw new Error(`Icône introuvable : ${name}`);
       const svg = iconToSVG(data);
       return [key, { body: svg.body, viewBox: svg.attributes.viewBox }];
@@ -53,11 +57,11 @@ function build(map) {
 }
 
 const out = `// Fichier généré par scripts/generate-icons.mjs : ne pas modifier à la main.
-// Icônes Solar (480 Design), licence CC BY 4.0.
+// Icônes Solar (480 Design, CC BY 4.0), Font Awesome Free (CC BY 4.0) et Material Symbols (Google, Apache 2.0).
 
 export const MONO_ICONS: Record<string, { body: string; viewBox: string }> = ${JSON.stringify(build(MONO), null, 2)};
 
-export const DUO_ICONS: Record<string, { body: string; viewBox: string }> = ${JSON.stringify(build(DUO), null, 2)};
+export const TILE_ICONS: Record<string, { body: string; viewBox: string }> = ${JSON.stringify(build(TILES), null, 2)};
 `;
 writeFileSync(new URL("../src/components/icons.generated.ts", import.meta.url), out);
 console.log("icons.generated.ts : ok");
