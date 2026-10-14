@@ -18,11 +18,35 @@ async function ensureCsrf(): Promise<string> {
   const existing = readCookie("csrftoken");
   if (existing) return existing;
   const res = await fetch("/api/v1/auth/csrf/", { credentials: "same-origin" });
+  if (!res.ok) throw await parseError(res);
   const data = (await res.json()) as { csrfToken: string };
   return data.csrfToken;
 }
 
+// L'hébergement de démonstration met le serveur en veille : pendant son réveil (≈ 1 min), le proxy répond 502 à 504.
+const WAKING_STATUSES = [502, 503, 504];
+
+export function isWaking(e: unknown): boolean {
+  return e instanceof ApiError && WAKING_STATUSES.includes(e.status);
+}
+
+/** Relance l'appel toutes les 5 s tant que le serveur se réveille (2 min au plus). */
+export async function retryWhileWaking<T>(call: () => Promise<T>, onWaiting?: () => void, signal?: AbortSignal): Promise<T> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await call();
+    } catch (e) {
+      if (!isWaking(e) || attempt >= 24 || signal?.aborted) throw e;
+      onWaiting?.();
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
+  }
+}
+
 async function parseError(res: Response): Promise<ApiError> {
+  if (WAKING_STATUSES.includes(res.status)) {
+    return new ApiError(res.status, "Le serveur démarre. Réessayez dans une minute.");
+  }
   let message = "Une erreur est survenue.";
   try {
     const body = await res.json();

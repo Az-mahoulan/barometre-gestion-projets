@@ -4,12 +4,13 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Icon } from "@/components/ui";
-import { apiPost } from "@/lib/api";
+import { apiPost, retryWhileWaking } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [waking, setWaking] = useState(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -17,11 +18,16 @@ export default function LoginPage() {
     setPending(true);
     setError(null);
     try {
-      await apiPost("/auth/login/", { username: form.get("username"), password: form.get("password") });
+      await retryWhileWaking(
+        () => apiPost("/auth/login/", { username: form.get("username"), password: form.get("password") }),
+        () => setWaking(true),
+      );
       router.replace("/");
     } catch (err) {
       setError((err as Error).message);
       setPending(false);
+    } finally {
+      setWaking(false);
     }
   }
 
@@ -54,7 +60,7 @@ export default function LoginPage() {
         )}
 
         <button type="submit" className="btn btn-dark mt-6 w-full justify-center" disabled={pending}>
-          {pending ? "Connexion…" : "Se connecter"}
+          {waking ? "Démarrage du serveur (≈ 1 min)…" : pending ? "Connexion…" : "Se connecter"}
         </button>
       </form>
     </main>

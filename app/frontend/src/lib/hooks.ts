@@ -2,24 +2,26 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { ApiError, apiGet } from "./api";
+import { ApiError, apiGet, retryWhileWaking } from "./api";
 import type { Country, Dashboard, Me, Period } from "./types";
 
 export function useMe() {
   const [me, setMe] = useState<Me | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
+  const [waking, setWaking] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
-    apiGet<Me>("/auth/me/", controller.signal)
+    retryWhileWaking(() => apiGet<Me>("/auth/me/", controller.signal), () => setWaking(true), controller.signal)
       .then(setMe)
       .catch((e) => {
         if (e.name !== "AbortError") setError(e as ApiError);
-      });
+      })
+      .finally(() => setWaking(false));
     return () => controller.abort();
   }, []);
 
-  return { me, error };
+  return { me, error, waking };
 }
 
 export function useCountries(enabled: boolean) {

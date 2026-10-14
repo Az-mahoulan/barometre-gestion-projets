@@ -26,7 +26,7 @@ const SCOPE_LABEL = { all: "Tous les projets", owned: "Projets dont vous avez la
 
 export function DashboardView() {
   const router = useRouter();
-  const { me, error: meError } = useMe();
+  const { me, error: meError, waking } = useMe();
   const countries = useCountries(!!me);
 
   const [country, setCountry] = useState("");
@@ -91,10 +91,31 @@ export function DashboardView() {
     }
   }
 
+  if (meError && meError.status !== 401 && meError.status !== 403) {
+    return (
+      <div className="grid min-h-screen place-items-center p-6 text-center">
+        <div>
+          <p className="font-medium">Le serveur ne répond pas.</p>
+          <p className="mt-1 text-sm text-muted">{meError.message}</p>
+          <button className="btn btn-dark mt-4" onClick={() => window.location.reload()}>
+            Réessayer
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!me || (loading && !data)) {
     return (
-      <div className="grid min-h-screen place-items-center text-muted" role="status">
-        Chargement…
+      <div className="grid min-h-screen place-items-center p-6 text-center text-muted" role="status">
+        {waking ? (
+          <div>
+            <p className="font-medium text-ink">Démarrage du serveur…</p>
+            <p className="mt-1 text-sm">Après une période d’inactivité, cela prend environ une minute. La page s’affichera toute seule.</p>
+          </div>
+        ) : (
+          "Chargement…"
+        )}
       </div>
     );
   }
