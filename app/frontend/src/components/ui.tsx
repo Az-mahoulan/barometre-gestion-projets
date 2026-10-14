@@ -1,28 +1,72 @@
 import type { ReactNode } from "react";
+import type { IconType } from "react-icons";
+import { FaBoxArchive, FaCircleCheck, FaFlag, FaUsersGear } from "react-icons/fa6";
+import {
+  LuBell,
+  LuCalendarDays,
+  LuChartNoAxesColumn,
+  LuCheck,
+  LuChevronDown,
+  LuClock,
+  LuFlag,
+  LuFolder,
+  LuLayoutGrid,
+  LuListChecks,
+  LuLogOut,
+  LuMapPin,
+  LuSearch,
+  LuSend,
+  LuSettings,
+  LuShieldCheck,
+  LuSparkles,
+  LuUpload,
+  LuUsers,
+} from "react-icons/lu";
+import { MdYoutubeSearchedFor } from "react-icons/md";
 
 import type { Health } from "@/lib/types";
 
-import { MONO_ICONS, TILE_ICONS } from "./icons.generated";
 
-/** Icône au trait (Solar) : prend la couleur du texte. */
+// Icônes de l'interface : Lucide (au trait), importées via react-icons. Elles prennent la couleur du texte.
+const ICONS: Record<string, IconType> = {
+  grid: LuLayoutGrid,
+  folder: LuFolder,
+  task: LuListChecks,
+  calendar: LuCalendarDays,
+  users: LuUsers,
+  chart: LuChartNoAxesColumn,
+  shield: LuShieldCheck,
+  gear: LuSettings,
+  search: LuSearch,
+  bell: LuBell,
+  sparkle: LuSparkles,
+  upload: LuUpload,
+  send: LuSend,
+  flag: LuFlag,
+  clock: LuClock,
+  check: LuCheck,
+  chevron: LuChevronDown,
+  pin: LuMapPin,
+  logout: LuLogOut,
+};
+
 export function Icon({ name, className = "h-[18px] w-[18px]" }: { name: string; className?: string }) {
-  const icon = MONO_ICONS[name];
-  if (!icon) return null;
-  return (
-    <svg
-      viewBox={icon.viewBox}
-      className={`shrink-0 ${className}`}
-      aria-hidden="true"
-      dangerouslySetInnerHTML={{ __html: icon.body }}
-    />
-  );
+  const Svg = ICONS[name];
+  return Svg ? <Svg className={`shrink-0 ${className}`} aria-hidden="true" /> : null;
 }
 
-/** Icône pleine des tuiles de progression : prend la couleur du texte. */
-export function TileIcon({ name, className = "h-10 w-10" }: { name: string; className?: string }) {
-  const icon = TILE_ICONS[name];
-  if (!icon) return null;
-  return <svg viewBox={icon.viewBox} className={`shrink-0 ${className}`} aria-hidden="true" dangerouslySetInnerHTML={{ __html: icon.body }} />;
+// Icônes des tuiles de progression : Font Awesome et Material (pleines), comme la référence « Task Flow ».
+const TILE_ICONS: Record<string, IconType> = {
+  todo: FaBoxArchive,
+  doing: FaUsersGear,
+  done: FaFlag,
+  review: MdYoutubeSearchedFor,
+  approved: FaCircleCheck,
+};
+
+export function TileIcon({ name, className = "h-9 w-9" }: { name: string; className?: string }) {
+  const Svg = TILE_ICONS[name];
+  return Svg ? <Svg className={`shrink-0 ${className}`} aria-hidden="true" /> : null;
 }
 
 const HEALTH: Record<Health, { label: string; className: string }> = {

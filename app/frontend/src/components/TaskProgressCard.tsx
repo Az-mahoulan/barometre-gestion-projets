@@ -2,7 +2,7 @@ import type { Dashboard, GanttProject } from "@/lib/types";
 
 import { CardHeader, TileIcon } from "./ui";
 
-// Couleur de chaque statut : libellé, icône et part du demi-anneau.
+// Couleur de chaque statut : libellé, icône et part dans la barre de répartition.
 const STATUS_COLOR: Record<string, string> = {
   todo: "#6b7280",
   doing: "#2a56c6",
@@ -22,15 +22,9 @@ export function TaskProgressCard({
   value: string;
   onChange: (id: string) => void;
 }) {
-  // Demi-anneau : les statuts occupent la moitié supérieure d'un cercle en dégradé conique.
   const total = Math.max(progress.total, 1);
-  const stops = progress.statuses
-    .filter((s) => s.count > 0)
-    .map((s, i, all) => {
-      const from = all.slice(0, i).reduce((sum, x) => sum + x.count, 0);
-      return `${STATUS_COLOR[s.key]} ${(from / total) * 50}% ${((from + s.count) / total) * 50}%`;
-    });
-  const gradient = `conic-gradient(from -90deg, ${stops.join(", ") || "#e6ebe8 0% 50%"}, transparent 50% 100%)`;
+  const finished = progress.statuses.filter((s) => s.key === "done" || s.key === "approved").reduce((sum, s) => sum + s.count, 0);
+  const finishedPct = Math.round((finished / total) * 100);
 
   return (
     <section className="card flex flex-col" aria-label="Progression des tâches">
@@ -71,28 +65,46 @@ export function TaskProgressCard({
         ))}
       </ul>
 
-      <div className="flex flex-1 flex-col items-center justify-center pt-5">
+      {/* Barre de flux : la part de chaque statut, de « En attente » à « Approuvé », sur une seule ligne. */}
+      <div className="flex flex-1 flex-col justify-center pt-6">
+        <div className="flex items-baseline justify-between gap-3">
+          <span className="text-[13px] font-medium text-ink-2">Répartition des {progress.total} tâches</span>
+          <span className="text-[13px] text-muted">
+            <b className="text-[20px] font-semibold text-ink">{finishedPct} %</b> terminées
+          </span>
+        </div>
         <div
-          className="relative h-[122px] w-[240px] overflow-hidden"
+          className="mt-3 flex h-3.5 w-full gap-[3px] overflow-hidden rounded-full"
           role="img"
           aria-label={`Répartition des ${progress.total} tâches : ${progress.statuses.map((s) => `${s.label} ${s.pct} %`).join(", ")}`}
         >
-          <div className="h-[240px] w-[240px] rounded-full" style={{ background: gradient }} />
-          <div className="absolute left-9 top-9 h-[168px] w-[168px] rounded-full bg-surface" />
-          <div className="absolute inset-x-0 bottom-0 text-center">
-            <b className="text-[32px] font-semibold leading-none tracking-[-1px]">{progress.total}</b>
-            <div className="text-[12.5px] text-muted">tâches</div>
-          </div>
+          {progress.statuses
+            .filter((s) => s.count > 0)
+            .map((s) => (
+              <span
+                key={s.key}
+                className="h-full first:rounded-l-full last:rounded-r-full"
+                style={{ width: `${(s.count / total) * 100}%`, background: STATUS_COLOR[s.key] }}
+                title={`${s.label} : ${s.count} (${s.pct} %)`}
+              />
+            ))}
         </div>
-        <div className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1 text-[12px] text-muted">
+        <ul className="mt-3 grid grid-cols-3 gap-2.5 text-center text-[12px] sm:grid-cols-5">
           {progress.statuses.map((s) => (
-            <span key={s.key} className="inline-flex items-center gap-1.5">
-              <i className="inline-block h-2 w-2 rounded-[2px]" style={{ background: STATUS_COLOR[s.key] }} />
-              {s.label} {s.pct} %
-            </span>
+            <li key={s.key}>
+              <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-muted">
+                <i className="inline-block h-2 w-2 shrink-0 rounded-full" style={{ background: STATUS_COLOR[s.key] }} />
+                {s.label}
+              </span>
+              <b className="mt-0.5 block text-[15px] font-semibold">{s.pct} %</b>
+            </li>
           ))}
-        </div>
-        {progress.overdue > 0 && <p className="mt-2 text-[12.5px] text-late">{progress.overdue} en retard</p>}
+        </ul>
+        {progress.overdue > 0 && (
+          <p className="mt-4 rounded-lg bg-late-soft px-3 py-2 text-[12.5px] text-late">
+            {progress.overdue} tâche{progress.overdue > 1 ? "s" : ""} en retard sur leur échéance
+          </p>
+        )}
       </div>
     </section>
   );
