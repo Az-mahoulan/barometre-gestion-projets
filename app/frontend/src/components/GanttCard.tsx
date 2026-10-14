@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { monthShort, parseDate, shortDate } from "@/lib/format";
 import type { GanttProject } from "@/lib/types";
 
-import { CardHeader, HEALTH_BAR } from "./ui";
+import { HEALTH_BAR, Section } from "./ui";
 
 function firstOfMonth(d: Date, offset = 0) {
   return new Date(d.getFullYear(), d.getMonth() + offset, 1);
@@ -39,7 +39,9 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
             key: p.id,
             label: p.name,
             sub: p.next_milestone
-              ? `${p.next_milestone.overdue ? "Jalon dépassé" : p.next_milestone.name} · ${shortDate(p.next_milestone.date)}`
+              ? p.next_milestone.overdue
+                ? `Jalon dépassé le ${shortDate(p.next_milestone.date)}`
+                : `${p.next_milestone.name}, ${shortDate(p.next_milestone.date)}`
               : p.status === "active"
                 ? "Tous les jalons sont atteints"
                 : "Achevé",
@@ -49,7 +51,7 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
             progress: p.progress,
             color: HEALTH_BAR[p.health],
             muted: p.status !== "active",
-            tip: `${p.name} · ${shortDate(p.start)} → ${shortDate(p.end)} · ${Math.round(p.progress * 100)} % réalisé`,
+            tip: `${p.name}, du ${shortDate(p.start)} au ${shortDate(p.end)}, ${Math.round(p.progress * 100)} % réalisé`,
           }))
         : (current?.activities ?? []).map((a) => ({
             key: a.id,
@@ -59,7 +61,7 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
             end: parseDate(a.end),
             progress: a.progress,
             color: current ? HEALTH_BAR[current.health] : "var(--bar-ok)",
-            tip: `${a.name} · ${shortDate(a.start)} → ${shortDate(a.end)}`,
+            tip: `${a.name}, du ${shortDate(a.start)} au ${shortDate(a.end)}`,
           }));
     const pool = tab === "projects" ? list.filter((r) => !r.muted) : list;
     const base = pool.length ? pool : list;
@@ -79,11 +81,11 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
   const ownTodayLine = todayPos !== null;
 
   return (
-    <section className="card pb-3" aria-label="Gantt des projets">
-      <CardHeader
-        title="Gantt des projets"
-        aside={
-          <div className="flex overflow-hidden rounded-[9px] border border-line-strong text-[12.5px] text-ink-2" role="group" aria-label="Vue">
+    <Section
+      title="Gantt des projets"
+      bodyClassName="px-5 pb-4 pt-3"
+      aside={
+          <div className="flex rounded-lg bg-[#eceeed] p-0.5 text-[13px]" role="group" aria-label="Vue">
             {(
               [
                 ["projects", "Projets"],
@@ -94,17 +96,17 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
                 key={key}
                 aria-pressed={tab === key}
                 onClick={() => setTab(key)}
-                className={`px-3 py-1.5 ${tab === key ? "bg-ink text-white" : "bg-surface"}`}
+                className={`rounded-md px-3 py-1 ${tab === key ? "bg-surface font-medium text-ink shadow-[0_0_0_1px_var(--line)]" : "text-ink-2"}`}
               >
                 {label}
               </button>
             ))}
           </div>
-        }
-      />
+      }
+    >
 
       {tab === "detail" && (
-        <div className="mb-2">
+        <div className="mb-2 mt-1">
           <label className="sr-only" htmlFor="gantt-project">
             Projet
           </label>
@@ -119,15 +121,15 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
       )}
 
       {rows.length === 0 ? (
-        <p className="py-6 text-sm text-muted">Aucun projet pour ces filtres.</p>
+        <p className="py-6 text-muted">Aucun projet pour ces filtres.</p>
       ) : (
         <div className="overflow-x-auto">
-          <div className="relative min-w-[640px] pb-6">
-            <div className="flex h-6 items-center text-[11.5px] text-muted">
-              <div className="w-[200px] shrink-0" />
-              <div className="relative h-6 flex-1">
+          <div className={`relative min-w-[640px] ${ownTodayLine ? "pb-6" : ""}`}>
+            <div className="flex h-8 items-center text-[12px] text-muted">
+              <div className="w-[210px] shrink-0" />
+              <div className="relative h-8 flex-1">
                 {months.map((m) => (
-                  <span key={m.getTime()} className="absolute" style={{ left: `${pos(m)}%` }}>
+                  <span key={m.getTime()} className="absolute top-2 border-l border-line-soft pl-1.5" style={{ left: `${pos(m)}%` }}>
                     {monthShort(m)}
                   </span>
                 ))}
@@ -135,33 +137,35 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
             </div>
 
             {rows.map((r) => (
-              <div key={r.key} className="flex h-[46px] items-center border-t border-[#f1f3f5]">
-                <div className="w-[200px] shrink-0 overflow-hidden whitespace-nowrap pr-2">
-                  <span className="block truncate text-[13px]">{r.label}</span>
-                  {r.sub && <span className={`block text-[11.5px] ${r.subLate ? "text-late" : "text-muted"}`}>{r.sub}</span>}
+              <div key={r.key} className="flex h-[50px] items-center border-t border-line-soft">
+                <div className="w-[210px] shrink-0 overflow-hidden whitespace-nowrap pr-3">
+                  <span className={`block truncate ${r.muted ? "text-muted" : ""}`}>{r.label}</span>
+                  {r.sub && <span className={`block truncate text-[12px] ${r.subLate ? "text-late" : "text-muted"}`}>{r.sub}</span>}
                 </div>
-                <div className="relative h-[46px] flex-1">
+                <div className="relative h-[50px] flex-1">
                   <div
                     title={r.tip}
-                    className="absolute top-[19px] h-2 overflow-hidden rounded-full"
+                    className="absolute top-[22px] h-1.5 overflow-hidden rounded-[2px]"
                     style={{
                       left: `${pos(r.start)}%`,
                       width: `${Math.max(1, pos(r.end) - pos(r.start))}%`,
                       background: "var(--track)",
-                      opacity: r.muted ? 0.55 : 1,
                     }}
                   >
-                    <div className="h-full rounded-full" style={{ width: `${r.progress * 100}%`, background: r.color }} />
+                    <div className="h-full" style={{ width: `${r.progress * 100}%`, background: r.color }} />
                   </div>
                 </div>
               </div>
             ))}
 
             {ownTodayLine && (
-              <div className="pointer-events-none absolute bottom-6 top-6" style={{ left: 200, right: 0 }}>
-                <div className="absolute bottom-0 top-0 border-l border-ink" style={{ left: `${todayPos}%` }} />
-                <span className="absolute -bottom-5 -translate-x-1/2 text-[11.5px] font-medium" style={{ left: `${todayPos}%` }}>
-                  Aujourd’hui
+              <div className="pointer-events-none absolute bottom-6 top-7" style={{ left: 210, right: 0 }}>
+                <div className="absolute bottom-0 top-0 border-l border-ink/70" style={{ left: `${todayPos}%` }} />
+                <span
+                  className="absolute -bottom-6 -translate-x-1/2 whitespace-nowrap rounded bg-ink px-1.5 text-[12px] font-medium leading-[18px] text-white"
+                  style={{ left: `${todayPos}%` }}
+                >
+                  Aujourd’hui, {today.getDate()} {monthShort(today)}
                 </span>
               </div>
             )}
@@ -169,7 +173,7 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
         </div>
       )}
 
-      <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted">
+      <div className="mt-3 flex flex-wrap items-center gap-5 border-t border-line-soft pt-3 text-[12px] text-muted">
         {(
           [
             ["Dans les temps", "var(--bar-ok)"],
@@ -178,11 +182,12 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
           ] as const
         ).map(([label, color]) => (
           <span key={label} className="inline-flex items-center gap-1.5">
-            <i className="inline-block h-[5px] w-3.5 rounded-sm" style={{ background: color }} />
+            <i className="inline-block h-1.5 w-3.5 rounded-[2px]" style={{ background: color }} />
             {label}
           </span>
         ))}
+        <span className="ml-auto">Barre pleine : part du travail réalisée</span>
       </div>
-    </section>
+    </Section>
   );
 }

@@ -30,3 +30,10 @@
 - Ajouts : sonde de santé `/api/v1/health/`, `seed_demo --if-empty`, super-utilisateur = administrateur de l'application.
 - Séquence de démarrage vérifiée en local avec PostgreSQL 16 et réglages de production (migration, données, connexion, CSRF, cookies sécurisés).
 - Non vérifié : le déploiement réel sur Render (compte, noms d'offres et de domaines).
+
+## 2026-10-14 (refonte visuelle du tableau de bord)
+- Critique détaillée de la version en ligne (module frontend-design + critique de design) : trop de cartes identiques, éléments décoratifs ou inactifs, symboles « IA » génériques.
+- Refonte : police IBM Plex Sans, échelle typographique 12 / 14 / 16 / 20 / 28, titres de section hors des panneaux, synthèse de l'assistant en tête avec les 4 chiffres et l'avancement des tâches (barre segmentée à la place du demi-anneau).
+- Retiré : barre de recherche et boutons inactifs, cloche, liste des projets du menu, icônes décoratives, pastilles de disponibilité, hachures et bulles du graphique, points médians et flèches dans les textes.
+- Serveur : les actions à traiter renvoient projet, personne et échéance séparément ; message clair quand le serveur de démonstration se réveille (erreurs 502 à 504).
+- Vérifié en local : tests serveur (34), types, lint, build ; connexion admin et membre, aucune erreur console, pas de débordement à 400 px.

@@ -2,19 +2,15 @@
 
 import type { CriticalItem } from "@/lib/types";
 
-import { CardHeader, Icon } from "./ui";
+import { Section } from "./ui";
 
-const TONE: Record<CriticalItem["severity"], { box: string; icon: string }> = {
-  late: { box: "bg-late-soft text-late", icon: "clock" },
-  risk: { box: "bg-risk-soft text-risk", icon: "calendar" },
-  info: { box: "bg-ok-soft text-ok", icon: "check" },
+const DUE_CLASS: Record<CriticalItem["severity"], string> = {
+  late: "text-late",
+  risk: "text-risk",
+  info: "text-muted",
 };
 
-const ACTION_LABEL: Record<NonNullable<CriticalItem["action"]>, string> = {
-  remind: "Relancer",
-  approve: "Approuver",
-  reschedule: "Replanifier",
-};
+const ACTION_LABEL = { remind: "Relancer", approve: "Approuver" } as const;
 
 export function CriticalCard({
   total,
@@ -28,37 +24,37 @@ export function CriticalCard({
   onAction: (item: CriticalItem) => void;
 }) {
   return (
-    <section className="card" aria-label="Actions critiques">
-      <CardHeader title="Actions critiques" aside={`${total} à traiter`} />
-      {items.length === 0 && <p className="py-4 text-sm text-muted">Rien d’urgent : aucun retard ni échéance proche.</p>}
+    <Section
+      title="À traiter"
+      bodyClassName="px-5 py-1"
+      aside={total > items.length ? `${items.length} sur ${total}, les plus urgentes d’abord` : undefined}
+    >
+      {items.length === 0 && <p className="py-5 text-muted">Aucun retard ni échéance dans les 3 prochains jours.</p>}
       <ul>
         {items.map((item) => {
-          const tone = item.severity === "late" && item.kind === "milestone_overdue" ? { ...TONE.late, icon: "flag" } : TONE[item.severity];
           const key = `${item.kind}-${item.task_id ?? item.project_id}-${item.title}`;
+          const action = item.action === "remind" || item.action === "approve" ? item.action : null;
           return (
-            <li key={key} className="grid grid-cols-[34px_1fr_auto] items-center gap-3 border-t border-[#f1f3f5] py-2.5 first:border-t-0">
-              <span className={`grid h-[34px] w-[34px] place-items-center rounded-[10px] ${tone.box}`}>
-                <Icon name={tone.icon} />
-              </span>
-              <div className="min-w-0">
-                <b className="block truncate text-[13.5px] font-medium">{item.title}</b>
-                <small className="text-xs text-muted">{item.subtitle}</small>
+            <li key={key} className="flex items-center gap-4 border-t border-line-soft py-3 first:border-t-0">
+              <div className="min-w-0 flex-1">
+                <span className="block truncate font-medium">{item.title}</span>
+                <span className="block truncate text-[13px] text-muted">
+                  {item.project}
+                  {item.person ? `, ${item.person}` : ""}
+                </span>
               </div>
-              {item.action && (
-                <button
-                  className="btn btn-sm"
-                  disabled={busy === key || item.action === "reschedule"}
-                  title={item.action === "reschedule" ? "La replanification arrive à l’étape suivante" : undefined}
-                  onClick={() => onAction(item)}
-                >
-                  {ACTION_LABEL[item.action]}
-                </button>
-              )}
+              <span className={`shrink-0 text-right text-[13px] ${DUE_CLASS[item.severity]}`}>{item.due_text}</span>
+              <span className="w-[92px] shrink-0 text-right">
+                {action && (
+                  <button className="btn btn-sm" disabled={busy === key} onClick={() => onAction(item)}>
+                    {ACTION_LABEL[action]}
+                  </button>
+                )}
+              </span>
             </li>
           );
         })}
       </ul>
-      <p className="mt-2 text-xs text-muted">Retards et échéances des 3 prochains jours. Toutes les échéances sont dans « Programmation ».</p>
-    </section>
+    </Section>
   );
 }

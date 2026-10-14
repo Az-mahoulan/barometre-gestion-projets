@@ -18,11 +18,16 @@ async function ensureCsrf(): Promise<string> {
   const existing = readCookie("csrftoken");
   if (existing) return existing;
   const res = await fetch("/api/v1/auth/csrf/", { credentials: "same-origin" });
+  if (!res.ok) throw await parseError(res);
   const data = (await res.json()) as { csrfToken: string };
   return data.csrfToken;
 }
 
 async function parseError(res: Response): Promise<ApiError> {
+  // L'hébergement de démonstration met le serveur en veille : le premier appel peut échouer le temps qu'il redémarre.
+  if ([502, 503, 504].includes(res.status)) {
+    return new ApiError(res.status, "Le serveur démarre. Réessayez dans une minute.");
+  }
   let message = "Une erreur est survenue.";
   try {
     const body = await res.json();

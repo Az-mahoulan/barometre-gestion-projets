@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { Icon } from "@/components/ui";
 import { apiPost } from "@/lib/api";
 
 export default function LoginPage() {
@@ -27,36 +26,33 @@ export default function LoginPage() {
 
   return (
     <main className="grid min-h-screen place-items-center bg-bg p-6">
-      <form onSubmit={onSubmit} className="card w-full max-w-[380px] !p-7">
-        <div className="mb-6 flex items-center gap-2.5 text-xl font-bold tracking-tight">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-ink text-white">
-            <Icon name="chart" />
-          </span>
-          Baromètre
-        </div>
-        <h1 className="text-lg font-semibold">Connexion</h1>
-        <p className="mt-1 text-sm text-muted">Accédez au pilotage des projets.</p>
+      <div className="w-full max-w-[360px]">
+        <p className="mb-6 text-[20px] font-semibold tracking-[-0.2px]">Baromètre</p>
+        <form onSubmit={onSubmit} className="panel p-7">
+          <h1 className="text-[20px] font-semibold">Connexion</h1>
+          <p className="mt-1 text-ink-2">Pilotage des projets internes.</p>
 
-        <label className="mt-5 block text-sm font-medium" htmlFor="username">
-          Identifiant
-        </label>
-        <input id="username" name="username" autoComplete="username" required className="field mt-1.5 w-full" />
+          <label className="mt-6 block font-medium" htmlFor="username">
+            Identifiant
+          </label>
+          <input id="username" name="username" autoComplete="username" required className="field mt-1.5 w-full" />
 
-        <label className="mt-4 block text-sm font-medium" htmlFor="password">
-          Mot de passe
-        </label>
-        <input id="password" name="password" type="password" autoComplete="current-password" required className="field mt-1.5 w-full" />
+          <label className="mt-4 block font-medium" htmlFor="password">
+            Mot de passe
+          </label>
+          <input id="password" name="password" type="password" autoComplete="current-password" required className="field mt-1.5 w-full" />
 
-        {error && (
-          <p role="alert" className="mt-4 rounded-lg bg-late-soft px-3 py-2 text-sm text-late">
-            {error}
-          </p>
-        )}
+          {error && (
+            <p role="alert" className="mt-4 rounded-md bg-late-soft px-3 py-2 text-late">
+              {error}
+            </p>
+          )}
 
-        <button type="submit" className="btn btn-dark mt-6 w-full justify-center" disabled={pending}>
-          {pending ? "Connexion…" : "Se connecter"}
-        </button>
-      </form>
+          <button type="submit" className="btn btn-primary mt-6 w-full" disabled={pending}>
+            {pending ? "Connexion…" : "Se connecter"}
+          </button>
+        </form>
+      </div>
     </main>
   );
 }
