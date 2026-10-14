@@ -2,6 +2,22 @@ import type { GanttProject, TrendMonth } from "@/lib/types";
 
 const PLOT_H = 220;
 
+// Couleur d'une barre selon le taux de jalons atteints dans le mois.
+function barColor(pct: number): string {
+  if (pct >= 100) return "#1f7a4d"; // vert : objectif atteint
+  if (pct >= 95) return "#6fbf8f"; // vert moins franc
+  if (pct >= 50) return "#e8901c"; // orange
+  if (pct >= 25) return "#e2582c"; // orange tirant sur le rouge
+  return "#c7321f"; // rouge
+}
+
+// Couleur d'un segment de courbe : montant en vert, descendant en rouge, stable en gris.
+function trendColor(from: number, to: number): string {
+  if (to > from) return "#1f7a4d";
+  if (to < from) return "#c7321f";
+  return "#9aa3ae";
+}
+
 export function TrendCard({
   trend,
   projects,
@@ -66,7 +82,7 @@ export function TrendCard({
                       className="w-full rounded-full"
                       style={{
                         height: `${m.pct ?? 0}%`,
-                        background: m.state === "current" ? "#7cc19b" : "var(--accent-2)",
+                        background: barColor(m.pct ?? 0),
                       }}
                     />
                   </div>
@@ -83,14 +99,22 @@ export function TrendCard({
               aria-label={`Courbe de l’achèvement des jalons : ${summary}`}
               className="pointer-events-none absolute left-0 top-0 h-[220px] w-full overflow-visible"
             >
-              <polyline
-                points={points.map((p) => `${p.x * 100},${p.y}`).join(" ")}
-                fill="none"
-                stroke="var(--ink)"
-                strokeWidth="2"
-                strokeLinejoin="round"
-                vectorEffect="non-scaling-stroke"
-              />
+              {points.slice(1).map((p, i) => {
+                const prev = points[i];
+                return (
+                  <line
+                    key={p.m.month}
+                    x1={prev.x * 100}
+                    y1={prev.y}
+                    x2={p.x * 100}
+                    y2={p.y}
+                    stroke={trendColor(prev.pct, p.pct)}
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                );
+              })}
             </svg>
           )}
 
