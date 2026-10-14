@@ -46,7 +46,7 @@ export function TrendCard({
         <label className="sr-only" htmlFor="trend-project">
           Projet
         </label>
-        <select id="trend-project" className="field !py-1.5" value={value} onChange={(e) => onChange(e.target.value)}>
+        <select id="trend-project" className="field max-w-[210px] !py-1.5" value={value} onChange={(e) => onChange(e.target.value)}>
           <option value="">Tous les projets</option>
           {projects.map((p) => (
             <option key={p.id} value={p.id}>
@@ -134,7 +134,7 @@ export function TrendCard({
             {trend.map((m) => (
               <span key={m.month} className={m.state === "current" ? "font-semibold text-ink" : ""}>
                 {m.label}
-                {m.state === "current" ? " · en cours" : ""}
+                {m.state === "current" && <span className="block text-[11.5px] font-normal text-muted">en cours</span>}
               </span>
             ))}
           </div>

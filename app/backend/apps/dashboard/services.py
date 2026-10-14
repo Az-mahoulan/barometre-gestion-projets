@@ -340,7 +340,8 @@ def build_teams(country: str | None, today: date) -> dict:
 
 
 def build_dashboard(user, *, country: str | None = None, period: str = "year", week: int = 0,
-                    trend_project: int | None = None, today: date | None = None) -> dict:
+                    trend_project: int | None = None, tasks_project: int | None = None,
+                    today: date | None = None) -> dict:
     today = today or today_date()
     p_start, p_end = period_range(period, today)
     base = list(_visible_projects(user, country))
@@ -349,9 +350,13 @@ def build_dashboard(user, *, country: str | None = None, period: str = "year", w
 
     trend_base = [p for p in base if trend_project is None or p.id == trend_project]
     scope_tasks = _scope_tasks(user, in_period)
-    progress = build_task_progress(scope_tasks)
-    progress["overdue"] = sum(1 for t in scope_tasks if is_overdue(t, today))
-    progress["in_review"] = sum(1 for t in scope_tasks if t.status == Task.Status.REVIEW)
+    # La progression des tâches peut être limitée à un projet ; les indicateurs restent globaux.
+    progress_tasks = [t for t in scope_tasks if tasks_project is None or t.project_id == tasks_project]
+    progress = build_task_progress(progress_tasks)
+    progress["overdue"] = sum(1 for t in progress_tasks if is_overdue(t, today))
+    progress["in_review"] = sum(1 for t in progress_tasks if t.status == Task.Status.REVIEW)
+    kpis = build_kpis(in_period, stats_all, p_start, p_end)
+    kpis["overdue_tasks"] = sum(1 for t in scope_tasks if is_overdue(t, today))
 
     return {
         "as_of": today,
@@ -359,7 +364,7 @@ def build_dashboard(user, *, country: str | None = None, period: str = "year", w
         "user": {"name": user.display_name, "role": user.role, "role_label": user.get_role_display()},
         "scope": {"admin": "all", "responsable": "owned", "membre": "assigned"}[user.role],
         "filters": {"country": country, "period": period},
-        "kpis": build_kpis(in_period, stats_all, p_start, p_end),
+        "kpis": kpis,
         "gantt": build_gantt(in_period, stats_all, today),
         "week": build_week(user, in_period, today, week),
         "trend": build_trend(trend_base, today),

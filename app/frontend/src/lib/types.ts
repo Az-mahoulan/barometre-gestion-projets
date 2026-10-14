@@ -34,6 +34,7 @@ export interface Kpis {
   milestones_total: number;
   milestones_achieved: number;
   milestones_pct: number;
+  overdue_tasks: number;
 }
 
 export interface GanttActivity {

@@ -33,7 +33,8 @@ export function DashboardView() {
   const [period, setPeriod] = useState<Period>("year");
   const [week, setWeek] = useState(0);
   const [trendProject, setTrendProject] = useState("");
-  const { data, error, loading, refresh } = useDashboard({ country, period, week, trendProject }, !!me);
+  const [tasksProject, setTasksProject] = useState("");
+  const { data, error, loading, refresh } = useDashboard({ country, period, week, trendProject, tasksProject }, !!me);
 
   const [toast, setToast] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -125,6 +126,7 @@ export function DashboardView() {
           onCountry={(c) => {
             setCountry(c);
             setTrendProject("");
+            setTasksProject("");
           }}
           onPeriod={setPeriod}
         />
@@ -161,9 +163,9 @@ export function DashboardView() {
             <WeekCard week={data.week} onOffset={setWeek} />
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <div className="grid gap-4 xl:grid-cols-2">
             <TrendCard trend={data.trend} projects={data.gantt} value={trendProject} onChange={setTrendProject} />
-            <TaskProgressCard progress={data.task_progress} />
+            <TaskProgressCard progress={data.task_progress} projects={data.gantt} value={tasksProject} onChange={setTasksProject} />
           </div>
 
           <ProjectsTable projects={data.projects} />

@@ -40,6 +40,7 @@ export interface DashboardParams {
   period: Period;
   week: number;
   trendProject: string;
+  tasksProject: string;
 }
 
 export function useDashboard(params: DashboardParams, enabled: boolean) {
@@ -56,6 +57,7 @@ export function useDashboard(params: DashboardParams, enabled: boolean) {
     const query = new URLSearchParams({ period: params.period, week: String(params.week) });
     if (params.country) query.set("country", params.country);
     if (params.trendProject) query.set("trend_project", params.trendProject);
+    if (params.tasksProject) query.set("tasks_project", params.tasksProject);
     apiGet<Dashboard>(`/dashboard/?${query}`, controller.signal)
       .then((d) => {
         if (id !== latest.current) return;
@@ -69,7 +71,7 @@ export function useDashboard(params: DashboardParams, enabled: boolean) {
         setLoading(false);
       });
     return () => controller.abort();
-  }, [enabled, params.country, params.period, params.week, params.trendProject, version]);
+  }, [enabled, params.country, params.period, params.week, params.trendProject, params.tasksProject, version]);
 
   const refresh = useCallback(() => setVersion((v) => v + 1), []);
   return { data, error, loading, refresh };

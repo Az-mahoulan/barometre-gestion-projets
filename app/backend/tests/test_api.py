@@ -155,3 +155,14 @@ def test_superuser_is_application_admin(db):
 
     u = User.objects.create_superuser(username="root", password="x-Test-Passw0rd")
     assert u.role == User.Role.ADMIN
+
+
+def test_task_progress_can_be_limited_to_one_project(admin, boss, project, make_project, client_for):
+    other = make_project(boss, name="Autre projet")
+    Task.objects.create(project=other, title="T", due_date=date(2026, 11, 1))
+    full = client_for(admin).get("/api/v1/dashboard/").json()
+    only = client_for(admin).get(f"/api/v1/dashboard/?tasks_project={other.id}").json()
+    assert only["task_progress"]["total"] == 1
+    assert full["task_progress"]["total"] > 1
+    # Les indicateurs du haut de page ne dépendent pas de ce filtre.
+    assert only["kpis"] == full["kpis"]

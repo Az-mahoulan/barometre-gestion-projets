@@ -7,7 +7,7 @@ import { Icon } from "./ui";
 /** Synthèse du jour, construite à partir des chiffres du tableau de bord (aucune donnée inventée). */
 export function buildSummary(d: Dashboard): string {
   const { late_projects } = d.kpis;
-  const overdue = d.task_progress.overdue;
+  const overdue = d.kpis.overdue_tasks;
   if (late_projects === 0 && overdue === 0) {
     return "Aucun projet en retard et aucune tâche en dépassement d’échéance. Les prochaines échéances sont dans « Programmation ».";
   }

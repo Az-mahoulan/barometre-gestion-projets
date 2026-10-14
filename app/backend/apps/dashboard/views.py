@@ -15,6 +15,7 @@ class DashboardQuerySerializer(serializers.Serializer):
     period = serializers.ChoiceField(choices=["month", "quarter", "year"], required=False, default="year")
     week = serializers.IntegerField(required=False, default=0, min_value=-52, max_value=52)
     trend_project = serializers.IntegerField(required=False, allow_null=True, min_value=1)
+    tasks_project = serializers.IntegerField(required=False, allow_null=True, min_value=1)
 
     def validate_country(self, value):
         value = value.upper()
@@ -30,6 +31,7 @@ class DashboardView(APIView):
             OpenApiParameter("period", str, enum=["month", "quarter", "year"]),
             OpenApiParameter("week", int, description="Décalage de la semaine affichée (0 = cette semaine)"),
             OpenApiParameter("trend_project", int, description="Limite l'évolution mensuelle à un projet"),
+            OpenApiParameter("tasks_project", int, description="Limite la progression des tâches à un projet"),
         ],
         responses={200: serializers.DictField()},
     )
@@ -43,6 +45,7 @@ class DashboardView(APIView):
                 period=query.validated_data["period"],
                 week=query.validated_data["week"],
                 trend_project=query.validated_data.get("trend_project"),
+                tasks_project=query.validated_data.get("tasks_project"),
             )
         )
 
