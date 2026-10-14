@@ -97,9 +97,6 @@ export interface CriticalItem {
   kind: string;
   title: string;
   subtitle: string;
-  project: string;
-  person: string | null;
-  due_text: string;
   action: "remind" | "approve" | "reschedule" | null;
   task_id?: number;
   project_id?: number;

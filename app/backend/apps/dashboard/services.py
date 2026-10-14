@@ -189,7 +189,7 @@ def build_week(user, projects, today: date, offset: int) -> dict:
         for m in p.milestones.all():
             if monday <= m.due_date <= sunday:
                 days[m.due_date].append(
-                    {"kind": "milestone", "title": m.name, "subtitle": f"Jalon, {p.name}", "done": m.is_achieved}
+                    {"kind": "milestone", "title": m.name, "subtitle": f"Jalon · {p.name}", "done": m.is_achieved}
                 )
     for t in _scope_tasks(user, projects):
         if monday <= t.due_date <= sunday:
@@ -245,10 +245,6 @@ def build_task_progress(tasks) -> dict:
     }
 
 
-def _late_text(days: int) -> str:
-    return "1 jour de retard" if days == 1 else f"{days} jours de retard"
-
-
 def build_critical(user, projects, stats, today: date) -> dict:
     items: list[dict] = []
     active = [p for p in projects if p.status == Project.Status.ACTIVE]
@@ -258,7 +254,6 @@ def build_critical(user, projects, stats, today: date) -> dict:
                 items.append(
                     {"severity": "late", "kind": "milestone_overdue", "title": f"Jalon « {m.name} » dépassé",
                      "subtitle": f"{p.name} · {(today - m.due_date).days} jours de retard",
-                     "project": p.name, "person": None, "due_text": _late_text((today - m.due_date).days),
                      "action": "reschedule", "project_id": p.id, "days": (today - m.due_date).days}
                 )
     for t in _scope_tasks(user, active):
@@ -268,7 +263,6 @@ def build_critical(user, projects, stats, today: date) -> dict:
             items.append(
                 {"severity": "late", "kind": "task_overdue", "title": t.title,
                  "subtitle": f"{t.project.name} · {who} · {days} jours de retard",
-                 "project": t.project.name, "person": who, "due_text": _late_text(days),
                  "action": "remind" if can_manage_project(user, t.project) else None, "task_id": t.id, "days": days}
             )
         elif not t.is_complete and 0 <= (t.due_date - today).days <= DUE_SOON_DAYS:
@@ -276,15 +270,12 @@ def build_critical(user, projects, stats, today: date) -> dict:
             items.append(
                 {"severity": "risk", "kind": "task_due_soon", "title": t.title,
                  "subtitle": f"{t.project.name} · {who} · échéance " + ("aujourd'hui" if left == 0 else "demain" if left == 1 else f"dans {left} jours"),
-                 "project": t.project.name, "person": who,
-                 "due_text": "Pour aujourd'hui" if left == 0 else "Pour demain" if left == 1 else f"Dans {left} jours",
                  "action": "remind" if can_manage_project(user, t.project) else None, "task_id": t.id, "days": -left}
             )
         elif t.status == Task.Status.REVIEW and can_manage_project(user, t.project):
             items.append(
                 {"severity": "info", "kind": "review_pending", "title": t.title,
-                 "subtitle": f"{t.project.name} · en revue, à approuver",
-                 "project": t.project.name, "person": who, "due_text": "À approuver", "action": "approve", "task_id": t.id, "days": 0}
+                 "subtitle": f"{t.project.name} · en revue, à approuver", "action": "approve", "task_id": t.id, "days": 0}
             )
     items.sort(key=lambda i: (SEVERITY_RANK[i["severity"]], -i["days"]))
     return {"total": len(items), "items": items[:8]}
@@ -341,7 +332,7 @@ def build_teams(country: str | None, today: date) -> dict:
                 "reason": pres.reason if pres else "",
                 "place": pres.place if pres else "office",
                 "place_label": (pres.get_place_display() if pres else "Au bureau")
-                + (f", {pres.place_detail}" if pres and pres.place_detail else ""),
+                + (f" · {pres.place_detail}" if pres and pres.place_detail else ""),
                 "open_tasks": counts["open"], "overdue_tasks": counts["overdue"],
             }
         )

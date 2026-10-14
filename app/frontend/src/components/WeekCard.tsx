@@ -3,9 +3,15 @@
 import { useState } from "react";
 
 import { dayLabel, parseDate, shortDate } from "@/lib/format";
-import type { Week } from "@/lib/types";
+import type { Week, WeekItem } from "@/lib/types";
 
-import { Icon, Section } from "./ui";
+import { CardHeader } from "./ui";
+
+const BAR: Record<WeekItem["kind"], string> = {
+  event: "var(--accent-2)",
+  milestone: "var(--bar-risk)",
+  task: "var(--ink)",
+};
 
 export function WeekCard({ week, onOffset }: { week: Week; onOffset: (offset: number) => void }) {
   const todayDay = week.days.find((d) => d.is_today);
@@ -14,29 +20,28 @@ export function WeekCard({ week, onOffset }: { week: Week; onOffset: (offset: nu
   const selected = week.days.find((d) => d.date === selectedDate) ?? week.days[0];
 
   return (
-    <Section
-      title="Cette semaine"
-      bodyClassName="px-4 pb-2 pt-3"
-      aside={
-        <span className="flex items-center gap-1">
-          {week.offset !== 0 && (
-            <button className="mr-1 text-[13px] font-medium text-accent-2 hover:underline" onClick={() => onOffset(0)}>
-              Aujourd’hui
+    <section className="card" aria-label="Programmation">
+      <CardHeader
+        title="Programmation"
+        aside={
+          <span className="flex items-center gap-1.5">
+            <button className="rounded-md border border-line-strong px-2 py-0.5" onClick={() => onOffset(week.offset - 1)} aria-label="Semaine précédente">
+              ‹
             </button>
-          )}
-          <button className="rounded-md p-1 text-ink-2 hover:bg-[#e9ecea]" onClick={() => onOffset(week.offset - 1)} aria-label="Semaine précédente">
-            <Icon name="left" />
-          </button>
-          <span className="min-w-[96px] text-center text-ink-2">
             {shortDate(week.start)} – {shortDate(week.end)}
+            <button className="rounded-md border border-line-strong px-2 py-0.5" onClick={() => onOffset(week.offset + 1)} aria-label="Semaine suivante">
+              ›
+            </button>
+            {week.offset !== 0 && (
+              <button className="btn btn-sm" onClick={() => onOffset(0)}>
+                Aujourd’hui
+              </button>
+            )}
           </span>
-          <button className="rounded-md p-1 text-ink-2 hover:bg-[#e9ecea]" onClick={() => onOffset(week.offset + 1)} aria-label="Semaine suivante">
-            <Icon name="right" />
-          </button>
-        </span>
-      }
-    >
-      <div className="grid grid-cols-7 border-b border-line-soft" role="tablist" aria-label="Jours de la semaine">
+        }
+      />
+
+      <div className="mb-2 flex justify-between" role="tablist" aria-label="Jours de la semaine">
         {week.days.map((d) => {
           const active = d.date === selected.date;
           return (
@@ -45,36 +50,34 @@ export function WeekCard({ week, onOffset }: { week: Week; onOffset: (offset: nu
               role="tab"
               aria-selected={active}
               onClick={() => setPicked(d.date)}
-              className={`-mb-px flex flex-col items-center border-b-2 pb-2 pt-1 text-[12px] ${
-                active ? "border-accent text-ink" : "border-transparent text-muted hover:text-ink"
+              className={`flex w-10 flex-col items-center gap-0.5 rounded-[10px] py-1.5 text-[11.5px] ${
+                active ? "bg-accent text-[#cfe8d9]" : "text-muted"
               }`}
             >
               <span>{dayLabel(d.date)}</span>
-              <span className={`text-[16px] ${d.is_today ? "font-semibold text-accent" : active ? "font-medium" : ""}`}>{parseDate(d.date).getDate()}</span>
-              <span
-                className={`mt-1 h-1 w-1 rounded-full ${d.items.length ? "bg-ink-2" : "bg-transparent"}`}
-                aria-label={d.items.length ? `${d.items.length} élément${d.items.length > 1 ? "s" : ""} prévu${d.items.length > 1 ? "s" : ""}` : undefined}
-              />
+              <b className={`text-[15px] font-semibold ${active ? "text-white" : "text-ink"}`}>{parseDate(d.date).getDate()}</b>
+              <i className={`h-1 w-1 rounded-full ${d.items.length ? (active ? "bg-white" : "bg-accent-2") : "bg-transparent"}`} />
             </button>
           );
         })}
       </div>
 
-      <ul>
-        {selected.items.length === 0 && <li className="py-4 text-muted">Rien de prévu ce jour.</li>}
+      <ul className="flex flex-col">
+        {selected.items.length === 0 && <li className="border-t border-[#f1f3f5] py-4 text-sm text-muted">Rien de prévu ce jour.</li>}
         {selected.items.map((item, i) => (
-          <li key={`${item.kind}-${i}`} className="flex gap-3 border-t border-line-soft py-2.5 first:border-t-0">
-            <span className="w-11 shrink-0 text-[13px] text-muted">{item.time ?? ""}</span>
+          <li key={`${item.kind}-${i}`} className="flex gap-3 border-t border-[#f1f3f5] py-2.5">
+            <i className="w-[3px] shrink-0 rounded-sm" style={{ background: item.late ? "var(--bar-late)" : BAR[item.kind] }} />
             <div className="min-w-0 flex-1">
-              <span className={`block font-medium leading-snug ${item.done ? "text-muted line-through" : ""}`}>{item.title}</span>
-              <span className="text-[13px] text-muted">
+              <b className={`block text-[13.5px] font-medium leading-snug ${item.done ? "text-muted line-through" : ""}`}>{item.title}</b>
+              <small className="text-xs text-muted">
+                {item.time ? `${item.time} · ` : ""}
                 {item.subtitle}
-                {item.late && <span className="text-late">, en retard</span>}
-              </span>
+                {item.late ? " · en retard" : ""}
+              </small>
             </div>
           </li>
         ))}
       </ul>
-    </Section>
+    </section>
   );
 }

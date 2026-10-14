@@ -1,6 +1,6 @@
 import type { ActivityEntry } from "@/lib/types";
 
-import { Avatar, Section } from "./ui";
+import { Avatar, CardHeader } from "./ui";
 
 function relative(iso: string, now: Date): string {
   const minutes = Math.round((now.getTime() - new Date(iso).getTime()) / 60_000);
@@ -14,20 +14,22 @@ function relative(iso: string, now: Date): string {
 export function ActivityCard({ entries, now }: { entries: ActivityEntry[]; now: string }) {
   const ref = new Date(now);
   return (
-    <Section title="Activité récente" bodyClassName="px-5 py-1">
-      {entries.length === 0 && <p className="py-5 text-muted">Aucune activité récente.</p>}
+    <section className="card" aria-label="Activités récentes">
+      <CardHeader title="Activités récentes" />
+      {entries.length === 0 && <p className="py-4 text-sm text-muted">Aucune activité récente.</p>}
       <ul>
         {entries.map((e) => (
-          <li key={e.id} className="flex items-start gap-3 border-t border-line-soft py-3 first:border-t-0">
-            <Avatar initials={e.actor_initials || "?"} />
-            <div className="min-w-0 flex-1">
-              <span className="block">{e.message}</span>
-              <span className="block truncate text-[13px] text-muted">{e.project}</span>
+          <li key={e.id} className="flex items-center gap-3 border-t border-[#f1f3f5] py-2.5 text-[13.5px] first:border-t-0">
+            <Avatar initials={e.actor_initials || "·"} />
+            <div className="min-w-0">
+              {e.message}
+              <small className="block text-xs text-muted">
+                {relative(e.created_at, ref)} · {e.project}
+              </small>
             </div>
-            <span className="shrink-0 whitespace-nowrap text-[13px] text-muted">{relative(e.created_at, ref)}</span>
           </li>
         ))}
       </ul>
-    </Section>
+    </section>
   );
 }
