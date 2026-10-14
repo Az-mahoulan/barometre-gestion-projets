@@ -71,3 +71,7 @@ Ne jamais lancer `seed_demo` en production.
 ## Prochaines étapes
 
 Écrans Projets, Tâches (kanban), Calendrier, Équipes, Administration ; création de projet ; import de Gantt ; assistant IA conversationnel ; notifications ; export PDF/Excel.
+
+## Crédits
+
+- Icônes : [Fluent UI System Icons](https://github.com/microsoft/fluentui-system-icons) (Microsoft, licence MIT) et [Solar](https://www.figma.com/community/file/1166831539721848736) (480 Design, licence CC BY 4.0), via [Iconify](https://iconify.design). Liste des icônes utilisées : `frontend/scripts/generate-icons.mjs`.

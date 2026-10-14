@@ -1,8 +1,8 @@
 import type { Dashboard, GanttProject } from "@/lib/types";
 
-import { CardHeader, ColorIcon } from "./ui";
+import { CardHeader, DuoIcon } from "./ui";
 
-// Une tuile par statut : libellé dans la couleur du statut, icône Fluent en couleur, nombre de tâches en grand.
+// Une tuile par statut : libellé et icône Solar dans la couleur du statut, nombre de tâches en grand.
 const STATUS_COLOR: Record<string, string> = {
   todo: "#6b7280",
   doing: "#2a56c6",
@@ -54,7 +54,9 @@ export function TaskProgressCard({
               <span className="text-[12.5px] font-semibold leading-tight" style={{ color: STATUS_COLOR[s.key] }}>
                 {s.label}
               </span>
-              <ColorIcon name={s.key} className="h-11 w-11" />
+              <span style={{ color: STATUS_COLOR[s.key] }}>
+                <DuoIcon name={s.key} className="h-11 w-11" />
+              </span>
               <span>
                 <b className="block text-[30px] font-semibold leading-none tracking-[-0.5px]">{s.count}</b>
                 <span className="mt-1 block text-[11.5px] text-muted">{s.pct} %</span>
