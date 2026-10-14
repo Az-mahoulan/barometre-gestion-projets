@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pilotage Baromètre</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&display=swap">
+<style>
+/* Concept : menu latéral + tableau de bord en blocs. Le résumé (4 chiffres) en haut, l'action (critique, semaine) au milieu, le détail (projets, équipes) en bas. */
+:root{
+  --bg:#f2f5f5;--surface:#ffffff;--surface2:#f7fafa;
+  --ink:#13242b;--ink2:#4b5c63;--muted:#5f7077;--line:#dbe3e5;
+  --accent:#0f6b6b;--accent-ink:#ffffff;--accent-soft:#e0f0ee;
+  --s1:#d9eae8;--s2:#a9d0cc;--s3:#6fb3ad;--s4:#2f8f89;--s5:#0d5c5c;
+  --ok:#1d7a44;--risk:#8f5c00;--late:#b3261e;
+  --f-display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --f-body:'Figtree','Segoe UI',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0d1517;--surface:#142024;--surface2:#101b1e;
+  --ink:#e5eef0;--ink2:#a9bbc0;--muted:#8a9ca1;--line:#25353a;
+  --accent:#5fc4bd;--accent-ink:#06201f;--accent-soft:#17383a;
+  --s1:#2a4547;--s2:#3b6f6d;--s3:#4f9a96;--s4:#7cc6c0;--s5:#b4ece5;
+  --ok:#5cc489;--risk:#e6b04a;--late:#ff8f86;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1517;--surface:#142024;--surface2:#101b1e;
+  --ink:#e5eef0;--ink2:#a9bbc0;--muted:#8a9ca1;--line:#25353a;
+  --accent:#5fc4bd;--accent-ink:#06201f;--accent-soft:#17383a;
+  --s1:#2a4547;--s2:#3b6f6d;--s3:#4f9a96;--s4:#7cc6c0;--s5:#b4ece5;
+  --ok:#5cc489;--risk:#e6b04a;--late:#ff8f86;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body);font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;line-height:1.15}
+h1{font-size:1.6rem}h2{font-size:1.05rem}h3{font-size:.95rem}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ico{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.app{display:grid;grid-template-columns:228px minmax(0,1fr);min-height:100vh}
+aside{background:var(--surface);border-right:1px solid var(--line);padding:18px 12px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px}
+.brand{font:700 1.1rem var(--f-display);display:flex;align-items:center;gap:9px;padding:2px 8px 16px}
+.brand i{width:26px;height:26px;border-radius:7px;background:var(--accent);display:grid;place-items:center}
+.brand i svg{width:15px;height:15px;stroke:var(--accent-ink);fill:none;stroke-width:3;stroke-linecap:round}
+aside nav{display:grid;gap:2px}
+aside nav button{display:flex;align-items:center;gap:10px;background:none;border:0;text-align:left;padding:9px 10px;border-radius:8px;color:var(--ink2);font-weight:500}
+aside nav button:hover{background:var(--surface2);color:var(--ink)}
+aside nav button[aria-current="page"]{background:var(--accent-soft);color:var(--accent)}
+aside .sp{flex:1}
+.me{display:flex;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px;font-size:.85rem}
+.me b{display:block;font-weight:600}.me small{color:var(--muted)}
+.av{width:30px;height:30px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font:700 .72rem var(--f-display);display:inline-grid;place-items:center;flex:none}
+.av.sm{width:22px;height:22px;font-size:.62rem}
+.main{padding:18px max(16px,env(safe-area-inset-right,0px)) 80px max(16px,env(safe-area-inset-left,0px));min-width:0;max-width:1320px;width:100%;margin:0 auto}
+.bar-top{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin-bottom:16px}
+.search{flex:1 1 240px;min-width:0;display:flex;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:7px 12px;color:var(--muted)}
+.search input{border:0;background:none;flex:1;min-width:0;outline:0}
+.chip{font-size:.75rem;padding:3px 9px;border-radius:99px;border:1px dashed var(--muted);color:var(--muted);white-space:nowrap}
+.sel{display:grid;gap:2px;font-size:.72rem;color:var(--muted)}
+.sel select{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:.88rem;color:var(--ink)}
+.bell{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:10px;width:38px;height:38px;display:grid;place-items:center}
+.bell b{position:absolute;top:-4px;right:-4px;background:var(--late);color:#fff;font-size:.65rem;border-radius:99px;min-width:16px;height:16px;display:grid;place-items:center}
+.head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:10px 16px;margin-bottom:16px}
+.head p{margin:3px 0 0;color:var(--ink2);font-size:.92rem}
+.filters{display:flex;gap:10px;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px;margin-bottom:14px}
+.c3{grid-column:span 3}.c4{grid-column:span 4}.c5{grid-column:span 5}.c6{grid-column:span 6}.c7{grid-column:span 7}.c8{grid-column:span 8}.c12{grid-column:1/-1}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.panel>.ph{display:flex;justify-content:space-between;align-items:center;gap:8px 12px;flex-wrap:wrap;margin-bottom:12px}
+.ph small{font:400 .78rem var(--f-body);color:var(--muted)}
+.kpi{display:flex;gap:12px;align-items:center}
+.kpi .bub{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex:none;background:var(--accent-soft);color:var(--accent)}
+.kpi .bub.late{background:color-mix(in srgb,var(--late) 12%,var(--surface));color:var(--late)}
+.kpi .bub.ok{background:color-mix(in srgb,var(--ok) 13%,var(--surface));color:var(--ok)}
+.kpi .bub .ico{width:20px;height:20px}
+.kpi .lab{color:var(--ink2);font-size:.84rem}
+.kpi .val{font:700 1.9rem/1.1 var(--f-display)}
+.kpi .sub{font-size:.78rem;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:.76rem;font-weight:600;padding:2px 9px 2px 7px;border-radius:99px;white-space:nowrap}
+.pill.ok{color:var(--ok);background:color-mix(in srgb,var(--ok) 13%,var(--surface))}
+.pill.risk{color:var(--risk);background:color-mix(in srgb,var(--risk) 14%,var(--surface))}
+.pill.late{color:var(--late);background:color-mix(in srgb,var(--late) 12%,var(--surface))}
+.pill.info{color:var(--accent);background:var(--accent-soft)}
+.pill.off{color:var(--ink2);background:var(--surface2);border:1px solid var(--line)}
+.t-ok{color:var(--ok)}.t-risk{color:var(--risk)}.t-late{color:var(--late)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{background:var(--surface);border:0;padding:5px 11px;font-size:.82rem;color:var(--ink2)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.gw{overflow-x:auto}
+.gantt{min-width:640px;position:relative;padding-bottom:20px}
+.g-row{display:grid;grid-template-columns:170px 1fr;align-items:center;min-height:36px;border-top:1px solid var(--line)}
+.g-row.hd{border-top:0;min-height:22px;font-size:.74rem;color:var(--muted)}
+.g-name{font-size:.84rem;padding-right:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.g-name button{background:none;border:0;padding:0;color:inherit;text-align:left;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.g-name button:hover{color:var(--accent);text-decoration:underline}
+.g-track{position:relative;height:36px}
+.g-bar{position:absolute;top:12px;height:12px;border-radius:6px;background:var(--s1);overflow:hidden}
+.g-bar>i{display:block;height:100%;background:var(--s5)}
+.g-bar.fin{opacity:.55}
+.ms{position:absolute;top:9px;width:16px;height:16px;margin-left:-8px;transform:rotate(45deg) scale(.75);border-radius:3px;border:2px solid var(--surface);background:var(--muted);padding:0}
+.ms.done{background:var(--ok)}.ms.late{background:var(--late)}.ms.next{background:var(--surface);border-color:var(--ink2)}
+.g-month{position:absolute;top:0;font-size:.74rem;color:var(--muted);border-left:1px solid var(--line);padding-left:5px;height:100%;white-space:nowrap}
+.g-today{position:absolute;top:0;bottom:0;border-left:2px solid var(--accent);z-index:2;pointer-events:none}
+.g-today span{position:absolute;bottom:-18px;left:-34px;font-size:.68rem;font-weight:600;color:var(--accent);background:var(--surface);padding:0 3px}
+.gl{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.76rem;color:var(--ink2);margin-top:10px}
+.gl span{display:inline-flex;align-items:center;gap:6px}
+.dm{width:10px;height:10px;transform:rotate(45deg);display:inline-block;border-radius:2px}
+.sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+.crit{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.crit li{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface2)}
+.crit .tx{min-width:0;font-size:.86rem}
+.crit .tx b{font-weight:600;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crit .tx span{color:var(--ink2);font-size:.78rem}
+.crit .dot{width:30px;height:30px;border-radius:8px;display:grid;place-items:center}
+.crit .dot.late{background:color-mix(in srgb,var(--late) 12%,var(--surface));color:var(--late)}
+.crit .dot.risk{background:color-mix(in srgb,var(--risk) 14%,var(--surface));color:var(--risk)}
+.crit .dot.info{background:var(--accent-soft);color:var(--accent)}
+.btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:8px;padding:6px 12px;font-weight:600;font-size:.82rem;white-space:nowrap}
+.btn.ghost{background:var(--surface);color:var(--accent);border:1px solid var(--line)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.week{display:grid;grid-template-columns:repeat(7,minmax(92px,1fr));gap:8px;overflow-x:auto;padding-bottom:4px}
+.day{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:8px;min-height:150px}
+.day.today{border-color:var(--accent);background:var(--accent-soft)}
+.day h4{margin:0 0 8px;font:600 .78rem var(--f-body);color:var(--ink2);display:flex;justify-content:space-between}
+.day.today h4{color:var(--accent)}
+.ev{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--s4);border-radius:6px;padding:5px 7px;font-size:.76rem;margin-bottom:6px;line-height:1.3}
+.ev.late{border-left-color:var(--late)}.ev.jl{border-left-color:var(--ok)}.ev.mt{border-left-color:var(--s2)}
+.ev.dn{opacity:.6;text-decoration:line-through}
+.ev small{display:block;color:var(--muted)}
+.wk-nav{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.wk-nav button{min-width:30px;height:28px;border-radius:7px;border:1px solid var(--line);background:var(--surface)}
+.wk-nav .btn{padding:0 10px;font-size:.78rem}
+.wk-nav small{white-space:nowrap}
+.stk{display:flex;gap:2px;height:20px;margin:6px 0 14px}
+.stk>div{border-radius:4px;min-width:6px}
+.s-todo{background:var(--s1)}.s-doing{background:var(--s2)}.s-done{background:var(--s3)}.s-review{background:var(--s4)}.s-appr{background:var(--s5)}
+.tp{display:grid;gap:7px}
+.tp div.r{display:grid;grid-template-columns:auto 1fr auto auto;gap:8px;align-items:center;font-size:.86rem}
+.tp .pc{color:var(--muted);font-size:.78rem;min-width:36px;text-align:right}
+.trend text{fill:var(--muted);font-size:11px;font-family:var(--f-body)}
+.trend .tk{fill:var(--surface2);stroke:var(--line)}
+.trend .fut{fill:url(#hatch);stroke:var(--line);stroke-dasharray:3 3}
+.trend .fl{fill:var(--accent)}
+.trend .ln{fill:none;stroke:var(--ink);stroke-width:2}
+.trend .pt{fill:var(--surface);stroke:var(--ink);stroke-width:2}
+.trend .gl2{stroke:var(--line);stroke-dasharray:2 4}
+.trend .val{fill:var(--ink);font-weight:600;font-size:11px}
+.feed{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.feed li{display:flex;gap:10px;font-size:.85rem}
+.feed small{color:var(--muted);display:block}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:860px;font-size:.86rem}
+th{text-align:left;font-weight:600;color:var(--muted);font-size:.76rem;padding:6px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr.pr:hover td{background:var(--surface2)}
+td .nm{font-weight:600;background:none;border:0;padding:0;text-align:left;color:var(--ink)}
+td .nm:hover{color:var(--accent);text-decoration:underline}
+td small{display:block;color:var(--muted);font-size:.75rem}
+.meter{height:7px;background:var(--s1);border-radius:4px;overflow:hidden;min-width:70px}
+.meter>i{display:block;height:100%;background:var(--s5)}
+.teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.tm{border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--surface2);display:grid;gap:8px}
+.tm .top{display:flex;gap:10px;align-items:center}
+.tm .top b{display:block;font-weight:600}.tm .top small{color:var(--muted)}
+.tm .why{font-size:.82rem;color:var(--ink2)}
+.tm .loc{font-size:.8rem;color:var(--ink2);display:flex;gap:6px;align-items:center}
+.tm .ld{font-size:.76rem;color:var(--muted);display:flex;gap:8px;align-items:center}
+.tm .ld .meter{flex:1}
+.empty{color:var(--muted);font-size:.88rem;padding:8px 0}
+.note{font-size:.78rem;color:var(--muted);margin-top:8px}
+#tip{position:fixed;z-index:60;background:var(--ink);color:var(--bg);font-size:.78rem;padding:4px 8px;border-radius:6px;pointer-events:none;max-width:260px;opacity:0;transition:opacity .08s}
+#toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:99px;font-size:.88rem;opacity:0;transition:opacity .2s;pointer-events:none;z-index:70;max-width:90vw}
+#toast.on{opacity:1}
+/* assistant IA */
+#aiBtn{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:40;display:flex;align-items:center;gap:8px;background:var(--ink);color:var(--bg);border:0;border-radius:99px;padding:11px 16px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+#aiPanel{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:50;width:min(390px,calc(100vw - 32px));height:min(560px,calc(100vh - 32px));background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.28);display:flex;flex-direction:column;overflow:hidden}
+#aiPanel[hidden]{display:none}
+.ai-h{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.ai-h b{font:700 .98rem var(--f-display)}
+.ai-h button{margin-left:auto;background:none;border:0;width:30px;height:30px;border-radius:8px}
+.ai-b{flex:1;overflow-y:auto;padding:14px;display:grid;gap:10px;align-content:start}
+.msg{max-width:88%;padding:8px 11px;border-radius:12px;font-size:.88rem;line-height:1.4}
+.msg.u{justify-self:end;background:var(--accent);color:var(--accent-ink)}
+.msg.a{background:var(--surface2);border:1px solid var(--line)}
+.msg ul{margin:6px 0 0;padding-left:18px}
+.msg .acts{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.sug{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 10px}
+.sug button{background:var(--surface2);border:1px solid var(--line);border-radius:99px;padding:4px 10px;font-size:.78rem;color:var(--ink2)}
+.sug button:hover{border-color:var(--accent);color:var(--accent)}
+.ai-f{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
+.ai-f input{flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface)}
+@media(max-width:1100px){.c3{grid-column:span 6}.c4,.c5,.c6,.c7,.c8{grid-column:1/-1}}
+@media(max-width:900px){
+  .app{grid-template-columns:1fr}
+  aside{display:none}
+  .c3{grid-column:span 6}
+}
+@media(max-width:560px){.c3{grid-column:1/-1}.g-row{grid-template-columns:130px 1fr}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="app">
+<aside aria-label="Menu">
+  <div class="brand"><i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V10M12 20V4M20 20v-7"/></svg></i>Pilotage Baromètre</div>
+  <nav id="nav" aria-label="Navigation principale"></nav>
+  <div class="sp"></div>
+  <div class="me"><span class="av" id="meAv"></span><div><b id="meName"></b><small id="meRole"></small></div></div>
+</aside>
+<main class="main" id="app"></main>
+</div>
+<button id="aiBtn" type="button" aria-haspopup="dialog"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8L12 3zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/></svg>Assistant IA</button>
+<section id="aiPanel" role="dialog" aria-label="Assistant IA" hidden>
+  <div class="ai-h"><svg class="ico" viewBox="0 0 24 24" style="color:var(--accent)"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8L12 3z"/></svg><b>Assistant IA</b><span class="chip">simulation</span><button id="aiClose" type="button" aria-label="Fermer l’assistant"><svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <div class="ai-b" id="aiLog" aria-live="polite"></div>
+  <div class="sug" id="aiSug"></div>
+  <form class="ai-f" id="aiForm"><input id="aiIn" type="text" placeholder="Demandez une action ou une information…" autocomplete="off" aria-label="Message pour l’assistant"><button class="btn" type="submit">Envoyer</button></form>
+</section>
+<div id="tip" role="tooltip"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+const TODAY=new Date('2026-10-14T00:00:00'), DAY=864e5;
+const Y='2026-';
+const d=s=>new Date((s.length===5?Y+s:s)+'T00:00:00');
+const fmt=s=>d(s).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ST=[['todo','En attente'],['doing','En cours'],['done','Fait'],['review','En revue'],['appr','Approuvé']];
+const DONE=['done','review','appr'];
+const isDone=t=>DONE.includes(t.status);
+const isOver=t=>!isDone(t)&&d(t.due)<TODAY;
+const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
+const PAYS={BJ:'Bénin',TG:'Togo',SN:'Sénégal',CI:'Côte d’Ivoire'};
+const PEOPLE=[
+ {n:'Aïcha Dossou',r:'Analyste',c:'BJ',s:'ok',why:'',loc:'Au bureau'},
+ {n:'Koffi Adjovi',r:'Développeur web',c:'BJ',s:'ok',why:'',loc:'À distance'},
+ {n:'Mireille Houngbo',r:'Responsable de projets',c:'BJ',s:'meet',why:'Comité de pilotage, jusqu’à 15 h',loc:'Au bureau'},
+ {n:'Sèna Agbo',r:'Suivi-évaluation',c:'BJ',s:'mission',why:'Atelier partenaires à Dakar, jusqu’au 16 oct.',loc:'Sur le terrain · Sénégal'},
+ {n:'Romuald Tossou',r:'Contrôleur qualité',c:'TG',s:'leave',why:'Congé annuel, retour le 19 oct.',loc:'Absent'},
+ {n:'Fatou Bio',r:'Formatrice',c:'BJ',s:'ok',why:'',loc:'Au bureau'},
+ {n:'Ibrahim Sow',r:'Statisticien',c:'SN',s:'train',why:'Formation Power BI, jusqu’au 15 oct.',loc:'À distance'},
+ {n:'Adjoa Mensah',r:'Coordinatrice terrain',c:'TG',s:'mission',why:'Collecte terrain à Lomé, jusqu’au 20 oct.',loc:'Sur le terrain · Togo'}
+];
+const AV={ok:['Disponible','ok','ok'],meet:['En réunion','info','cal'],mission:['En mission','info','pin'],train:['En formation','info','book'],leave:['En congé','off','moon']};
+const ini=i=>PEOPLE[i].n.split(' ').map(w=>w[0]).join('');
+const mk=r=>r.map(x=>({title:x[0],who:x[1],status:x[2],due:x[3],prio:x[4],act:x[5]}));
+let uid=1;
+const DATA=[
+ {name:'Enquête nationale T4',c:'BJ',owner:2,start:'09-01',end:'12-15',acts:[['Préparation','09-01','09-30'],['Collecte terrain','10-01','11-20'],['Analyse et rapport','11-15','12-15']],
+  ms:[['Termes de référence validés','09-10',1],['Questionnaire validé','09-25',1],['Collecte lancée','10-12',1],['Collecte terminée','11-20',0],['Rapport préliminaire','12-10',0]],
+  tasks:mk([['Rédiger les termes de référence',2,'appr','09-09','n',0],['Finaliser le questionnaire',2,'appr','09-24','n',0],['Former les superviseurs',5,'appr','10-05','n',0],['Déployer les tablettes',7,'appr','10-09','n',1],['Lancer la collecte',2,'appr','10-12','h',1],['Valider le plan d’échantillonnage',6,'doing','10-15','n',1],['Suivre le taux de réponse',3,'doing','10-20','h',1],['Contrôler la qualité des saisies',4,'doing','10-30','n',1],['Rédiger la note méthodologique',0,'todo','11-10','n',2],['Rapport préliminaire',2,'todo','12-08','h',2]])},
+ {name:'Refonte du site web',c:'BJ',owner:2,start:'08-17',end:'11-30',acts:[['Conception','08-17','09-30'],['Développement','09-15','11-06'],['Recette et mise en ligne','11-01','11-30']],
+  ms:[['Arborescence validée','08-28',1],['Contenus rédigés','09-18',0],['Maquettes validées','09-30',1],['Version bêta','10-30',0],['Mise en ligne','11-27',0]],
+  tasks:mk([['Arborescence du site',1,'appr','08-27','n',0],['Maquettes des pages clés',1,'appr','09-28','n',0],['Charte graphique appliquée',1,'appr','10-02','n',0],['Intégration de la page d’accueil',1,'doing','10-09','n',1],['Page Méthodologie : contenus',0,'review','10-10','h',1],['Intégration des pages de résultats',1,'doing','10-23','n',1],['Tests d’accessibilité',5,'todo','11-06','n',2],['Mise en ligne',1,'todo','11-27','h',2]])},
+ {name:'Rapport annuel 2026',c:'BJ',owner:2,start:'09-14',end:'12-18',acts:[['Plan et données','09-14','10-16'],['Rédaction','10-12','11-30'],['Finalisation','11-25','12-18']],
+  ms:[['Plan validé','09-28',1],['Chiffres clés collectés','10-08',1],['Premier jet','11-06',0],['Relecture','12-01',0],['Publication','12-18',0]],
+  tasks:mk([['Plan du rapport',0,'appr','09-28','n',0],['Collecte des chiffres clés',3,'appr','10-09','n',0],['Valider la liste des tableaux',3,'todo','10-17','n',0],['Rédaction du chapitre 1',0,'doing','10-28','n',1],['Rédaction du chapitre 2',6,'todo','11-06','n',1],['Mise en page',1,'todo','11-25','n',2],['Relecture finale',4,'todo','12-01','n',2]])},
+ {name:'Tableau de bord partenaires',c:'SN',owner:3,start:'10-01',end:'11-27',acts:[['Cadrage','10-01','10-16'],['Prototype','10-12','11-06'],['Test et livraison','11-02','11-27']],
+  ms:[['Cadrage validé','10-09',0],['Prototype','10-30',0],['Livraison v1','11-27',0]],
+  tasks:mk([['Recueillir les besoins',3,'appr','10-07','n',0],['Atelier de cadrage',3,'doing','10-09','h',0],['Liste des indicateurs',6,'todo','10-12','h',0],['Prototype interactif',1,'todo','10-30','n',1],['Test avec trois partenaires',5,'todo','11-13','n',2],['Livraison v1',3,'todo','11-27','n',2]])},
+ {name:'Audit qualité des données',c:'TG',owner:4,start:'07-06',end:'10-30',acts:[['Préparation','07-06','08-14'],['Audit terrain','08-17','09-25'],['Rapport et suivi','09-28','10-30']],
+  ms:[['Cadrage de l’audit','07-10',1],['Plan d’audit','07-31',1],['Audit terrain','09-25',1],['Rapport d’audit','10-30',0]],
+  tasks:mk([['Plan d’audit',4,'appr','07-30','n',0],['Échantillonnage',4,'appr','08-14','n',0],['Visites de contrôle',7,'appr','09-18','n',1],['Analyse des écarts',6,'appr','09-30','n',2],['Restitution aux équipes',4,'done','10-09','n',2],['Rapport d’audit',4,'review','10-28','h',2],['Relire le rapport d’audit',0,'review','10-16','h',2],['Plan d’actions correctives',2,'todo','10-30','n',2]])},
+ {name:'Formation des enquêteurs',c:'BJ',owner:2,start:'10-05',end:'11-06',acts:[['Préparation','10-05','10-16'],['Sessions','10-19','10-30'],['Évaluation','11-02','11-06']],
+  ms:[['Supports prêts','10-16',0],['Sessions terminées','10-28',0],['Évaluation','11-06',0]],
+  tasks:mk([['Programme de formation',5,'appr','10-08','n',0],['Supports de formation',5,'doing','10-12','h',0],['Réserver les salles',0,'todo','10-20','n',1],['Sessions de formation',5,'todo','10-28','n',1],['Évaluation des acquis',2,'todo','11-06','n',2]])},
+ {name:'Cartographie des partenaires',c:'CI',owner:2,start:'06-15',end:'09-30',fin:1,acts:[['Inventaire','06-15','07-31'],['Validation','08-01','09-30']],
+  ms:[['Inventaire terminé','07-15',1],['Fiches validées','08-14',1],['Carte publiée','09-30',1]],
+  tasks:mk([['Inventaire des partenaires',0,'appr','07-15','n',0],['Validation des fiches',0,'appr','08-14','n',1],['Publication de la carte',1,'appr','09-30','n',1]])},
+ {name:'Évaluation 2025',c:'BJ',owner:0,start:'05-04',end:'08-28',fin:1,acts:[['Collecte','05-04','06-30'],['Rapport','07-01','08-28']],
+  ms:[['Collecte close','07-03',1],['Rapport remis','08-28',1]],
+  tasks:mk([['Collecte des données',3,'appr','06-30','n',0],['Analyse',6,'appr','07-31','n',1],['Rapport final',0,'appr','08-28','n',1]])}
+];
+DATA.forEach((p,i)=>{p.id=i;p.ms=p.ms.map(m=>({name:m[0],date:m[1],done:!!m[2]}));p.tasks.forEach(t=>{t.id=uid++;t.pid=i})});
+const ROLES={
+ admin:{label:'Administrateur',me:null,user:'Administration'},
+ resp:{label:'Responsable',me:2,user:'Mireille Houngbo'},
+ membre:{label:'Membre',me:3,user:'Sèna Agbo'}
+};
+const S={role:'admin',country:'all',period:'year',gTab:'projects',gPid:1,weekOff:0,tPid:'all',chat:false};
+const MEET=[[0,'10:00','Point hebdomadaire'],[2,'15:00','Comité de pilotage'],[3,'09:00','Atelier partenaires (Dakar)'],[4,'14:00','Revue des jalons']];
+const FEED=[
+ ['check','Mireille Houngbo a approuvé « Lancer la collecte »','il y a 2 h',0],
+ ['play','Sèna Agbo a passé « Atelier de cadrage » en cours','il y a 3 h',3],
+ ['check','Koffi Adjovi a terminé « Arborescence du site »','hier',1],
+ ['chat','Romuald Tossou a commenté « Rapport d’audit »','hier',4],
+ ['plus','Adjoa Mensah a ajouté 3 tâches à « Enquête nationale T4 »','il y a 2 j',0],
+ ['flag','Jalon « Collecte lancée » atteint','il y a 2 j',0],
+ ['up','Aïcha Dossou a importé un Gantt dans « Rapport annuel 2026 »','il y a 3 j',2]
+];
+const IC={
+ ok:'<svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>',
+ risk:'<svg class="ico" viewBox="0 0 24 24"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v4M12 17v.5"/></svg>',
+ late:'<svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+ info:'<svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.5"/></svg>',
+ cal:'<svg class="ico" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>',
+ pin:'<svg class="ico" viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+ book:'<svg class="ico" viewBox="0 0 24 24"><path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4zM5 17a3 3 0 0 1 3-3h10"/></svg>',
+ moon:'<svg class="ico" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg>',
+ home:'<svg class="ico" viewBox="0 0 24 24"><path d="M4 11 12 4l8 7v9h-5v-6H9v6H4v-9z"/></svg>',
+ folder:'<svg class="ico" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>',
+ task:'<svg class="ico" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>',
+ users:'<svg class="ico" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.8a3.5 3.5 0 0 1 0 6.4M18.5 14.5A6.5 6.5 0 0 1 21.5 20"/></svg>',
+ chart:'<svg class="ico" viewBox="0 0 24 24"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>',
+ gear:'<svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>',
+ shield:'<svg class="ico" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.2 7.7 8 9 4.8-1.3 8-4.5 8-9V6l-8-3z"/></svg>',
+ play:'<svg class="ico" viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg>',
+ check:'<svg class="ico" viewBox="0 0 24 24"><path d="m5 12 4.5 4.5L19 7"/></svg>',
+ chat:'<svg class="ico" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4V5z"/></svg>',
+ plus:'<svg class="ico" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+ flag:'<svg class="ico" viewBox="0 0 24 24"><path d="M5 21V4M5 4h12l-2 4 2 4H5"/></svg>',
+ up:'<svg class="ico" viewBox="0 0 24 24"><path d="M12 16V5M7 10l5-5 5 5M5 20h14"/></svg>',
+ bell:'<svg class="ico" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7zM10 20a2 2 0 0 0 4 0"/></svg>',
+ search:'<svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>',
+ lock:'<svg class="ico" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>'
+};
+const HL={ok:'Dans les temps',risk:'À surveiller',late:'En retard'};
+const pill=(k,t)=>`<span class="pill ${k}">${IC[k]||''}${t}</span>`;
+
+/* ---------- calculs ---------- */
+function inScope(p){
+  const R=ROLES[S.role];
+  if(S.role==='resp'&&p.owner!==R.me)return false;
+  if(S.role==='membre'&&!p.tasks.some(t=>t.who===R.me))return false;
+  if(S.country!=='all'&&p.c!==S.country)return false;
+  return true;
+}
+function periodRange(){
+  if(S.period==='month')return [d('2026-10-01'),d('2026-11-01')];
+  if(S.period==='quarter')return [d('2026-10-01'),d('2027-01-01')];
+  return [d('2026-01-01'),d('2027-01-01')];
+}
+const inPeriod=p=>{const [a,b]=periodRange();return d(p.end)>=a&&d(p.start)<b};
+const scoped=()=>DATA.filter(p=>inScope(p)&&inPeriod(p));
+function stats(p){
+  const total=p.tasks.length, comp=p.tasks.filter(isDone).length;
+  const over=p.tasks.filter(isOver).length;
+  const lateMs=p.ms.filter(m=>!m.done&&d(m.date)<TODAY);
+  const progress=total?comp/total:0;
+  const el=clamp((TODAY-d(p.start))/(d(p.end)-d(p.start)),0,1);
+  let health='ok';
+  if(lateMs.length||over>=2)health='late';else if(over>=1||progress<el-0.15)health='risk';
+  if(p.fin)health='fin';
+  const perf=(p.fin||el<0.1)?null:Math.round(progress/el*100);
+  const next=p.ms.find(m=>!m.done);
+  const nextTask=p.tasks.filter(t=>!isDone(t)).sort((a,b)=>d(a.due)-d(b.due))[0];
+  return {total,comp,over,progress,el,health,perf,lateMs,next,nextTask,msDone:p.ms.filter(m=>m.done).length};
+}
+const scopeTasks=()=>{const R=ROLES[S.role];return scoped().flatMap(p=>p.tasks).filter(t=>S.role!=='membre'||t.who===R.me)};
+const days=(a,b)=>Math.round((a-b)/DAY);
+const perfCls=v=>v>=90?'ok':v>=70?'risk':'late';
+
+/* ---------- tooltip, toast ---------- */
+const tip=document.getElementById('tip');
+document.addEventListener('mouseover',e=>{const t=e.target.closest('[data-tip]');if(!t){tip.style.opacity=0;return}tip.textContent=t.getAttribute('data-tip');tip.style.opacity=1});
+document.addEventListener('mousemove',e=>{tip.style.left=Math.min(e.clientX+12,innerWidth-tip.offsetWidth-8)+'px';tip.style.top=(e.clientY+16)+'px'});
+let tt;function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('on'),2400)}
+
+/* ---------- blocs ---------- */
+function vKpis(){
+  const act=scoped().filter(p=>!p.fin), fin=scoped().filter(p=>p.fin);
+  const late=act.filter(p=>stats(p).health==='late');
+  const [a,b]=periodRange();
+  const ms=scoped().flatMap(p=>p.ms).filter(m=>d(m.date)>=a&&d(m.date)<b), okMs=ms.filter(m=>m.done).length;
+  const pct=ms.length?Math.round(okMs/ms.length*100):0;
+  const lateMs=late.reduce((n,p)=>n+stats(p).lateMs.length,0);
+  return [
+   `<div class="panel kpi c3"><div class="bub">${IC.folder}</div><div><div class="lab">Projets en cours</div><div class="val">${act.length}</div><div class="sub">${act.filter(p=>stats(p).health==='risk').length} à surveiller</div></div></div>`,
+   `<div class="panel kpi c3"><div class="bub late">${IC.late}</div><div><div class="lab">Projets en retard</div><div class="val ${late.length?'t-late':''}">${late.length}</div><div class="sub">${lateMs} jalon${lateMs>1?'s':''} dépassé${lateMs>1?'s':''}</div></div></div>`,
+   `<div class="panel kpi c3"><div class="bub ok">${IC.ok}</div><div><div class="lab">Projets achevés</div><div class="val">${fin.length}</div><div class="sub">sur la période</div></div></div>`,
+   `<div class="panel kpi c3"><div class="bub">${IC.flag}</div><div><div class="lab">Achèvement des jalons</div><div class="val">${pct} %</div><div class="sub">${okMs} sur ${ms.length} jalons</div></div></div>`
+  ].join('');
+}
+function gantt(rows,A,B,showToday){
+  const span=B-A,pos=x=>(x-A)/span*100;
+  const mo=[];for(let x=new Date(A);x<B;x=new Date(x.getFullYear(),x.getMonth()+1,1))mo.push(new Date(x));
+  const months=mo.map(x=>{const n=new Date(x.getFullYear(),x.getMonth()+1,1);return `<div class="g-month" style="left:${Math.max(0,pos(x))}%;width:${(Math.min(n,B)-Math.max(x,A))/span*100}%">${x.toLocaleDateString('fr-FR',{month:'short'})}</div>`}).join('');
+  const body=rows.map(r=>`<div class="g-row"><div class="g-name">${r.label}</div><div class="g-track"><div class="g-bar ${r.fin?'fin':''}" style="left:${pos(r.s)}%;width:${(r.e-r.s)/span*100}%" data-tip="${esc(r.tip)}"><i style="width:${r.pr*100}%"></i></div>${(r.ms||[]).join('')}</div></div>`).join('');
+  const td=showToday&&TODAY>=A&&TODAY<B?`<div style="position:absolute;left:170px;right:0;top:0;bottom:0;pointer-events:none"><div class="g-today" style="left:${pos(TODAY)}%"><span>Aujourd’hui</span></div></div>`:'';
+  return `<div class="gw"><div class="gantt"><div class="g-row hd"><div></div><div class="g-track" style="height:22px">${months}</div></div>${body}${td}</div></div>`;
+}
+function vGantt(){
+  const ps=scoped();let inner;
+  const dm=(m,A,B)=>{const late=!m.done&&d(m.date)<TODAY,cls=m.done?'done':late?'late':'next',lab=m.done?'atteint':late?'dépassé':'à venir';return `<button class="ms ${cls}" style="left:${(d(m.date)-A)/(B-A)*100}%" data-tip="${esc(m.name)} · ${fmt(m.date)} · ${lab}" aria-label="Jalon ${esc(m.name)}, ${fmt(m.date)}, ${lab}"></button>`};
+  if(S.gTab==='projects'){
+    const A=d('2026-07-01'),B=d('2027-01-01');
+    const rows=ps.map(p=>{const s=stats(p);return {label:`<button data-act="gdetail" data-id="${p.id}" title="Voir le détail">${esc(p.name)}</button>`,s:d(p.start),e:d(p.end),pr:s.progress,fin:p.fin,tip:`${p.name} · ${fmt(p.start)} → ${fmt(p.end)} · ${Math.round(s.progress*100)} % réalisé`,ms:p.ms.map(m=>dm(m,A,B))}});
+    inner=rows.length?gantt(rows,A,B,true):'<div class="empty">Aucun projet pour ces filtres.</div>';
+  }else{
+    let p=DATA[S.gPid];if(!p||!ps.includes(p))p=ps[0];
+    if(!p)inner='<div class="empty">Aucun projet pour ces filtres.</div>';
+    else{
+      const A=new Date(d(p.start).getFullYear(),d(p.start).getMonth(),1),B=new Date(d(p.end).getFullYear(),d(p.end).getMonth()+1,1);
+      const rows=p.acts.map((a,i)=>{const ts=p.tasks.filter(t=>t.act===i),c=ts.filter(isDone).length;return {label:esc(a[0]),s:d(a[1]),e:d(a[2]),pr:ts.length?c/ts.length:0,fin:p.fin,tip:`${a[0]} · ${fmt(a[1])} → ${fmt(a[2])} · ${c}/${ts.length} tâches`,ms:[]}});
+      rows.push({label:'<b>Jalons</b>',s:A,e:A,pr:0,tip:'',ms:p.ms.map(m=>dm(m,A,B))});
+      inner=`<div style="margin-bottom:8px"><label class="sel" style="display:inline-grid">Projet<select id="gSel">${ps.map(x=>`<option value="${x.id}" ${x.id===p.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select></label></div>`+gantt(rows,A,B,true);
+    }
+  }
+  return `<section class="panel c8"><div class="ph"><h2>Gantt et chronologie des projets</h2><div class="seg" role="group" aria-label="Vue"><button data-act="gtab" data-id="projects" aria-pressed="${S.gTab==='projects'}">Projets</button><button data-act="gtab" data-id="detail" aria-pressed="${S.gTab==='detail'}">Détail par activité</button></div></div>${inner}
+   <div class="gl"><span><i class="sw" style="background:var(--s5)"></i>Réalisé</span><span><i class="sw" style="background:var(--s1)"></i>Prévu</span><span><i class="dm" style="background:var(--ok)"></i>Jalon atteint</span><span><i class="dm" style="background:var(--late)"></i>Jalon dépassé</span><span><i class="dm" style="background:var(--surface);border:2px solid var(--ink2)"></i>À venir</span></div></section>`;
+}
+function critical(){
+  const R=ROLES[S.role],out=[];
+  scoped().filter(p=>!p.fin).forEach(p=>{
+    if(S.role!=='membre')p.ms.filter(m=>!m.done&&d(m.date)<TODAY).forEach(m=>out.push({k:'late',w:0,ic:'flag',t:`Jalon « ${m.name} » dépassé`,s:`${p.name} · ${days(TODAY,d(m.date))} j de retard`,a:['Replanifier','Replanification proposée pour « '+m.name+' »']}));
+  });
+  scopeTasks().forEach(t=>{
+    if(DATA[t.pid].fin)return;
+    const who=PEOPLE[t.who].n,p=DATA[t.pid].name;
+    if(isOver(t))out.push({k:'late',w:1,ic:'late',t:`${t.title}`,s:`${p} · ${who} · ${days(TODAY,d(t.due))} j de retard`,a:['Relancer','Rappel envoyé à '+who]});
+    else if(!isDone(t)&&days(d(t.due),TODAY)<=3)out.push({k:'risk',w:2,ic:'cal',t:t.title,s:`${p} · ${who} · échéance ${fmt(t.due)}`,a:['Relancer','Rappel envoyé à '+who]});
+    else if(t.status==='review'&&S.role!=='membre')out.push({k:'info',w:3,ic:'check',t:t.title,s:`${p} · en revue, à approuver`,a:['Approuver','Tâche approuvée : '+t.title],approve:t.id});
+  });
+  out.sort((a,b)=>a.w-b.w);
+  const li=out.slice(0,5).map(x=>`<li><span class="dot ${x.k}">${IC[x.ic]}</span><div class="tx"><b title="${esc(x.t)}">${esc(x.t)}</b><span>${esc(x.s)}</span></div><button class="btn ghost" data-act="crit" data-msg="${esc(x.a[1])}" ${x.approve?`data-appr="${x.approve}"`:''}>${x.a[0]}</button></li>`).join('');
+  return `<section class="panel c4"><div class="ph"><h2>Actions critiques</h2><small>${out.length} à traiter</small></div><ul class="crit">${li||'<li class="empty">Rien d’urgent.</li>'}</ul><p class="note">Retards et échéances des 3 prochains jours. Toutes les échéances sont dans « Programmation ».</p></section>`;
+}
+function vWeek(){
+  const mon=new Date(d('2026-10-12').getTime()+S.weekOff*7*DAY),names=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  const all=scoped().flatMap(p=>p.tasks.map(t=>({t,p}))).filter(x=>S.role!=='membre'||x.t.who===ROLES[S.role].me);
+  const cols=names.map((n,i)=>{
+    const dt=new Date(mon.getTime()+i*DAY),iso=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+    const ev=[];
+    if(S.weekOff===0)MEET.filter(m=>m[0]===i).forEach(m=>ev.push(`<div class="ev mt"><small>${m[1]}</small>${esc(m[2])}</div>`));
+    scoped().forEach(p=>p.ms.filter(m=>(Y+m.date)===iso).forEach(m=>ev.push(`<div class="ev jl"><small>Jalon · ${esc(p.name)}</small>${esc(m.name)}</div>`)));
+    all.filter(x=>(Y+x.t.due)===iso).forEach(x=>ev.push(`<div class="ev ${isOver(x.t)?'late':''} ${isDone(x.t)?'dn':''}"><small>${esc(x.p.name)} · ${esc(PEOPLE[x.t.who].n.split(' ')[0])}</small>${esc(x.t.title)}</div>`));
+    const td=dt.getTime()===TODAY.getTime();
+    return `<div class="day ${td?'today':''}"><h4><span>${n}</span><span>${dt.getDate()}</span></h4>${ev.join('')||'<div class="empty" style="font-size:.74rem">—</div>'}</div>`}).join('');
+  const end=new Date(mon.getTime()+6*DAY);
+  return `<section class="panel c8"><div class="ph"><h2>Programmation</h2><div class="wk-nav"><button data-act="week" data-id="-1" aria-label="Semaine précédente">‹</button><small>${mon.getDate()} – ${end.getDate()} ${end.toLocaleDateString('fr-FR',{month:'long',year:'numeric'})}</small><button data-act="week" data-id="1" aria-label="Semaine suivante">›</button><button class="btn ghost" data-act="week" data-id="0">Aujourd’hui</button></div></div><div class="week">${cols}</div></section>`;
+}
+function vTasks(){
+  const ts=scopeTasks(),n=ts.length||1;
+  const seg=ST.map(([k,l])=>{const c=ts.filter(t=>t.status===k).length;return {k,l,c}});
+  const bar=seg.filter(s=>s.c).map(s=>`<div class="s-${s.k}" style="flex:${s.c} 1 0" data-tip="${s.l} : ${s.c}"></div>`).join('');
+  const rows=seg.map(s=>`<div class="r"><i class="sw s-${s.k}"></i><span>${s.l}</span><b>${s.c}</b><span class="pc">${Math.round(s.c/n*100)} %</span></div>`).join('');
+  return `<section class="panel c4"><div class="ph"><h2>Progression des tâches</h2><small>${ts.length} tâches</small></div><div class="stk" role="img" aria-label="Répartition des tâches par statut">${bar}</div><div class="tp">${rows}</div><ul class="crit" style="margin-top:14px"><li><span class="dot late">${IC.late}</span><div class="tx"><b>${ts.filter(isOver).length} en retard</b><span>à traiter en priorité</span></div><span></span></li><li><span class="dot info">${IC.check}</span><div class="tx"><b>${ts.filter(t=>t.status==='review').length} en revue</b><span>en attente d’approbation</span></div><span></span></li></ul></section>`;
+}
+function monthData(ps){
+  return [6,7,8,9,10,11].map(m=>{
+    const ms=ps.flatMap(p=>p.ms).filter(x=>d(x.date).getMonth()===m),done=ms.filter(x=>x.done).length;
+    const first=new Date(2026,m,1),fut=first>TODAY;
+    return {m,n:ms.length,done,fut,cur:TODAY.getMonth()===m,pct:ms.length?done/ms.length*100:null};
+  });
+}
+function vTrend(){
+  const ps=scoped();
+  const sel=S.tPid==='all'?ps:ps.filter(p=>String(p.id)===String(S.tPid));
+  const md=monthData(sel),W=600,H=250,L=38,R=10,T=16,Bm=34,ph=H-T-Bm,bw=(W-L-R)/6,w=Math.min(46,bw*.62);
+  const y=v=>T+ph*(1-v/100);
+  let svg=`<svg class="trend" viewBox="0 0 ${W} ${H}" role="img" aria-label="Évolution mensuelle de l’achèvement des jalons" style="width:100%;height:auto"><defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="var(--line)" stroke-width="2"/></pattern></defs>`;
+  [0,50,100].forEach(v=>{svg+=`<line class="gl2" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${v} %</text>`});
+  const pts=[];
+  md.forEach((x,i)=>{
+    const cx=L+bw*i+bw/2,x0=cx-w/2,lab=new Date(2026,x.m,1).toLocaleDateString('fr-FR',{month:'short'});
+    const tipTxt=x.n?`${lab} : ${x.done}/${x.n} jalons atteints (${Math.round(x.pct)} %)${x.cur?' · mois en cours':''}${x.fut?' · à venir':''}`:`${lab} : aucun jalon`;
+    svg+=`<rect class="${x.fut?'fut':'tk'}" x="${x0}" y="${y(100)}" width="${w}" height="${ph}" rx="5" data-tip="${esc(tipTxt)}"/>`;
+    if(!x.fut&&x.pct!==null){const hh=ph*x.pct/100;svg+=`<rect class="fl" x="${x0}" y="${y(x.pct)}" width="${w}" height="${Math.max(hh,2)}" rx="5" data-tip="${esc(tipTxt)}"/>`;pts.push([cx,y(x.pct),x.pct])}
+    svg+=`<text x="${cx}" y="${H-14}" text-anchor="middle">${lab}${x.cur?' •':''}</text>`;
+    if(x.fut)svg+=`<text x="${cx}" y="${y(50)+4}" text-anchor="middle">à venir</text>`;
+    else if(x.pct===null)svg+=`<text x="${cx}" y="${y(50)+4}" text-anchor="middle">—</text>`;
+  });
+  if(pts.length>1)svg+=`<polyline class="ln" points="${pts.map(p=>p[0]+','+p[1]).join(' ')}"/>`;
+  pts.forEach(p=>{svg+=`<circle class="pt" cx="${p[0]}" cy="${p[1]}" r="4"/><text class="val" x="${p[0]}" y="${p[1]-9}" text-anchor="middle">${Math.round(p[2])} %</text>`});
+  svg+='</svg>';
+  return `<section class="panel c8"><div class="ph"><h2>Évolution mois par mois</h2><label class="sel" style="display:inline-grid">Projets<select id="tSel"><option value="all">Tous les projets</option>${ps.map(p=>`<option value="${p.id}" ${String(S.tPid)===String(p.id)?'selected':''}>${esc(p.name)}</option>`).join('')}</select></label></div>${svg}<p class="note">Chaque barre vaut 100 % des jalons prévus ce mois-là ; la partie pleine montre ceux atteints. La courbe relie les sommets.</p></section>`;
+}
+function vFeed(){
+  const li=FEED.filter(f=>inScope(DATA[f[3]])).map(f=>`<li><span class="av sm">${IC[f[0]].replace('class="ico"','class="ico" style="width:12px;height:12px"')}</span><div>${esc(f[1])}<small>${f[2]}</small></div></li>`).join('');
+  return `<section class="panel c4"><div class="ph"><h2>Activités récentes</h2></div><ul class="feed">${li||'<li class="empty">Aucune activité.</li>'}</ul></section>`;
+}
+function vProjects(){
+  const rows=scoped().map(p=>{
+    const s=stats(p),pr=Math.round(s.progress*100);
+    const state=p.fin?pill('ok','Achevé'):pill(s.health,HL[s.health]);
+    const perf=s.perf===null?'<span class="empty">—</span>':`<span class="${'t-'+perfCls(s.perf)}"><b>${s.perf} %</b></span>`;
+    const nx=p.fin?'—':(s.next?`${esc(s.next.name)}<small>${fmt(s.next.date)}</small>`:'—');
+    return `<tr class="pr"><td><button class="nm" data-act="gdetail" data-id="${p.id}">${esc(p.name)}</button><small>${PAYS[p.c]}</small></td><td>${esc(PEOPLE[p.owner].n)}</td><td>${fmt(p.start)} → ${fmt(p.end)}</td><td><div class="meter" role="img" aria-label="Avancement ${pr} %"><i style="width:${pr}%"></i></div><small>${pr} % · ${s.comp}/${s.total} tâches</small></td><td>${p.acts.length}</td><td>${s.msDone}/${p.ms.length}</td><td>${nx}</td><td>${perf}</td><td>${state}</td></tr>`}).join('');
+  return `<section class="panel c12"><div class="ph"><h2>Vue d’ensemble des projets</h2><small>${scoped().length} projets</small></div><div class="tbl"><table><thead><tr><th>Projet</th><th>Responsable</th><th>Période</th><th>Avancement</th><th>Activités</th><th>Jalons</th><th>Prochain jalon</th><th title="Avancement réel ÷ avancement attendu à ce jour">Performance</th><th>État</th></tr></thead><tbody>${rows||'<tr><td colspan="9" class="empty">Aucun projet.</td></tr>'}</tbody></table></div><p class="note">Performance = avancement réel ÷ avancement attendu à ce jour (≥ 90 % bon, 70–90 % à surveiller, &lt; 70 % en retard). Formule proposée, à valider.</p></section>`;
+}
+function vTeams(){
+  const ts=DATA.flatMap(p=>inScope({...p,c:p.c,tasks:p.tasks})?p.tasks:[]);
+  const ppl=PEOPLE.map((p,i)=>({p,i})).filter(x=>S.country==='all'||x.p.c===S.country);
+  const open=i=>DATA.flatMap(p=>p.tasks).filter(t=>t.who===i&&!isDone(t)).length;
+  const mx=Math.max(1,...PEOPLE.map((_,i)=>open(i)));
+  const dispo=ppl.filter(x=>x.p.s==='ok').length;
+  const cards=ppl.map(({p,i})=>{const a=AV[p.s],o=open(i),ov=DATA.flatMap(q=>q.tasks).filter(t=>t.who===i&&isOver(t)).length;
+    return `<div class="tm"><div class="top"><span class="av">${ini(i)}</span><div><b>${esc(p.n)}</b><small>${esc(p.r)} · ${PAYS[p.c]}</small></div></div>
+    <div>${`<span class="pill ${a[1]}">${IC[a[2]]}${a[0]}</span>`}</div>
+    ${p.why?`<div class="why">${esc(p.why)}</div>`:''}
+    <div class="loc">${IC.pin}${esc(p.loc)}</div>
+    <div class="ld"><span>${o} tâche${o>1?'s':''} ouverte${o>1?'s':''}${ov?` · <span class="t-late">${ov} en retard</span>`:''}</span><div class="meter"><i style="width:${o/mx*100}%"></i></div></div></div>`}).join('');
+  return `<section class="panel c12"><div class="ph"><h2>Vue d’ensemble des équipes</h2><small>${dispo} disponible${dispo>1?'s':''} sur ${ppl.length}</small></div><div class="teams">${cards||'<div class="empty">Aucun membre pour ce pays.</div>'}</div></section>`;
+}
+const NAV=[['home','Tableau de bord','home'],['proj','Projets','folder'],['task','Tâches','task'],['cal','Calendrier','cal'],['team','Équipes','users'],['rep','Rapports','chart'],['adm','Administration','shield'],['set','Paramètres','gear']];
+function render(){
+  const R=ROLES[S.role];
+  document.getElementById('nav').innerHTML=NAV.filter(n=>n[0]!=='adm'||S.role==='admin').map(n=>`<button data-act="${n[0]==='home'?'home':'soon'}" ${n[0]==='home'?'aria-current="page"':''}>${IC[n[2]]}${n[1]}</button>`).join('');
+  document.getElementById('meName').textContent=R.user;document.getElementById('meRole').textContent=R.label;
+  document.getElementById('meAv').textContent=R.user.split(' ').map(w=>w[0]).join('').slice(0,2);
+  const scope=S.role==='admin'?'Tous les projets':S.role==='resp'?'Projets dont vous avez la charge':'Projets où vous avez des tâches';
+  document.getElementById('app').innerHTML=`
+  <div class="bar-top"><label class="search">${IC.search}<input type="search" placeholder="Rechercher un projet, une tâche, une personne…" aria-label="Rechercher"></label><span class="chip">Maquette · données fictives</span>
+   <label class="sel">Voir comme<select id="roleSel">${Object.entries(ROLES).map(([k,v])=>`<option value="${k}" ${k===S.role?'selected':''}>${v.label}</option>`).join('')}</select></label>
+   <button class="bell" data-act="soon" aria-label="Notifications">${IC.bell}<b>3</b></button></div>
+  <div class="head"><div><h1>${S.role==='admin'?'Tableau de bord':'Bonjour '+esc(R.user.split(' ')[0])}</h1><p>${scope} · situation au mercredi 14 octobre 2026</p></div>
+   <div class="filters"><label class="sel">Pays<select id="cSel"><option value="all">Tous les pays</option>${Object.entries(PAYS).map(([k,v])=>`<option value="${k}" ${k===S.country?'selected':''}>${v}</option>`).join('')}</select></label>
+   <label class="sel">Période<select id="pSel"><option value="year" ${S.period==='year'?'selected':''}>Année 2026</option><option value="quarter" ${S.period==='quarter'?'selected':''}>4e trimestre 2026</option><option value="month" ${S.period==='month'?'selected':''}>Octobre 2026</option></select></label></div></div>
+  <div class="grid">${vKpis()}</div>
+  <div class="grid">${vGantt()}${critical()}</div>
+  <div class="grid">${vWeek()}${vTasks()}</div>
+  <div class="grid">${vTrend()}${vFeed()}</div>
+  <div class="grid">${vProjects()}</div>
+  <div class="grid">${vTeams()}</div>`;
+  tip.style.opacity=0;
+}
+
+/* ---------- événements ---------- */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b)return;
+  const a=b.dataset.act,id=b.dataset.id;
+  if(a==='soon'){toast('Cet écran arrive à l’étape suivante.');return}
+  if(a==='home'){scrollTo({top:0,behavior:'smooth'});return}
+  if(a==='gtab')S.gTab=id;
+  else if(a==='gdetail'){S.gTab='detail';S.gPid=+id}
+  else if(a==='week')S.weekOff=id==='0'?0:S.weekOff+ +id;
+  else if(a==='crit'){
+    if(b.dataset.appr){const t=DATA.flatMap(p=>p.tasks).find(x=>x.id===+b.dataset.appr);if(t)t.status='appr'}
+    toast(b.dataset.msg);
+  }
+  else if(a==='aiact'){aiRun(b.dataset.k,b);return}
+  render();
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.id==='roleSel'){S.role=t.value;S.gTab='projects';S.tPid='all'}
+  else if(t.id==='cSel'){S.country=t.value;S.tPid='all'}
+  else if(t.id==='pSel')S.period=t.value;
+  else if(t.id==='gSel'){S.gPid=+t.value}
+  else if(t.id==='tSel'){S.tPid=t.value}
+  else return;
+  render();
+});
+
+/* ---------- assistant IA (simulation) ---------- */
+const log=document.getElementById('aiLog'),panel=document.getElementById('aiPanel'),btn=document.getElementById('aiBtn');
+const SUG=['Quels projets sont en retard ?','Qui est disponible ?','Créer une tâche « Préparer le budget de la collecte »','Résume la semaine'];
+function say(html,cls){const m=document.createElement('div');m.className='msg '+cls;m.innerHTML=html;log.appendChild(m);log.scrollTop=log.scrollHeight;return m}
+function openAI(){panel.hidden=false;btn.hidden=true;if(!log.children.length){say('Bonjour. Je peux répondre à vos questions sur les projets et préparer des actions. <b>Je ne modifie rien sans votre confirmation.</b>','a')}document.getElementById('aiIn').focus()}
+function closeAI(){panel.hidden=true;btn.hidden=false;btn.focus()}
+btn.addEventListener('click',openAI);document.getElementById('aiClose').addEventListener('click',closeAI);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden)closeAI()});
+document.getElementById('aiSug').innerHTML=SUG.map(s=>`<button type="button">${esc(s)}</button>`).join('');
+document.getElementById('aiSug').addEventListener('click',e=>{const b=e.target.closest('button');if(b)ask(b.textContent)});
+document.getElementById('aiForm').addEventListener('submit',e=>{e.preventDefault();const i=document.getElementById('aiIn'),v=i.value.trim();if(v){ask(v);i.value=''}});
+let pending=null;
+function ask(q){
+  say(esc(q),'u');
+  const s=q.toLowerCase(),R=ROLES[S.role];
+  setTimeout(()=>{
+    if(/retard/.test(s)){
+      const l=scoped().filter(p=>!p.fin&&stats(p).health==='late');
+      say(l.length?`${l.length} projet${l.length>1?'s':''} en retard :<ul>${l.map(p=>{const x=stats(p);return `<li><b>${esc(p.name)}</b> — ${esc([x.lateMs.length?x.lateMs.length+' jalon dépassé':'',x.over?x.over+' tâche(s) en retard':''].filter(Boolean).join(', '))}</li>`}).join('')}</ul>${S.role==='membre'?'':'<div class="acts"><button class="btn" data-act="aiact" data-k="remind">Relancer les responsables</button></div>'}`:'Aucun projet en retard dans votre périmètre.','a');
+    }else if(/dispo/.test(s)){
+      const l=PEOPLE.filter(p=>p.s==='ok');say(`Disponibles maintenant :<ul>${l.map(p=>`<li>${esc(p.n)} · ${esc(p.loc)}</li>`).join('')}</ul>`,'a');
+    }else if(/(créer|crée|ajoute|ajouter).*t[âa]che/.test(s)){
+      const m=q.match(/[«"“](.+?)[»"”]/),title=m?m[1]:q.replace(/.*t[âa]che/i,'').trim()||'Nouvelle tâche';
+      if(S.role==='membre'){say('Votre rôle (Membre) ne permet pas de créer des tâches. Demandez à un Responsable ou à un Administrateur.','a');return}
+      const p=scoped().find(x=>!x.fin);if(!p){say('Aucun projet actif dans votre périmètre.','a');return}
+      pending={pid:p.id,title};
+      say(`Je propose de créer la tâche <b>« ${esc(title)} »</b> dans <b>${esc(p.name)}</b>, échéance le 21 oct., assignée à ${esc(PEOPLE[p.owner].n)}.<div class="acts"><button class="btn" data-act="aiact" data-k="create">Confirmer</button><button class="btn ghost" data-act="aiact" data-k="cancel">Annuler</button></div>`,'a');
+    }else if(/r[ée]sum/.test(s)){
+      const t=scopeTasks(),o=t.filter(isOver).length,w=t.filter(x=>!isDone(x)&&days(d(x.due),TODAY)>=0&&days(d(x.due),TODAY)<=7).length;
+      say(`Cette semaine : <b>${w}</b> échéance${w>1?'s':''} à venir, <b>${o}</b> tâche${o>1?'s':''} en retard, ${t.filter(x=>x.status==='review').length} en attente d’approbation. Les points les plus sensibles sont dans « Actions critiques ».`,'a');
+    }else say('Je peux, par exemple : lister les projets en retard, dire qui est disponible, résumer la semaine ou préparer la création d’une tâche. Essayez une des suggestions ci-dessous.','a');
+  },350);
+}
+function aiRun(k,b){
+  const acts=b.closest('.acts');if(acts)acts.remove();
+  if(k==='create'&&pending){const p=DATA[pending.pid];p.tasks.push({id:uid++,pid:p.id,title:pending.title,who:p.owner,status:'todo',due:'10-21',prio:'n',act:0});say('C’est fait : tâche créée dans « '+esc(p.name)+' ».','a');toast('Tâche créée par l’assistant');pending=null;render()}
+  else if(k==='remind'){say('Rappels préparés pour les responsables concernés.','a');toast('Rappels envoyés (simulation)')}
+  else{pending=null;say('D’accord, rien n’a été modifié.','a')}
+}
+render();
+})();
+</script>
