@@ -74,4 +74,4 @@ Ne jamais lancer `seed_demo` en production.
 
 ## Crédits
 
-- Icônes : [react-icons](https://react-icons.github.io/react-icons/) : Lucide (ISC) pour l'interface, Font Awesome Free (CC BY 4.0) et Material Design (Apache 2.0) pour les tuiles de progression.
+- Icônes : [Material UI Icons](https://mui.com/material-ui/material-icons/) (`@mui/icons-material`, licence MIT).

@@ -1,72 +1,80 @@
 import type { ReactNode } from "react";
-import type { IconType } from "react-icons";
-import { FaBoxArchive, FaCircleCheck, FaFlag, FaUsersGear } from "react-icons/fa6";
-import {
-  LuBell,
-  LuCalendarDays,
-  LuChartNoAxesColumn,
-  LuCheck,
-  LuChevronDown,
-  LuClock,
-  LuFlag,
-  LuFolder,
-  LuLayoutGrid,
-  LuListChecks,
-  LuLogOut,
-  LuMapPin,
-  LuSearch,
-  LuSend,
-  LuSettings,
-  LuShieldCheck,
-  LuSparkles,
-  LuUpload,
-  LuUsers,
-} from "react-icons/lu";
-import { MdYoutubeSearchedFor } from "react-icons/md";
+import AdminPanelSettingsOutlined from "@mui/icons-material/AdminPanelSettingsOutlined";
+import AutoAwesomeOutlined from "@mui/icons-material/AutoAwesomeOutlined";
+import BarChartOutlined from "@mui/icons-material/BarChartOutlined";
+import CalendarMonthOutlined from "@mui/icons-material/CalendarMonthOutlined";
+import CheckCircle from "@mui/icons-material/CheckCircle";
+import CheckOutlined from "@mui/icons-material/CheckOutlined";
+import ChecklistOutlined from "@mui/icons-material/ChecklistOutlined";
+import ExpandMoreOutlined from "@mui/icons-material/ExpandMoreOutlined";
+import FileUploadOutlined from "@mui/icons-material/FileUploadOutlined";
+import Flag from "@mui/icons-material/Flag";
+import FlagOutlined from "@mui/icons-material/FlagOutlined";
+import FolderOutlined from "@mui/icons-material/FolderOutlined";
+import GridViewOutlined from "@mui/icons-material/GridViewOutlined";
+import GroupsOutlined from "@mui/icons-material/GroupsOutlined";
+import Inventory2 from "@mui/icons-material/Inventory2";
+import LogoutOutlined from "@mui/icons-material/LogoutOutlined";
+import ManageAccounts from "@mui/icons-material/ManageAccounts";
+import NotificationsNoneOutlined from "@mui/icons-material/NotificationsNoneOutlined";
+import PlaceOutlined from "@mui/icons-material/PlaceOutlined";
+import ScheduleOutlined from "@mui/icons-material/ScheduleOutlined";
+import SearchOutlined from "@mui/icons-material/SearchOutlined";
+import SendOutlined from "@mui/icons-material/SendOutlined";
+import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
+import YoutubeSearchedFor from "@mui/icons-material/YoutubeSearchedFor";
+import type SvgIcon from "@mui/material/SvgIcon";
 
 import type { Health } from "@/lib/types";
 
 
-// Icônes de l'interface : Lucide (au trait), importées via react-icons. Elles prennent la couleur du texte.
-const ICONS: Record<string, IconType> = {
-  grid: LuLayoutGrid,
-  folder: LuFolder,
-  task: LuListChecks,
-  calendar: LuCalendarDays,
-  users: LuUsers,
-  chart: LuChartNoAxesColumn,
-  shield: LuShieldCheck,
-  gear: LuSettings,
-  search: LuSearch,
-  bell: LuBell,
-  sparkle: LuSparkles,
-  upload: LuUpload,
-  send: LuSend,
-  flag: LuFlag,
-  clock: LuClock,
-  check: LuCheck,
-  chevron: LuChevronDown,
-  pin: LuMapPin,
-  logout: LuLogOut,
+// Icônes Material UI (@mui/icons-material). Interface : variante « Outlined » ; tuiles de progression : variante pleine.
+const ICONS: Record<string, typeof SvgIcon> = {
+  grid: GridViewOutlined,
+  folder: FolderOutlined,
+  task: ChecklistOutlined,
+  calendar: CalendarMonthOutlined,
+  users: GroupsOutlined,
+  chart: BarChartOutlined,
+  shield: AdminPanelSettingsOutlined,
+  gear: SettingsOutlined,
+  search: SearchOutlined,
+  bell: NotificationsNoneOutlined,
+  sparkle: AutoAwesomeOutlined,
+  upload: FileUploadOutlined,
+  send: SendOutlined,
+  flag: FlagOutlined,
+  clock: ScheduleOutlined,
+  check: CheckOutlined,
+  chevron: ExpandMoreOutlined,
+  pin: PlaceOutlined,
+  logout: LogoutOutlined,
 };
 
-export function Icon({ name, className = "h-[18px] w-[18px]" }: { name: string; className?: string }) {
-  const Svg = ICONS[name];
-  return Svg ? <Svg className={`shrink-0 ${className}`} aria-hidden="true" /> : null;
+const TILE_ICONS: Record<string, typeof SvgIcon> = {
+  todo: Inventory2,
+  doing: ManageAccounts,
+  done: Flag,
+  review: YoutubeSearchedFor,
+  approved: CheckCircle,
+};
+
+// L'icône occupe toute la boîte définie par className (ex. h-4 w-4) et prend la couleur du texte.
+function render(Svg: typeof SvgIcon | undefined, className: string) {
+  if (!Svg) return null;
+  return (
+    <span className={`inline-flex shrink-0 ${className}`} aria-hidden="true">
+      <Svg sx={{ width: "100%", height: "100%", color: "inherit" }} />
+    </span>
+  );
 }
 
-// Icônes des tuiles de progression : Font Awesome et Material (pleines), comme la référence « Task Flow ».
-const TILE_ICONS: Record<string, IconType> = {
-  todo: FaBoxArchive,
-  doing: FaUsersGear,
-  done: FaFlag,
-  review: MdYoutubeSearchedFor,
-  approved: FaCircleCheck,
-};
+export function Icon({ name, className = "h-[18px] w-[18px]" }: { name: string; className?: string }) {
+  return render(ICONS[name], className);
+}
 
 export function TileIcon({ name, className = "h-9 w-9" }: { name: string; className?: string }) {
-  const Svg = TILE_ICONS[name];
-  return Svg ? <Svg className={`shrink-0 ${className}`} aria-hidden="true" /> : null;
+  return render(TILE_ICONS[name], className);
 }
 
 const HEALTH: Record<Health, { label: string; className: string }> = {
