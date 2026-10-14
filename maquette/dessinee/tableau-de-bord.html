@@ -1,0 +1,254 @@
+<!doctype html><html lang="fr"><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap">
+<style>
+body{margin:0;font-family:'Geist','Segoe UI',system-ui,sans-serif;color:#111418;font-variant-numeric:tabular-nums;font-size:14px}
+.ic{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nv{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:9px;color:#4a5160;font-size:14px;font-weight:500}
+.nv.on{background:#eef1f4;color:#111418}
+.sec{font-size:11.5px;letter-spacing:.04em;color:#8a919c;padding:18px 12px 6px;font-weight:500}
+.pj{display:flex;align-items:center;gap:10px;padding:7px 12px;font-size:13.5px;color:#4a5160}
+.pj i{width:9px;height:9px;border-radius:3px;display:block}
+.cd{background:#fff;border:1px solid #eceef1;border-radius:16px;padding:20px 22px;min-width:0;box-sizing:border-box}
+.cd h2{margin:0;font-size:16px;font-weight:600}
+.cd.tb{padding:0;overflow:hidden}
+.kp{background:#fff;border:1px solid #eceef1;border-radius:16px;padding:16px 18px;height:112px;box-sizing:border-box;position:relative;display:flex;flex-direction:column}
+.kp .t{font-size:13.5px;color:#5c6370;font-weight:500}
+.kp .n{font-size:40px;font-weight:600;letter-spacing:-1.2px;line-height:1.05;margin-top:6px}
+.kp .s{margin-top:auto;font-size:12.5px;color:#6b7280;display:flex;align-items:center;gap:6px}
+.kp .ar{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;border:1px solid #e1e4e8;display:grid;place-items:center;color:#111418}
+.kp.g{background:#14532d;border-color:#14532d;color:#fff}
+.kp.g .t{color:#cfe8d9}.kp.g .s{color:#cfe8d9}.kp.g .ar{background:#fff;border-color:#fff;color:#14532d}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:2px 9px;border-radius:99px;white-space:nowrap}
+.c-ok{background:#e6f4ec;color:#1b6b43}.c-risk{background:#fdf1dc;color:#9a6208}.c-late{background:#fde8e4;color:#b3321f}.c-gray{background:#eef1f4;color:#4a5160}
+.gr{display:flex;align-items:center;height:46px;border-top:1px solid #f1f3f5}
+.gl{width:200px;flex:none;padding-right:8px;overflow:hidden;white-space:nowrap}
+.gl .nm{display:block;font-size:13px;overflow:hidden;text-overflow:ellipsis}
+.gl .ms{display:block;font-size:11.5px;color:#8a919c;margin-top:1px}
+.gl .ms.late{color:#b3321f}
+.gt{position:relative;flex:1;height:46px}
+.gb{position:absolute;top:19px;height:8px;border-radius:99px;background:#e6ebe8;overflow:hidden}
+.gb b{display:block;height:100%;border-radius:99px}
+.mk{position:absolute;top:15px;width:10px;height:10px;margin-left:-6px;transform:rotate(45deg);border-radius:2px;background:#111418;border:2px solid #fff;box-sizing:content-box}
+.mk.l{background:#d1432f}.mk.o{background:#fff;border-color:#111418;width:8px;height:8px}
+.dy{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;color:#8a919c;width:40px;padding:7px 0;border-radius:10px}
+.dy b{font-size:15px;font-weight:600;color:#111418}
+.dy.t{background:#14532d;color:#cfe8d9}.dy.t b{color:#fff}
+.ev{display:flex;gap:12px;padding:11px 0;border-top:1px solid #f1f3f5}
+.ev i{width:3px;border-radius:2px;flex:none}
+.ev b{display:block;font-weight:500;font-size:13.5px;line-height:1.3}
+.ev small{font-size:12px;color:#8a919c}
+.row{display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid #f1f3f5}
+.row .ci{width:34px;height:34px;border-radius:10px;display:grid;place-items:center}
+.row b{display:block;font-weight:500;font-size:13.5px}
+.row small{font-size:12px;color:#8a919c}
+.bt{border:1px solid #dfe3e8;border-radius:9px;padding:6px 12px;font-size:12.5px;font-weight:500;background:#fff}
+.bk{background:#111418;color:#fff;border-radius:10px;padding:9px 14px;font-size:13.5px;font-weight:500;display:inline-flex;align-items:center;gap:8px}
+.bo{border:1px solid #dfe3e8;background:#fff;border-radius:10px;padding:9px 14px;font-size:13.5px;font-weight:500;display:inline-flex;align-items:center;gap:8px}
+.trk{width:58px;height:220px;border-radius:99px;background:#eef1f0;display:flex;align-items:flex-end;overflow:hidden}
+.trk b{display:block;width:100%;border-radius:99px}
+.fut{width:58px;height:220px;border-radius:99px;background:repeating-linear-gradient(135deg,#fff,#fff 4px,#e3e8e5 4px,#e3e8e5 5.5px);border:1px solid #e3e8e5;box-sizing:border-box}
+.col{display:flex;justify-content:center;align-items:flex-end;height:220px}
+.dot{position:absolute;width:13px;height:13px;margin:-6.5px 0 0 -6.5px;border-radius:50%;background:#fff;border:2.5px solid #111418;box-sizing:border-box}
+.tip{position:absolute;transform:translateX(-50%);background:#111418;color:#fff;font-size:12px;font-weight:500;padding:3px 9px;border-radius:7px}
+.lg{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:center;font-size:13.5px;padding:6px 0}
+.lg i{width:10px;height:10px;border-radius:3px;display:block}
+.av{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:600;font-size:11.5px;flex:none}
+.fe{display:flex;gap:12px;align-items:center;padding:11px 0;border-top:1px solid #f1f3f5;font-size:13.5px}
+.fe small{display:block;color:#8a919c;font-size:12px;margin-top:1px}
+.th,.tr{display:grid;gap:14px;align-items:center;padding:0 20px}
+.p{grid-template-columns:250px 120px 180px 56px 90px 120px 1fr}
+.m{grid-template-columns:260px 130px 270px 200px 1fr}
+.th{height:40px;background:#f7f8fa;border-top:1px solid #eceef1;font-size:12.5px;color:#6b7280;font-weight:500}
+.tr{height:54px;border-top:1px solid #f1f3f5;font-size:13.5px}
+.tr b{font-weight:500}.tr small{display:block;font-size:12px;color:#8a919c}
+.mt{height:6px;border-radius:99px;background:#e6ebe8;overflow:hidden}
+.mt i{display:block;height:100%;border-radius:99px}
+.who{display:flex;gap:10px;align-items:center}
+.ld{display:flex;align-items:center;gap:10px;font-size:12.5px;color:#6b7280}
+.ld .mt{flex:1;max-width:140px}
+.c-blue{background:#e8effd;color:#2a56c6}
+.th,.tr{display:grid;gap:14px;align-items:center;padding:0 20px}
+.p{grid-template-columns:250px 120px 180px 56px 90px 120px 1fr}
+.m{grid-template-columns:260px 130px 270px 200px 1fr}
+.th{height:40px;background:#f7f8fa;border-top:1px solid #eceef1;font-size:12.5px;color:#6b7280;font-weight:500}
+.tr{height:54px;border-top:1px solid #f1f3f5;font-size:13.5px}
+.tr b{font-weight:500}.tr small{display:block;font-size:12px;color:#8a919c}
+.mt{height:6px;border-radius:99px;background:#e6ebe8;overflow:hidden}
+.mt i{display:block;height:100%;border-radius:99px}
+.who{display:flex;gap:10px;align-items:center}
+.ld{display:flex;align-items:center;gap:10px;font-size:12.5px;color:#6b7280}
+.ld .mt{flex:1;max-width:140px}
+</style>
+<body style="margin:0">
+
+<div style="width:1440px;height:2762px;box-sizing:border-box;background:#eceff2;padding:20px">
+<div style="width:1400px;height:2722px;background:#fff;border-radius:24px;border:1px solid #e3e6ea;display:flex;overflow:hidden;box-shadow:0 10px 30px rgba(17,20,24,.06)">
+
+  <!-- barre latérale -->
+  <aside style="width:236px;flex:none;border-right:1px solid #eceef1;padding:20px 14px;display:flex;flex-direction:column;box-sizing:border-box">
+    <div style="display:flex;align-items:center;gap:10px;font-size:19px;font-weight:700;letter-spacing:-.4px;padding:0 8px 22px"><span style="width:28px;height:28px;border-radius:8px;background:#111418;display:grid;place-items:center"><svg class="ic" viewBox="0 0 24 24" style="stroke:#fff;stroke-width:2.6;width:15px;height:15px" aria-hidden="true"><path d="M5 20V11M12 20V4M19 20v-6"/></svg></span>Baromètre</div>
+    <div class="nv on"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg>Tableau de bord</div>
+    <div class="nv"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>Projets</div>
+    <div class="nv"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>Mes tâches<span class="chip c-gray" style="margin-left:auto;padding:0 7px">5</span></div>
+    <div class="nv"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>Calendrier</div>
+    <div class="nv"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.8a3.5 3.5 0 0 1 0 6.4M18.5 14.5A6.5 6.5 0 0 1 21.5 20"/></svg>Équipes</div>
+    <div class="nv"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>Rapports</div>
+    <div class="nv"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.2 7.7 8 9 4.8-1.3 8-4.5 8-9V6l-8-3z"/></svg>Administration</div>
+    <div style="border-top:1px solid #eceef1;margin:14px 0 0"></div>
+    <div class="sec" style="display:flex;justify-content:space-between">PROJETS<span>+</span></div>
+    <div class="pj"><i style="background:#1f7a4d"></i>Enquête nationale T4</div>
+    <div class="pj"><i style="background:#d1432f"></i>Refonte du site web</div>
+    <div class="pj"><i style="background:#1f7a4d"></i>Rapport annuel 2026</div>
+    <div class="pj"><i style="background:#d1432f"></i>Tableau de bord partenaires</div>
+    <div class="pj"><i style="background:#d9a21b"></i>Formation des enquêteurs</div>
+    <div style="flex:1"></div>
+    <div class="nv"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>Paramètres</div>
+    <div style="border-top:1px solid #eceef1;margin-top:10px;padding-top:12px;display:flex;align-items:center;gap:10px"><span style="width:34px;height:34px;border-radius:50%;background:#e6f4ec;color:#1b6b43;font-weight:600;font-size:12px;display:grid;place-items:center">MH</span><div style="line-height:1.3"><b style="display:block;font-weight:600;font-size:13.5px">Mireille Houngbo</b><span style="font-size:12px;color:#8a919c">Responsable</span></div></div>
+  </aside>
+
+  <!-- principal -->
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:68px;flex:none;border-bottom:1px solid #eceef1;display:flex;align-items:center;gap:14px;padding:0 24px">
+      <div style="width:380px;height:40px;box-sizing:border-box;background:#f6f7f9;border:1px solid #eceef1;border-radius:11px;display:flex;align-items:center;gap:10px;padding:0 12px;color:#8a919c;font-size:13.5px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>Rechercher ou demander à l’assistant<span style="margin-left:auto;background:#fff;border:1px solid #e3e6ea;border-radius:6px;padding:1px 7px;font-size:12px;color:#5c6370">⌘ K</span></div>
+      <div style="flex:1"></div>
+      <span class="bk" style="background:#111418"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8L12 3z"/></svg>Assistant IA</span>
+      <span class="bo" style="gap:6px">Tous les pays <svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
+      <span class="bo" style="gap:6px">Année 2026 <svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
+      <span style="position:relative;width:40px;height:40px;display:grid;place-items:center"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7zM10 20a2 2 0 0 0 4 0"/></svg><span style="position:absolute;top:7px;right:9px;width:8px;height:8px;border-radius:50%;background:#d1432f;border:2px solid #fff"></span></span>
+    </div>
+
+    <div style="flex:1;min-height:0;background:#f7f8fa;padding:22px 24px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div><h1 style="margin:0;font-size:28px;font-weight:600;letter-spacing:-.8px">Tableau de bord</h1><p style="margin:4px 0 0;color:#6b7280;font-size:14px">Mercredi 14 octobre 2026 · 5 projets en charge</p></div>
+        <div style="display:flex;gap:10px"><span class="bk" style="background:#14532d">+ Ajouter un projet</span><span class="bo"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V5M7 10l5-5 5 5M5 20h14"/></svg>Importer un Gantt</span></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
+        <div class="kp g"><div class="t">Projets en cours</div><div class="n">6</div><div class="s">dont 1 à surveiller</div></div>
+        <div class="kp"><div class="t">Projets en retard</div><div class="n" style="color:#b3321f">2</div><div class="s"><span class="chip c-late">2 jalons dépassés</span></div></div>
+        <div class="kp"><div class="t">Projets achevés</div><div class="n">2</div><div class="s">sur la période</div></div>
+        <div class="kp"><div class="t">Jalons atteints</div><div class="n">50 %</div><div class="s" style="gap:10px"><span style="flex:1;height:6px;border-radius:99px;background:#e6ebe8;overflow:hidden;display:block"><i style="display:block;width:50%;height:100%;background:#1f7a4d"></i></span>15 sur 30</div></div>
+      </div>
+
+      <section style="background:#fff;border:1px solid #dfe9e2;border-radius:16px;padding:18px 22px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;gap:16px;align-items:flex-start">
+          <span style="width:38px;height:38px;border-radius:11px;background:#111418;color:#fff;display:grid;place-items:center;flex:none"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8L12 3zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/></svg></span>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12.5px;color:#6b7280;font-weight:500">Assistant IA · Synthèse du jour</div>
+            <p style="margin:4px 0 0;font-size:14.5px;line-height:1.5;max-width:760px">2 projets sont en retard et 4 tâches ont dépassé leur échéance. Sèna Agbo, en mission à Dakar jusqu’au 16 octobre, porte 2 de ces retards.</p>
+          </div>
+          <div style="display:flex;gap:10px;flex:none"><span class="bk">Relancer les responsables</span><span class="bo">Replanifier les jalons</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;background:#f6f7f9;border:1px solid #eceef1;border-radius:12px;padding:6px 6px 6px 16px;font-size:13.5px;color:#8a919c">
+          <span style="flex:1">Demandez ou donnez un ordre : « Crée une tâche pour Koffi », « Qui est disponible demain ? »</span>
+          <span style="font-size:12px">Rien n’est modifié sans votre confirmation</span>
+          <span style="width:34px;height:34px;border-radius:9px;background:#111418;color:#fff;display:grid;place-items:center"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></span>
+        </div>
+      </section>
+      <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:16px">
+        <section class="cd" style="padding-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h2 style="margin:0;font-size:16px;font-weight:600">Gantt des projets</h2><div style="display:flex;border:1px solid #e3e6ea;border-radius:9px;overflow:hidden;font-size:12.5px"><span style="padding:5px 12px;background:#111418;color:#fff">Projets</span><span style="padding:5px 12px;color:#5c6370">Par activité</span></div></div>
+          <div style="position:relative;padding-bottom:24px">
+            <div class="gr" style="border-top:0;height:24px;font-size:11.5px;color:#8a919c"><div class="gl" style="width:200px"></div><div class="gt" style="height:24px"><span style="position:absolute;left:0">août</span><span style="position:absolute;left:20.3%">sept.</span><span style="position:absolute;left:39.9%">oct.</span><span style="position:absolute;left:60.1%">nov.</span><span style="position:absolute;left:79.7%">déc.</span></div></div>
+            <div class="gr"><div class="gl"><span class="nm">Enquête nationale T4</span><span class="ms">Collecte terminée · 20 nov.</span></div><div class="gt"><div class="gb" style="left:20.3%;width:68.6%"><b style="width:50%;background:#1f7a4d"></b></div></div></div>
+            <div class="gr"><div class="gl"><span class="nm">Refonte du site web</span><span class="ms late">Jalon dépassé · 18 sept.</span></div><div class="gt"><div class="gb" style="left:10.5%;width:68.6%"><b style="width:50%;background:#d1432f"></b></div></div></div>
+            <div class="gr"><div class="gl"><span class="nm">Rapport annuel 2026</span><span class="ms">Premier jet · 6 nov.</span></div><div class="gt"><div class="gb" style="left:28.8%;width:62%"><b style="width:29%;background:#1f7a4d"></b></div></div></div>
+            <div class="gr"><div class="gl"><span class="nm">Tableau de bord partenaires</span><span class="ms late">Jalon dépassé · 9 oct.</span></div><div class="gt"><div class="gb" style="left:39.9%;width:37.2%"><b style="width:17%;background:#d1432f"></b></div></div></div>
+            <div class="gr"><div class="gl"><span class="nm">Audit qualité des données</span><span class="ms">Rapport d’audit · 30 oct.</span></div><div class="gt"><div class="gb" style="left:0;width:58.8%"><b style="width:88%;background:#1f7a4d"></b></div></div></div>
+            <div class="gr"><div class="gl"><span class="nm">Formation des enquêteurs</span><span class="ms">Supports prêts · 16 oct.</span></div><div class="gt"><div class="gb" style="left:42.5%;width:20.9%"><b style="width:20%;background:#d9a21b"></b></div></div></div>
+            <div style="position:absolute;left:200px;right:0;top:0;bottom:0;pointer-events:none"><div style="position:absolute;left:48.4%;top:24px;bottom:22px;border-left:1px solid #111418"></div><span style="position:absolute;left:48.4%;bottom:0;transform:translateX(-50%);color:#111418;font-size:11.5px;font-weight:500">Aujourd’hui</span></div>
+          </div>
+          <div style="display:flex;gap:16px;font-size:12px;color:#6b7280;margin-top:12px;align-items:center"><span><i style="display:inline-block;width:14px;height:5px;border-radius:3px;background:#1f7a4d;vertical-align:middle;margin-right:6px"></i>Dans les temps</span><span><i style="display:inline-block;width:14px;height:5px;border-radius:3px;background:#d9a21b;vertical-align:middle;margin-right:6px"></i>À surveiller</span><span><i style="display:inline-block;width:14px;height:5px;border-radius:3px;background:#d1432f;vertical-align:middle;margin-right:6px"></i>En retard</span></div>
+        </section>
+
+        <section class="cd">
+          <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0;font-size:16px;font-weight:600">Programmation</h2><span style="font-size:12.5px;color:#6b7280">12 – 18 oct.</span></div>
+          <div style="display:flex;justify-content:space-between;margin:14px 0 8px"><div class="dy"><span>Lu</span><b>12</b></div><div class="dy"><span>Ma</span><b>13</b></div><div class="dy t"><span>Me</span><b>14</b></div><div class="dy"><span>Je</span><b>15</b></div><div class="dy"><span>Ve</span><b>16</b></div><div class="dy"><span>Sa</span><b>17</b></div><div class="dy"><span>Di</span><b>18</b></div></div>
+          <div class="ev"><i style="background:#1f7a4d"></i><div style="flex:1"><b>Comité de pilotage</b><small>Aujourd’hui · 15:00 – 16:30</small></div></div>
+          <div class="ev"><i style="background:#111418"></i><div style="flex:1"><b>Valider le plan d’échantillonnage</b><small>Enquête T4 · jeu. 15 oct.</small></div></div>
+          <div class="ev"><i style="background:#d9a21b"></i><div style="flex:1"><b>Jalon « Supports prêts »</b><small>Formation · ven. 16 oct.</small></div></div>
+          <div class="ev"><i style="background:#7c8794"></i><div style="flex:1"><b>Revue des jalons</b><small>Équipe · ven. 16 oct. · 14:00</small></div></div>
+        </section>
+      </div>
+
+      <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:16px">
+<section class="cd">
+          <div style="display:flex;justify-content:space-between;align-items:center"><div><h2>Évolution mois par mois</h2><div style="font-size:12.5px;color:#6b7280;margin-top:2px">Jalons atteints, en % des jalons prévus chaque mois</div></div><span class="bo" style="padding:6px 12px;font-size:13px">Tous les projets ⌄</span></div>
+          <div style="display:flex;gap:10px;margin-top:44px">
+            <div style="width:40px;height:220px;display:flex;flex-direction:column;justify-content:space-between;font-size:11.5px;color:#8a919c;text-align:right"><span>100 %</span><span>50 %</span><span>0 %</span></div>
+            <div style="flex:1;position:relative">
+              <div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));height:220px">
+                <div class="col"><div class="trk"><b style="height:100%;background:#1f7a4d"></b></div></div>
+                <div class="col"><div class="trk"><b style="height:100%;background:#1f7a4d"></b></div></div>
+                <div class="col"><div class="trk"><b style="height:86%;background:#1f7a4d"></b></div></div>
+                <div class="col"><div class="trk"><b style="height:25%;background:#7cc19b"></b></div></div>
+                <div class="col"><div class="fut"></div></div>
+                <div class="col"><div class="fut"></div></div>
+              </div>
+              <svg viewBox="0 0 600 220" preserveAspectRatio="none" role="img" aria-label="Courbe : 100 % en juillet, 100 % en août, 86 % en septembre, 25 % en octobre" style="position:absolute;left:0;top:0;width:100%;height:220px;overflow:visible"><polyline points="50,0 150,0 250,30.8 350,165" fill="none" stroke="#111418" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>
+              <span class="dot" style="left:calc(100%/12);top:0"></span><span class="dot" style="left:25%;top:0"></span><span class="dot" style="left:calc(100%*5/12);top:30.8px"></span><span class="dot" style="left:calc(100%*7/12);top:165px"></span>
+              <span class="tip" style="left:calc(100%/12);top:-34px">100 %</span><span class="tip" style="left:25%;top:-34px">100 %</span><span class="tip" style="left:calc(100%*5/12);top:-4px">86 %</span><span class="tip" style="left:calc(100%*7/12);top:128px">25 %</span>
+              <div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));margin-top:12px;font-size:12.5px;color:#6b7280;text-align:center"><span>juil.</span><span>août</span><span>sept.</span><span style="font-weight:600;color:#111418">oct. · en cours</span><span>nov.</span><span>déc.</span></div>
+            </div>
+          </div>
+        </section>
+<section class="cd">
+          <h2>Progression des tâches</h2>
+          <div style="position:relative;width:240px;height:122px;overflow:hidden;margin:20px auto 6px">
+            <div style="width:240px;height:240px;border-radius:50%;background:conic-gradient(from -90deg,#dfe5e1 0 16%,#a9d5bb 16% 24%,#5fb383 24% 25%,#2f8f5b 25% 28%,#14532d 28% 50%,transparent 50% 100%)"></div>
+            <div style="position:absolute;left:36px;top:36px;width:168px;height:168px;border-radius:50%;background:#fff"></div>
+            <div style="position:absolute;left:0;right:0;bottom:0;text-align:center"><b style="font-size:34px;font-weight:600;letter-spacing:-1px;line-height:1">50</b><div style="font-size:12.5px;color:#6b7280">tâches</div></div>
+          </div>
+          <div class="lg"><i style="background:#dfe5e1"></i>En attente<b>16</b><span style="color:#8a919c;font-size:12.5px;min-width:34px;text-align:right">32 %</span></div>
+          <div class="lg"><i style="background:#a9d5bb"></i>En cours<b>8</b><span style="color:#8a919c;font-size:12.5px;min-width:34px;text-align:right">16 %</span></div>
+          <div class="lg"><i style="background:#5fb383"></i>Fait<b>1</b><span style="color:#8a919c;font-size:12.5px;min-width:34px;text-align:right">2 %</span></div>
+          <div class="lg"><i style="background:#2f8f5b"></i>En revue<b>3</b><span style="color:#8a919c;font-size:12.5px;min-width:34px;text-align:right">6 %</span></div>
+          <div class="lg"><i style="background:#14532d"></i>Approuvé<b>22</b><span style="color:#8a919c;font-size:12.5px;min-width:34px;text-align:right">44 %</span></div>
+        </section>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+<section class="cd">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><h2 style="margin:0;font-size:16px;font-weight:600">Actions critiques</h2><span style="font-size:12.5px;color:#6b7280">11 à traiter · <b style="color:#111418;font-weight:500">Voir tout</b></span></div>
+          <div class="row"><span class="ci c-late"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4M5 4h12l-2 4 2 4H5"/></svg></span><div><b>Jalon « Contenus rédigés » dépassé</b><small>Refonte du site web · 26 jours de retard</small></div><span class="bt">Replanifier</span></div>
+          <div class="row"><span class="ci c-late"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span><div><b>Atelier de cadrage</b><small>Tableau de bord partenaires · Sèna Agbo · 5 jours de retard</small></div><span class="bt">Relancer</span></div>
+          <div class="row"><span class="ci c-late"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span><div><b>Intégration de la page d’accueil</b><small>Refonte du site web · Koffi Adjovi · 5 jours de retard</small></div><span class="bt">Relancer</span></div>
+          <div class="row"><span class="ci c-late"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span><div><b>Liste des indicateurs</b><small>Tableau de bord partenaires · Ibrahim Sow · 2 jours de retard</small></div><span class="bt">Relancer</span></div>
+          <div class="row"><span class="ci c-risk"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></span><div><b>Valider le plan d’échantillonnage</b><small>Enquête nationale T4 · échéance demain</small></div><span class="bt">Relancer</span></div>
+        </section>
+<section class="cd" style="padding-bottom:8px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><h2>Activités récentes</h2><span style="font-size:12.5px;color:#6b7280">Voir tout</span></div>
+          <div class="fe"><span class="av" style="background:#e6f4ec;color:#1b6b43">MH</span><div>Mireille a approuvé « Lancer la collecte »<small>il y a 2 h · Enquête nationale T4</small></div></div>
+          <div class="fe"><span class="av" style="background:#eef1f4;color:#4a5160">SA</span><div>Sèna a passé « Atelier de cadrage » en cours<small>il y a 3 h · Tableau de bord partenaires</small></div></div>
+          <div class="fe"><span class="av" style="background:#e6f4ec;color:#1b6b43">KA</span><div>Koffi a terminé « Arborescence du site »<small>hier · Refonte du site web</small></div></div>
+          <div class="fe"><span class="av" style="background:#eef1f4;color:#4a5160">RT</span><div>Romuald a commenté « Rapport d’audit »<small>hier · Audit qualité des données</small></div></div>
+          <div class="fe"><span class="av" style="background:#e6f4ec;color:#1b6b43">AM</span><div>Adjoa a ajouté 3 tâches à « Enquête nationale T4 »<small>il y a 2 jours · Enquête nationale T4</small></div></div>
+          <div class="fe"><span class="av" style="background:#eef1f4;color:#4a5160">AD</span><div>Aïcha a importé un Gantt dans « Rapport annuel 2026 »<small>il y a 3 jours · Rapport annuel 2026</small></div></div>
+        </section>
+      </div>
+<section class="cd tb">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px"><h2>Projets</h2><span style="font-size:12.5px;color:#6b7280">Performance = avancement réel ÷ avancement attendu · <b style="color:#111418;font-weight:500">Voir les 2 projets achevés</b></span></div>
+        <div class="th p"><span>Projet</span><span>Responsable</span><span>Avancement</span><span>Jalons</span><span>Performance</span><span>État</span><span>Prochain jalon</span></div>
+        <div class="tr p"><div><b>Enquête nationale T4</b><small>Bénin · 1 sept. → 15 déc.</small></div><div class="who"><span class="av" style="background:#e6f4ec;color:#1b6b43">MH</span>Mireille</div><div><div class="mt"><i style="width:50%;background:#1f7a4d"></i></div><small>50 % · 5/10 tâches</small></div><b>3/5</b><b style="color:#1b6b43">122 %</b><span><span class="chip c-ok">Dans les temps</span></span><div>Collecte terminée<small>20 nov.</small></div></div>
+        <div class="tr p"><div><b>Refonte du site web</b><small>Bénin · 17 août → 30 nov.</small></div><div class="who"><span class="av" style="background:#e6f4ec;color:#1b6b43">MH</span>Mireille</div><div><div class="mt"><i style="width:50%;background:#d1432f"></i></div><small>50 % · 4/8 tâches</small></div><b>2/5</b><b style="color:#1b6b43">91 %</b><span><span class="chip c-late">En retard</span></span><div>Contenus rédigés<small style="color:#b3321f">dépassé · 18 sept.</small></div></div>
+        <div class="tr p"><div><b>Rapport annuel 2026</b><small>Bénin · 14 sept. → 18 déc.</small></div><div class="who"><span class="av" style="background:#e6f4ec;color:#1b6b43">MH</span>Mireille</div><div><div class="mt"><i style="width:29%;background:#1f7a4d"></i></div><small>29 % · 2/7 tâches</small></div><b>2/5</b><b style="color:#1b6b43">90 %</b><span><span class="chip c-ok">Dans les temps</span></span><div>Premier jet<small>6 nov.</small></div></div>
+        <div class="tr p"><div><b>Tableau de bord partenaires</b><small>Sénégal · 1 oct. → 27 nov.</small></div><div class="who"><span class="av" style="background:#eef1f4;color:#4a5160">SA</span>Sèna</div><div><div class="mt"><i style="width:17%;background:#d1432f"></i></div><small>17 % · 1/6 tâches</small></div><b>0/3</b><b style="color:#9a6208">73 %</b><span><span class="chip c-late">En retard</span></span><div>Cadrage validé<small style="color:#b3321f">dépassé · 9 oct.</small></div></div>
+        <div class="tr p"><div><b>Audit qualité des données</b><small>Togo · 6 juil. → 30 oct.</small></div><div class="who"><span class="av" style="background:#eef1f4;color:#4a5160">RT</span>Romuald</div><div><div class="mt"><i style="width:88%;background:#1f7a4d"></i></div><small>88 % · 7/8 tâches</small></div><b>3/4</b><b style="color:#1b6b43">102 %</b><span><span class="chip c-ok">Dans les temps</span></span><div>Rapport d’audit<small>30 oct.</small></div></div>
+        <div class="tr p"><div><b>Formation des enquêteurs</b><small>Bénin · 5 oct. → 6 nov.</small></div><div class="who"><span class="av" style="background:#e6f4ec;color:#1b6b43">MH</span>Mireille</div><div><div class="mt"><i style="width:20%;background:#d9a21b"></i></div><small>20 % · 1/5 tâches</small></div><b>0/3</b><b style="color:#9a6208">71 %</b><span><span class="chip c-risk">À surveiller</span></span><div>Supports prêts<small>16 oct.</small></div></div>
+      </section>
+<section class="cd tb">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px"><h2>Équipes</h2><span style="font-size:12.5px;color:#6b7280">3 disponibles sur 8</span></div>
+        <div class="th m"><span>Membre</span><span>Disponibilité</span><span>Raison</span><span>Lieu</span><span>Charge</span></div>
+        <div class="tr m"><div class="who"><span class="av" style="background:#e6f4ec;color:#1b6b43">AD</span><div><b>Aïcha Dossou</b><small>Analyste · Bénin</small></div></div><span><span class="chip c-ok">Disponible</span></span><span style="color:#8a919c">—</span><span>Au bureau</span><div class="ld"><div class="mt"><i style="width:45%;background:#1f7a4d"></i></div>3 tâches</div></div>
+        <div class="tr m"><div class="who"><span class="av" style="background:#e6f4ec;color:#1b6b43">KA</span><div><b>Koffi Adjovi</b><small>Développeur web · Bénin</small></div></div><span><span class="chip c-ok">Disponible</span></span><span style="color:#8a919c">—</span><span>À distance</span><div class="ld"><div class="mt"><i style="width:75%;background:#1f7a4d"></i></div>5 tâches</div></div>
+        <div class="tr m"><div class="who"><span class="av" style="background:#eef1f4;color:#4a5160">MH</span><div><b>Mireille Houngbo</b><small>Responsable de projets · Bénin</small></div></div><span><span class="chip c-blue">En réunion</span></span><span>Comité de pilotage, jusqu’à 15 h</span><span>Au bureau</span><div class="ld"><div class="mt"><i style="width:45%;background:#1f7a4d"></i></div>3 tâches</div></div>
+        <div class="tr m"><div class="who"><span class="av" style="background:#eef1f4;color:#4a5160">SA</span><div><b>Sèna Agbo</b><small>Suivi-évaluation · Bénin</small></div></div><span><span class="chip c-blue">En mission</span></span><span>Atelier partenaires à Dakar, jusqu’au 16 oct.</span><span>Sur le terrain · Sénégal</span><div class="ld"><div class="mt"><i style="width:60%;background:#1f7a4d"></i></div>4 tâches</div></div>
+        <div class="tr m"><div class="who"><span class="av" style="background:#eef1f4;color:#4a5160">RT</span><div><b>Romuald Tossou</b><small>Contrôleur qualité · Togo</small></div></div><span><span class="chip c-gray">En congé</span></span><span>Congé annuel, retour le 19 oct.</span><span style="color:#8a919c">Absent</span><div class="ld"><div class="mt"><i style="width:30%;background:#1f7a4d"></i></div>2 tâches</div></div>
+        <div class="tr m"><div class="who"><span class="av" style="background:#e6f4ec;color:#1b6b43">FB</span><div><b>Fatou Bio</b><small>Formatrice · Bénin</small></div></div><span><span class="chip c-ok">Disponible</span></span><span style="color:#8a919c">—</span><span>Au bureau</span><div class="ld"><div class="mt"><i style="width:70%;background:#1f7a4d"></i></div>4 tâches</div></div>
+        <div class="tr m"><div class="who"><span class="av" style="background:#eef1f4;color:#4a5160">IS</span><div><b>Ibrahim Sow</b><small>Statisticien · Sénégal</small></div></div><span><span class="chip c-blue">En formation</span></span><span>Formation Power BI, jusqu’au 15 oct.</span><span>À distance</span><div class="ld"><div class="mt"><i style="width:50%;background:#1f7a4d"></i></div>3 tâches</div></div>
+        <div class="tr m"><div class="who"><span class="av" style="background:#eef1f4;color:#4a5160">AM</span><div><b>Adjoa Mensah</b><small>Coordinatrice terrain · Togo</small></div></div><span><span class="chip c-blue">En mission</span></span><span>Collecte terrain à Lomé, jusqu’au 20 oct.</span><span>Sur le terrain · Togo</span><div class="ld"><div class="mt"><i style="width:8%;background:#1f7a4d"></i></div>0 tâche</div></div>
+      </section>
+    </div>
+  </div>
+</div>
+</div>
+</body></html>

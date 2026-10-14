@@ -13,3 +13,8 @@
 - Maquette du tableau de bord : `maquette/tableau-de-bord.html` (HTML autonome, données fictives).
 - Contenu : 4 indicateurs, Gantt + chronologie, actions critiques, programmation (semaine), progression des tâches (5 statuts), évolution mensuelle des jalons, activités récentes, vue d'ensemble des projets (avec performance), vue d'ensemble des équipes (disponibilité, raison, lieu), assistant IA simulé.
 - Hypothèses à valider : formule de performance, périmètre par rôle, échéances dans « Actions critiques » (urgentes) et « Programmation » (toutes).
+
+## 2026-10-14 (maquette dessinée)
+- Maquette dessinée en style blanc, sur une seule page : `maquette/dessinee/`.
+- Retours : tout sur le même tableau de bord, Gantt sans losanges (prochain jalon écrit sous le projet), IA intégrée (synthèse du jour et saisie).
+- Reste : fenêtre de conversation de l assistant, version téléphone, écrans suivants.
