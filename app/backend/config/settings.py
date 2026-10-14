@@ -75,6 +75,10 @@ TEMPLATES = [
     }
 ]
 
+# En production, une base PostgreSQL est obligatoire : on refuse de démarrer plutôt que d'utiliser un fichier local.
+if not DEBUG and not os.environ.get("DATABASE_URL"):
+    raise RuntimeError("DATABASE_URL est obligatoire quand DJANGO_DEBUG est désactivé.")
+
 DATABASES = {
     "default": dj_database_url.config(
         env="DATABASE_URL",
