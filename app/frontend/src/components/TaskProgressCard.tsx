@@ -23,7 +23,9 @@ export function TaskProgressCard({
   onChange: (id: string) => void;
 }) {
   const total = Math.max(progress.total, 1);
-  const finished = progress.statuses.filter((s) => s.key === "done" || s.key === "approved").reduce((sum, s) => sum + s.count, 0);
+  // Tâches terminées : faites, en revue ou approuvées (même règle que l'avancement des projets côté serveur).
+  const FINISHED = ["done", "review", "approved"];
+  const finished = progress.statuses.filter((s) => FINISHED.includes(s.key)).reduce((sum, s) => sum + s.count, 0);
   const finishedPct = Math.round((finished / total) * 100);
 
   return (
