@@ -45,11 +45,15 @@ cd backend && pytest && ruff check .
 cd frontend && npx tsc --noEmit && npm run lint && npm run build
 ```
 
+## Déployer sur Render
+
+Voir `docs/deploiement-render.md` (démonstration gratuite : `render.yaml` ; production : `render.production.yaml`).
+
 ## Déployer sur un VPS
 
 1. `cp .env.example .env` puis remplir **chaque** valeur (clé secrète, mot de passe de base, nom de domaine).
 2. `docker compose up -d --build`
-3. Créer le premier administrateur : `docker compose exec backend python manage.py createsuperuser`, puis, dans `/admin/`, lui donner le rôle « Administrateur ».
+3. Créer le premier administrateur : `docker compose exec backend python manage.py createsuperuser` (ce compte est automatiquement administrateur de l’application).
 4. Placer un reverse proxy (Nginx, Caddy) devant le port 3000 avec TLS.
 
 Ne jamais lancer `seed_demo` en production.

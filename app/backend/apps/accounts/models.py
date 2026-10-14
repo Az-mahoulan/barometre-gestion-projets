@@ -29,6 +29,12 @@ class User(AbstractUser):
         verbose_name = "utilisateur"
         verbose_name_plural = "utilisateurs"
 
+    def save(self, *args, **kwargs):
+        # Un super-utilisateur (créé par createsuperuser) est toujours administrateur de l'application.
+        if self.is_superuser:
+            self.role = self.Role.ADMIN
+        super().save(*args, **kwargs)
+
     @property
     def display_name(self) -> str:
         return self.get_full_name() or self.username

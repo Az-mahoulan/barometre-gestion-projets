@@ -1,0 +1,77 @@
+# Production sur Render (Blueprint), serveur Django PRIVÉ.
+# Offres payantes : un serveur privé ne peut pas utiliser l'offre gratuite. Vérifiez les noms d'offres et les tarifs
+# sur la page de prix de Render avant de valider. Fichier à indiquer comme « Blueprint file path » à la création.
+databases:
+  - name: barometre-db
+    plan: basic-256mb   # à vérifier : nom de l'offre selon la grille actuelle de Render
+    region: frankfurt
+    databaseName: barometre
+    user: barometre
+    ipAllowList: []     # aucune connexion depuis Internet : seule la base privée est accessible
+
+services:
+  # Serveur Django, sans adresse publique : seul le service « barometre-pilotage » peut l'appeler.
+  - type: pserv
+    name: barometre-api
+    runtime: python
+    region: frankfurt
+    plan: starter
+    rootDir: app/backend
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    startCommand: >-
+      sh -c 'python manage.py migrate --noinput
+      && if [ -n "$DJANGO_SUPERUSER_USERNAME" ]; then python manage.py createsuperuser --noinput || true; fi
+      && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 3 --access-logfile -'
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.5
+      - key: DJANGO_DEBUG
+        value: "0"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: barometre-db
+          property: connectionString
+      # Service privé : injoignable depuis Internet, son nom d'hôte interne comporte un suffixe aléatoire.
+      - key: DJANGO_ALLOWED_HOSTS
+        value: "*"
+      # Le TLS est terminé en amont par Render ; l'appel interne depuis Next est en HTTP.
+      - key: DJANGO_SECURE_SSL_REDIRECT
+        value: "0"
+      - key: DJANGO_CSRF_TRUSTED_ORIGINS
+        value: https://barometre-pilotage.onrender.com
+      # Premier administrateur (à saisir à la création ; le mot de passe n'est jamais dans le dépôt)
+      - key: DJANGO_SUPERUSER_USERNAME
+        sync: false
+      - key: DJANGO_SUPERUSER_EMAIL
+        sync: false
+      - key: DJANGO_SUPERUSER_PASSWORD
+        sync: false
+
+  - type: web
+    name: barometre-pilotage
+    runtime: node
+    region: frankfurt
+    plan: starter
+    rootDir: app/frontend
+    buildCommand: npm ci && npm run build
+    startCommand: >-
+      sh -c 'mkdir -p public
+      && cp -r .next/static .next/standalone/.next/
+      && cp -r public .next/standalone/
+      && node .next/standalone/server.js'
+    healthCheckPath: /login
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: HOSTNAME
+        value: 0.0.0.0
+      # Adresse interne « hôte:port » du serveur privé
+      - key: BACKEND_URL
+        fromService:
+          type: pserv
+          name: barometre-api
+          property: hostport

@@ -1,5 +1,7 @@
+from django.db import connection
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import serializers
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -49,3 +51,16 @@ class CountriesView(APIView):
     @extend_schema(responses={200: serializers.ListField()})
     def get(self, request):
         return Response([{"code": c.code, "name": c.name} for c in Country.objects.all()])
+
+
+class HealthView(APIView):
+    """Sonde de santé pour l'hébergeur : répond 200 si le serveur et la base fonctionnent."""
+
+    permission_classes = [AllowAny]
+    authentication_classes: list = []
+
+    @extend_schema(responses={200: serializers.DictField()})
+    def get(self, request):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+        return Response({"status": "ok"})

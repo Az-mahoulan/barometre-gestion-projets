@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
-// Adresse du serveur Django (réseau interne en production).
-const BACKEND_URL = process.env.BACKEND_URL ?? "http://127.0.0.1:8000";
+// Adresse du serveur Django. Sur le réseau privé de l'hébergeur, on reçoit « hôte:port » sans schéma.
+const RAW_BACKEND = process.env.BACKEND_URL ?? "http://127.0.0.1:8000";
+const BACKEND_URL = (/^https?:\/\//.test(RAW_BACKEND) ? RAW_BACKEND : `http://${RAW_BACKEND}`).replace(/\/$/, "");
 
 const nextConfig: NextConfig = {
   output: "standalone",

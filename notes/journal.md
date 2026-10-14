@@ -24,3 +24,9 @@
 - `app/` : serveur (modèles, API du tableau de bord, droits par rôle, données de démo, 31 tests) et interface (tableau de bord complet, connexion).
 - Vérifié de bout en bout avec un navigateur : connexion des 3 rôles, mêmes chiffres que la maquette (6 / 2 / 2 / 50 %).
 - Reste : assistant IA conversationnel, import Gantt, création de projet, écrans suivants, sauvegardes.
+
+## 2026-10-14 (déploiement Render)
+- `render.yaml` (démonstration gratuite) et `render.production.yaml` (serveur privé, payant) ; guide : docs/deploiement-render.md.
+- Ajouts : sonde de santé `/api/v1/health/`, `seed_demo --if-empty`, super-utilisateur = administrateur de l'application.
+- Séquence de démarrage vérifiée en local avec PostgreSQL 16 et réglages de production (migration, données, connexion, CSRF, cookies sécurisés).
+- Non vérifié : le déploiement réel sur Render (compte, noms d'offres et de domaines).

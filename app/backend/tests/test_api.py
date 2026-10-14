@@ -133,3 +133,25 @@ def test_seeded_demo_matches_mockup(admin, client_for, settings):
 def test_admin_account_is_not_listed_as_team_member(admin, worker, client_for):
     names = [m["name"] for m in client_for(admin).get("/api/v1/dashboard/").json()["teams"]["members"]]
     assert "admin" not in names and "worker" in names
+
+
+def test_health_is_public_and_checks_database():
+    from rest_framework.test import APIClient
+
+    r = APIClient().get("/api/v1/health/")
+    assert r.status_code == 200 and r.json() == {"status": "ok"}
+
+
+def test_seed_if_empty_does_not_touch_existing_data(project):
+    from django.core.management import call_command
+
+    before = Task.objects.count()
+    call_command("seed_demo", if_empty=True, stdout=open("/dev/null", "w"))
+    assert Task.objects.count() == before
+
+
+def test_superuser_is_application_admin(db):
+    from apps.accounts.models import User
+
+    u = User.objects.create_superuser(username="root", password="x-Test-Passw0rd")
+    assert u.role == User.Role.ADMIN

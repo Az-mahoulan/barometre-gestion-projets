@@ -102,11 +102,15 @@ class Command(BaseCommand):
     help = "Crée des données de démonstration fictives."
 
     def add_arguments(self, parser):
+        parser.add_argument("--if-empty", action="store_true", help="Ne fait rien si des projets existent déjà (démarrage d'une démonstration hébergée).")
         parser.add_argument("--reset", action="store_true", help="Supprime projets, tâches et utilisateurs de démonstration avant de recréer.")
 
     @transaction.atomic
     def handle(self, *args, **opts):
         if Project.objects.exists() and not opts["reset"]:
+            if opts["if_empty"]:
+                self.stdout.write("Des projets existent déjà : aucune donnée de démonstration ajoutée.")
+                return
             raise CommandError("Des projets existent déjà. Utilisez --reset pour repartir de zéro (données de démonstration uniquement).")
         if opts["reset"]:
             ActivityLog.objects.all().delete()
