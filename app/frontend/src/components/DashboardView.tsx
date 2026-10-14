@@ -166,12 +166,13 @@ export function DashboardView() {
             <TaskProgressCard progress={data.task_progress} />
           </div>
 
+          <ProjectsTable projects={data.projects} />
+
           <div className="grid gap-4 lg:grid-cols-2">
             <CriticalCard total={data.critical_actions.total} items={data.critical_actions.items} busy={busy} onAction={runAction} />
             <ActivityCard entries={data.recent_activity} now={data.now} />
           </div>
 
-          <ProjectsTable projects={data.projects} />
           <TeamsTable teams={data.teams} />
         </main>
       </div>

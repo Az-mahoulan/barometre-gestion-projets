@@ -2,7 +2,7 @@
 
 Projet indépendant d'AGRITRACK (aucun lien technique ni documentaire). Langue de travail : français.
 
-- Ne pas pousser ni fusionner sans accord de l'utilisateur.
+- Pousser sur `main` après chaque modification demandée par l'utilisateur (accord donné le 14/10/2026) : Render redéploie automatiquement et il vérifie en ligne. Pas de fusion d'autres branches sans accord.
 - Ne jamais lire ni recopier de secrets (`.env`).
 - Mettre à jour `notes/journal.md` après un travail significatif.
 
