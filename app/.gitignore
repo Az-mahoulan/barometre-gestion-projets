@@ -1,0 +1,13 @@
+# Secrets et données locales : ne jamais les versionner
+.env
+.env.*
+!.env.example
+backend/db.sqlite3
+backend/staticfiles/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.venv/
+frontend/node_modules/
+frontend/.next/

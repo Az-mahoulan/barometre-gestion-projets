@@ -18,3 +18,9 @@
 - Maquette dessinée en style blanc, sur une seule page : `maquette/dessinee/`.
 - Retours : tout sur le même tableau de bord, Gantt sans losanges (prochain jalon écrit sous le projet), IA intégrée (synthèse du jour et saisie).
 - Reste : fenêtre de conversation de l assistant, version téléphone, écrans suivants.
+
+## 2026-10-14 (conception réelle du tableau de bord)
+- Pile retenue : Next.js 16 + Django 5.2 + PostgreSQL (docs/architecture/01_architecture.md).
+- `app/` : serveur (modèles, API du tableau de bord, droits par rôle, données de démo, 31 tests) et interface (tableau de bord complet, connexion).
+- Vérifié de bout en bout avec un navigateur : connexion des 3 rôles, mêmes chiffres que la maquette (6 / 2 / 2 / 50 %).
+- Reste : assistant IA conversationnel, import Gantt, création de projet, écrans suivants, sauvegardes.

@@ -5,3 +5,11 @@ Projet indépendant d'AGRITRACK (aucun lien technique ni documentaire). Langue d
 - Ne pas pousser ni fusionner sans accord de l'utilisateur.
 - Ne jamais lire ni recopier de secrets (`.env`).
 - Mettre à jour `notes/journal.md` après un travail significatif.
+
+## Structure
+
+- `app/backend` : Django 5.2 + DRF + PostgreSQL. Tests : `cd app/backend && DJANGO_DEBUG=1 pytest`.
+- `app/frontend` : Next.js 16 (voir `app/frontend/AGENTS.md` : lire `node_modules/next/dist/docs/` avant de coder). Contrôles : `npx tsc --noEmit && npm run lint && npm run build`.
+- `docs/` : cadrage, recherche, architecture. `maquette/` : maquettes (HTML interactif, version dessinée). `ressources/` : références visuelles.
+- Les calculs du tableau de bord vivent côté serveur (`app/backend/apps/dashboard/services.py`) ; les droits par rôle dans `apps/projects/access.py`.
+- Ne jamais lancer `seed_demo` en production. Aucun secret dans le code : variables d'environnement (`app/.env.example`).
