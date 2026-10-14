@@ -2,13 +2,13 @@
 
 /* Jetons de couleur de la charte (style blanc, un seul accent vert). */
 :root {
-  --bg: #f7f8fa;
+  --bg: #ffffff;
   --surface: #ffffff;
-  --surface-2: #f6f7f9;
+  --surface-2: #fafbfc;
   --ink: #111418;
   --ink-2: #4a5160;
   --muted: #6b7280;
-  --line: #eceef1;
+  --line: #e8eaee;
   --line-strong: #dfe3e8;
   --accent: #14532d;
   --accent-2: #1f7a4d;
@@ -71,6 +71,7 @@ body {
   border: 1px solid var(--line);
   border-radius: 16px;
   padding: 20px 22px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
   min-width: 0;
 }
 .chip {
