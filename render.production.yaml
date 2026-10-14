@@ -17,7 +17,7 @@ services:
     region: frankfurt
     plan: starter
     rootDir: app/backend
-    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    buildCommand: pip install -r requirements.txt && DJANGO_DEBUG=1 python manage.py collectstatic --noinput
     startCommand: >-
       sh -c 'python manage.py migrate --noinput
       && if [ -n "$DJANGO_SUPERUSER_USERNAME" ]; then python manage.py createsuperuser --noinput || true; fi

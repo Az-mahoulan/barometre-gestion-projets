@@ -8,7 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 # Fichiers statiques de l'administration (servis par WhiteNoise)
-RUN DJANGO_SECRET_KEY=build-only python manage.py collectstatic --noinput
+RUN DJANGO_DEBUG=1 python manage.py collectstatic --noinput
 
 RUN useradd --system --no-create-home app && chown -R app /srv/backend
 USER app
