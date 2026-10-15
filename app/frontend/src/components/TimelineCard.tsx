@@ -10,16 +10,16 @@ import { Icon } from "./ui";
 const MONTHS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
 const NAME_W = 200;
 
-// Une teinte par projet : couleur franche (carré, losanges) et version douce (barre).
+// Une teinte par projet : couleur franche (pastille, losanges), teinte moyenne pour la barre, et une icône.
 const PALETTE = [
-  { solid: "#7c6cf0", soft: "#d9d3fc" },
-  { solid: "#3b82f6", soft: "#c3daf9" },
-  { solid: "#e0567f", soft: "#f7cad8" },
-  { solid: "#1fa37a", soft: "#b8e6d5" },
-  { solid: "#e5a216", soft: "#f6e0a6" },
-  { solid: "#e8743b", soft: "#f8d3bd" },
-  { solid: "#0ea5b7", soft: "#b7e5ec" },
-  { solid: "#64748b", soft: "#d7dce4" },
+  { solid: "#7c6cf0", bar: "#b8acf6", icon: "campaign" },
+  { solid: "#3b82f6", bar: "#9dbff3", icon: "chart" },
+  { solid: "#e0567f", bar: "#f2a9c0", icon: "factcheck" },
+  { solid: "#1fa37a", bar: "#8fd9b8", icon: "project" },
+  { solid: "#e5a216", bar: "#f3cd6b", icon: "rocket" },
+  { solid: "#e8743b", bar: "#f5b38f", icon: "training" },
+  { solid: "#0ea5b7", bar: "#8fd3dc", icon: "work" },
+  { solid: "#64748b", bar: "#b7c0cc", icon: "review" },
 ];
 
 /**
@@ -85,15 +85,15 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
       </div>
 
       <div ref={area} className="relative overflow-clip rounded-[14px] border border-line">
-        <div className="relative z-20 grid border-b border-line bg-[#f8f8f5]" style={{ gridTemplateColumns: `${NAME_W}px minmax(0,1fr)` }}>
-          <div className="flex items-center px-3 text-[12px] font-bold">Projets</div>
+        <div className="relative z-20 grid border-b border-line bg-[#f6f6f2]" style={{ gridTemplateColumns: `${NAME_W}px minmax(0,1fr)` }}>
+          <div className="flex items-center px-4 text-[12px] font-semibold">Projets</div>
           <div className="grid" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}>
             {dates.map((d) => {
               const day = parseDate(d);
               return (
-                <div key={d} className="border-l border-line px-0.5 py-2 text-center" title={(notes.get(d) ?? []).join("\n")}>
-                  <div className={`text-[13px] font-bold leading-tight ${d === asOf ? "text-ink" : ""}`}>{day.getDate()}</div>
-                  <div className="text-[10.5px] text-muted">{MONTHS[day.getMonth()]}</div>
+                <div key={d} className="border-l border-line px-0.5 py-1.5 text-center" title={(notes.get(d) ?? []).join("\n")}>
+                  <div className="text-[12.5px] font-semibold leading-tight">{day.getDate()}</div>
+                  <div className="text-[10px] text-muted">{MONTHS[day.getMonth()]}</div>
                 </div>
               );
             })}
@@ -127,19 +127,14 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
 
           return (
             <div key={p.id} className="grid border-b border-line last:border-b-0" style={{ gridTemplateColumns: `${NAME_W}px minmax(0,1fr)` }}>
-              <div className="flex min-w-0 items-center gap-2.5 px-3 py-2">
-                <i className="h-3 w-3 shrink-0 rounded-[4px]" style={{ background: color.solid }} />
-                <div className="min-w-0">
-                  <b className={`block truncate text-[12.5px] font-semibold ${p.status !== "active" ? "text-muted" : ""}`} title={p.name}>
-                    {p.name}
-                  </b>
-                  <small className="block text-[11px] text-muted">
-                    {shortDate(p.start)} → {shortDate(p.end)}
-                  </small>
-                </div>
+              <div className="flex min-w-0 items-center gap-2.5 bg-[#fafaf7] px-4" title={`${p.name} · ${shortDate(p.start)} → ${shortDate(p.end)}`}>
+                <span className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-[5px] text-white" style={{ background: color.solid }}>
+                  <Icon name={color.icon} className="h-3 w-3" />
+                </span>
+                <span className={`truncate text-[12px] font-medium ${p.status !== "active" ? "text-muted" : "text-ink-2"}`}>{p.name}</span>
               </div>
 
-              <div className={`relative ${below ? "h-[54px]" : "h-[46px]"}`}>
+              <div className={`relative ${below ? "h-[50px]" : "h-[40px]"}`}>
                 <div className="absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }} aria-hidden="true">
                   {dates.map((d) => (
                     <div key={d} className="border-l border-line" />
@@ -147,12 +142,12 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
                 </div>
 
                 <div
-                  className="absolute top-[14px] h-[18px]"
+                  className="absolute top-[13px] h-[14px]"
                   style={{
                     left: cutL ? 0 : `calc(${left}% + 4px)`,
                     width: `calc(${right - left}% - ${(cutL ? 0 : 4) + (cutR ? 0 : 4)}px)`,
-                    background: color.soft,
-                    borderRadius: `${cutL ? 0 : 9}px ${cutR ? 0 : 9}px ${cutR ? 0 : 9}px ${cutL ? 0 : 9}px`,
+                    background: color.bar,
+                    borderRadius: `${cutL ? 0 : 5}px ${cutR ? 0 : 5}px ${cutR ? 0 : 5}px ${cutL ? 0 : 5}px`,
                   }}
                   title={`${p.name} · ${shortDate(p.start)} → ${shortDate(p.end)}`}
                 />
@@ -164,18 +159,18 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
                   return (
                     <div key={k.label + k.date}>
                       <i
-                        className="absolute top-[17px] h-3 w-3 -translate-x-1/2 rotate-45 rounded-[2px] ring-2 ring-surface"
+                        className="absolute top-[15px] h-2.5 w-2.5 -translate-x-1/2 rotate-45 rounded-[2px] ring-2 ring-surface"
                         style={{ left: `${xPct}%`, background: color.solid }}
                         title={`${k.label} · ${shortDate(k.date)}`}
                       />
                       {where === "side" && (
-                        <span className="absolute top-[15px] whitespace-nowrap text-[11px] font-semibold text-ink-2" style={{ left: `calc(${xPct}% + 12px)` }}>
+                        <span className="absolute top-[12px] whitespace-nowrap text-[11px] font-medium text-ink-2" style={{ left: `calc(${xPct}% + 12px)` }}>
                           {k.label}
                         </span>
                       )}
                       {where === "below" && (
                         <span
-                          className="absolute top-[35px] whitespace-nowrap text-[10.5px] font-semibold text-ink-2"
+                          className="absolute top-[30px] whitespace-nowrap text-[10.5px] font-medium text-ink-2"
                           style={{ left: `${xPct}%`, transform: flip ? "translateX(calc(-100% + 6px))" : "translateX(-6px)" }}
                         >
                           {k.label}
@@ -196,16 +191,13 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
             aria-hidden="true"
           >
             <span className="absolute inset-y-0 w-[2px] -translate-x-1/2 bg-lime" />
-            <span className="absolute bottom-1 -translate-x-1/2 whitespace-nowrap rounded-full bg-lime px-1.5 text-[9.5px] font-bold text-ink">
-              Aujourd’hui
-            </span>
           </div>
         )}
       </div>
 
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted">
         <span className="inline-flex items-center gap-1.5">
-          <i className="h-2 w-5 rounded-full bg-[#d9d3fc]" />
+          <i className="h-2 w-5 rounded-[3px] bg-[#b8acf6]" />
           Début → fin du projet
         </span>
         <span className="inline-flex items-center gap-1.5">
