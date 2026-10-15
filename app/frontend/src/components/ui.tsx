@@ -161,17 +161,17 @@ export function toneFor(key: string): Tone {
   return AVATAR_TONES[h % AVATAR_TONES.length];
 }
 
-export function Tile({ icon, tone, className = "h-11 w-11" }: { icon: string; tone: Tone; className?: string }) {
+export function Tile({ icon, tone, className = "h-10 w-10" }: { icon: string; tone: Tone; className?: string }) {
   return (
-    <span className={`grid shrink-0 place-items-center rounded-[14px] ${TONES[tone]} ${className}`}>
-      <Icon name={icon} className="h-5 w-5" />
+    <span className={`grid shrink-0 place-items-center rounded-[12px] ${TONES[tone]} ${className}`}>
+      <Icon name={icon} className="h-[18px] w-[18px]" />
     </span>
   );
 }
 
-export function Avatar({ initials, size = "h-8 w-8 text-[11px]" }: { initials: string; size?: string }) {
+export function Avatar({ initials, size = "h-8 w-8 text-[10.5px]" }: { initials: string; size?: string }) {
   return (
-    <span className={`inline-grid shrink-0 place-items-center rounded-full font-extrabold ${TONES[toneFor(initials)]} ${size}`}>
+    <span className={`inline-grid shrink-0 place-items-center rounded-full font-bold ${TONES[toneFor(initials)]} ${size}`}>
       {initials}
     </span>
   );
@@ -179,9 +179,9 @@ export function Avatar({ initials, size = "h-8 w-8 text-[11px]" }: { initials: s
 
 export function CardHeader({ title, aside }: { title: string; aside?: ReactNode }) {
   return (
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-      <h2 className="text-[17px] font-bold">{title}</h2>
-      {aside ? <div className="text-[12.5px] text-muted">{aside}</div> : null}
+    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+      <h2 className="text-[15px] font-bold">{title}</h2>
+      {aside ? <div className="text-[12px] text-muted">{aside}</div> : null}
     </div>
   );
 }

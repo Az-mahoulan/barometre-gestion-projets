@@ -43,10 +43,10 @@ export function CriticalCard({
   return (
     <section aria-label="Actions critiques">
       <div className="mb-3.5 flex items-center justify-between">
-        <h2 className="text-[17px] font-bold">Actions critiques</h2>
+        <h2 className="text-[15px] font-bold">Actions critiques</h2>
         <span className="chip bg-lime text-ink">{total} à traiter</span>
       </div>
-      {items.length === 0 && <p className="card text-[13px] text-muted">Rien d’urgent : aucun retard ni échéance proche.</p>}
+      {items.length === 0 && <p className="card text-[12.5px] text-muted">Rien d’urgent : aucun retard ni échéance proche.</p>}
       <ul className="flex flex-col gap-3">
         {items.map((item) => {
           const sev = item.kind === "milestone_overdue" ? { tone: "rose" as Tone, icon: "flag" } : SEVERITY[item.severity];
@@ -57,10 +57,10 @@ export function CriticalCard({
               <Tile icon={sev.icon} tone={sev.tone} />
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-2">
-                  <b className="text-[13.5px] font-bold leading-snug">{item.title}</b>
+                  <b className="text-[13px] font-bold leading-snug">{item.title}</b>
                   <span className={`chip shrink-0 ${TONES[sev.tone]}`}>{due}</span>
                 </div>
-                <small className="block truncate text-[12px] text-muted">{context}</small>
+                <small className="block truncate text-[11.5px] text-muted">{context}</small>
                 {item.action && (
                   <button
                     className="btn btn-sm mt-2"

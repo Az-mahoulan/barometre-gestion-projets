@@ -45,10 +45,10 @@ export function WeekCard({ week, onOffset }: { week: Week; onOffset: (offset: nu
               role="tab"
               aria-selected={active}
               onClick={() => setPicked(d.date)}
-              className={`flex flex-col items-center rounded-[14px] py-1.5 text-[11.5px] ${active ? "bg-side text-white" : "text-muted hover:bg-surface-2"}`}
+              className={`flex flex-col items-center rounded-[14px] py-1.5 text-[11px] ${active ? "bg-side text-white" : "text-muted hover:bg-surface-2"}`}
             >
               <span>{dayLabel(d.date)}</span>
-              <b className={`text-[15px] font-bold ${active ? "text-lime" : d.is_today ? "text-ink underline decoration-lime decoration-[3px] underline-offset-4" : "text-ink"}`}>
+              <b className={`text-[14px] font-bold ${active ? "text-lime" : d.is_today ? "text-ink underline decoration-lime decoration-[3px] underline-offset-4" : "text-ink"}`}>
                 {parseDate(d.date).getDate()}
               </b>
               <i className={`mt-0.5 h-1 w-1 rounded-full ${d.items.length ? (active ? "bg-lime" : "bg-ink-2") : "bg-transparent"}`} />
@@ -58,15 +58,15 @@ export function WeekCard({ week, onOffset }: { week: Week; onOffset: (offset: nu
       </div>
 
       <ul>
-        {selected.items.length === 0 && <li className="py-4 text-[13px] text-muted">Rien de prévu ce jour.</li>}
+        {selected.items.length === 0 && <li className="py-4 text-[12.5px] text-muted">Rien de prévu ce jour.</li>}
         {selected.items.map((item, i) => {
           const k = KIND[item.kind];
           return (
             <li key={`${item.kind}-${i}`} className="flex items-center gap-3 py-2.5">
               <Tile icon={item.late ? "clock" : k.icon} tone={item.late ? "rose" : k.tone} />
               <div className="min-w-0 flex-1">
-                <b className={`block truncate text-[13.5px] font-bold ${item.done ? "text-muted line-through" : ""}`}>{item.title}</b>
-                <small className="block truncate text-[12px] text-muted">
+                <b className={`block truncate text-[13px] font-bold ${item.done ? "text-muted line-through" : ""}`}>{item.title}</b>
+                <small className="block truncate text-[11.5px] text-muted">
                   {[item.time, item.subtitle].filter(Boolean).join(" · ")}
                   {item.late && <span className="text-late"> · en retard</span>}
                 </small>

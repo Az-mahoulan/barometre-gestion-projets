@@ -34,8 +34,8 @@ export function ProjectsTable({ projects }: { projects: ProjectRow[] }) {
   return (
     <section aria-label="Vue d’ensemble des projets">
       <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-[17px] font-bold">Vue d’ensemble des projets</h2>
-        <span className="text-[12.5px] text-muted" title="Performance = avancement réel ÷ avancement attendu à cette date">
+        <h2 className="text-[15px] font-bold">Vue d’ensemble des projets</h2>
+        <span className="text-[12px] text-muted" title="Performance = avancement réel ÷ avancement attendu à cette date">
           {projects.length} projets · performance = avancement réel ÷ attendu
         </span>
       </div>
@@ -48,8 +48,8 @@ export function ProjectsTable({ projects }: { projects: ProjectRow[] }) {
             <div className="flex min-w-[200px] flex-1 items-center gap-3">
               <Tile icon="project" tone={TILE_TONES[i % TILE_TONES.length]} />
               <div className="min-w-0">
-                <b className="block truncate text-[14px] font-bold">{p.name}</b>
-                <span className="mt-0.5 flex items-center gap-1.5 text-[12px] text-muted">
+                <b className="block truncate text-[13px] font-bold">{p.name}</b>
+                <span className="mt-0.5 flex items-center gap-1.5 text-[11.5px] text-muted">
                   <Avatar initials={p.owner_initials} size="h-[18px] w-[18px] text-[8.5px]" />
                   <span className="truncate">
                     {p.owner} · {p.country}
@@ -58,20 +58,20 @@ export function ProjectsTable({ projects }: { projects: ProjectRow[] }) {
               </div>
             </div>
 
-            <div className="w-[150px] text-[12px] text-muted" title={`${shortDate(p.start)} → ${shortDate(p.end)}`}>
+            <div className="w-[150px] text-[11.5px] text-muted" title={`${shortDate(p.start)} → ${shortDate(p.end)}`}>
               Prochain jalon
               {p.next_milestone ? (
-                <b className={`block truncate text-[13px] ${p.next_milestone.overdue ? "text-late" : "text-ink"}`}>
+                <b className={`block truncate text-[12.5px] ${p.next_milestone.overdue ? "text-late" : "text-ink"}`}>
                   {p.next_milestone.name}, {p.next_milestone.overdue ? "dépassé" : shortDate(p.next_milestone.date)}
                 </b>
               ) : (
-                <b className="block text-[13px] text-ink">–</b>
+                <b className="block text-[12.5px] text-ink">–</b>
               )}
             </div>
 
-            <div className="w-[78px] text-[12px] text-muted">
+            <div className="w-[78px] text-[11.5px] text-muted">
               Performance
-              <b className={`block text-[13px] ${p.performance === null ? "text-muted" : perfClass(p.performance)}`}>
+              <b className={`block text-[12.5px] ${p.performance === null ? "text-muted" : perfClass(p.performance)}`}>
                 {p.performance === null ? "–" : `${p.performance} %`}
               </b>
             </div>
@@ -83,8 +83,8 @@ export function ProjectsTable({ projects }: { projects: ProjectRow[] }) {
             <div className="flex w-[104px] items-center gap-2" title={`${p.tasks_complete} tâches avancées sur ${p.tasks_total} · jalons ${p.milestones_achieved}/${p.milestones_total}`}>
               <Ring value={p.progress} color={HEALTH_BAR[p.health]} />
               <span>
-                <b className="block text-[14px] font-bold leading-tight">{Math.round(p.progress * 100)} %</b>
-                <small className="text-[11px] text-muted">
+                <b className="block text-[13px] font-bold leading-tight">{Math.round(p.progress * 100)} %</b>
+                <small className="text-[10.5px] text-muted">
                   {p.milestones_achieved}/{p.milestones_total} jalons
                 </small>
               </span>

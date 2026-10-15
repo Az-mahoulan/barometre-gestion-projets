@@ -83,7 +83,7 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
       <CardHeader
         title="Gantt des projets"
         aside={
-          <div className="flex gap-1 rounded-full bg-surface-2 p-1 text-[12.5px] font-semibold text-ink-2" role="group" aria-label="Vue">
+          <div className="flex gap-1 rounded-full bg-surface-2 p-1 text-[12px] font-semibold text-ink-2" role="group" aria-label="Vue">
             {(
               [
                 ["projects", "Projets"],
@@ -123,7 +123,7 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
       ) : (
         <div className="overflow-x-auto">
           <div className="relative min-w-[640px] pb-6">
-            <div className="flex h-6 items-center text-[11.5px] text-muted">
+            <div className="flex h-6 items-center text-[11px] text-muted">
               <div className="w-[200px] shrink-0" />
               <div className="relative h-6 flex-1">
                 {months.map((m) => (
@@ -137,8 +137,8 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
             {rows.map((r) => (
               <div key={r.key} className="flex h-[46px] items-center border-t border-line">
                 <div className="w-[200px] shrink-0 overflow-hidden whitespace-nowrap pr-2">
-                  <span className="block truncate text-[13px]">{r.label}</span>
-                  {r.sub && <span className={`block text-[11.5px] ${r.subLate ? "text-late" : "text-muted"}`}>{r.sub}</span>}
+                  <span className="block truncate text-[12.5px]">{r.label}</span>
+                  {r.sub && <span className={`block text-[11px] ${r.subLate ? "text-late" : "text-muted"}`}>{r.sub}</span>}
                 </div>
                 <div className="relative h-[46px] flex-1">
                   <div
@@ -160,7 +160,7 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
             {ownTodayLine && (
               <div className="pointer-events-none absolute bottom-6 top-6" style={{ left: 200, right: 0 }}>
                 <div className="absolute bottom-0 top-0 border-l border-ink" style={{ left: `${todayPos}%` }} />
-                <span className="absolute -bottom-5 -translate-x-1/2 text-[11.5px] font-medium" style={{ left: `${todayPos}%` }}>
+                <span className="absolute -bottom-5 -translate-x-1/2 text-[11px] font-medium" style={{ left: `${todayPos}%` }}>
                   Aujourd’hui
                 </span>
               </div>

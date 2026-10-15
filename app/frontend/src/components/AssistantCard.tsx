@@ -52,20 +52,20 @@ export function AssistantCard({
   return (
     <section className="relative overflow-hidden rounded-[22px] bg-side p-[22px] text-white" aria-label="Synthèse de l’assistant">
       <i className="pointer-events-none absolute -right-10 -top-10 h-[150px] w-[150px] rounded-full border-[22px] border-lime/10" />
-      <div className="flex items-center gap-2 text-[12.5px] font-semibold text-[#c9cad0]">
+      <div className="flex items-center gap-2 text-[12px] font-semibold text-[#c9cad0]">
         <span className="text-lime">
           <Icon name="sparkle" className="h-[18px] w-[18px]" />
         </span>
         Synthèse de l’assistant
       </div>
-      <p className="relative my-3.5 text-[17px] font-bold leading-[1.4]">{highlight(summary)}</p>
+      <p className="relative my-3.5 text-[15px] font-bold leading-[1.4]">{highlight(summary)}</p>
       {canRemind && reminders > 0 && (
         <button className="btn btn-lime" onClick={onRemind}>
           <Icon name="campaign" className="h-[18px] w-[18px]" />
           Relancer les responsables ({reminders})
         </button>
       )}
-      <div className="mt-4 flex items-center gap-2 rounded-full bg-side-2 py-[7px] pl-4 pr-[7px] text-[12.5px] text-[#9b9da5]">
+      <div className="mt-4 flex items-center gap-2 rounded-full bg-side-2 py-[7px] pl-4 pr-[7px] text-[12px] text-[#9b9da5]">
         <input
           disabled
           aria-label="Question pour l’assistant"

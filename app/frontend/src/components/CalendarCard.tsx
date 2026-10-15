@@ -43,7 +43,7 @@ export function CalendarCard({ asOf, projects }: { asOf: string; projects: Gantt
           <Icon name="right" className="h-[18px] w-[18px]" />
         </button>
       </div>
-      <table className="w-full border-separate border-spacing-y-1 text-center text-[12px]">
+      <table className="w-full border-separate border-spacing-y-1 text-center text-[11.5px]">
         <thead>
           <tr className="bg-surface-2 text-ink-2">
             {["L", "M", "M", "J", "V", "S", "D"].map((d, i) => (
@@ -62,8 +62,8 @@ export function CalendarCard({ asOf, projects }: { asOf: string; projects: Gantt
                 const isToday = key === asOf;
                 const out = d.getMonth() !== first.getMonth();
                 return (
-                  <td key={key} className={`relative py-1.5 ${out ? "text-[#c4c6cc]" : "text-ink-2"}`} title={mark?.names.join("\n")}>
-                    <span className={`inline-grid h-7 w-7 place-items-center rounded-full ${isToday ? "bg-lime font-extrabold text-ink" : ""}`}>{d.getDate()}</span>
+                  <td key={key} className={`relative py-0.5 ${out ? "text-[#c4c6cc]" : "text-ink-2"}`} title={mark?.names.join("\n")}>
+                    <span className={`inline-grid h-6 w-6 place-items-center rounded-full ${isToday ? "bg-lime font-bold text-ink" : ""}`}>{d.getDate()}</span>
                     {mark && !out && (
                       <i className={`absolute bottom-0 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full ${mark.late ? "bg-late" : "bg-info"}`} />
                     )}
@@ -74,7 +74,7 @@ export function CalendarCard({ asOf, projects }: { asOf: string; projects: Gantt
           ))}
         </tbody>
       </table>
-      <div className="mt-2 flex gap-4 text-[11.5px] text-muted">
+      <div className="mt-2 flex gap-4 text-[11px] text-muted">
         <span className="inline-flex items-center gap-1.5">
           <i className="h-1.5 w-1.5 rounded-full bg-info" />
           Jalon prévu

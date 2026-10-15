@@ -62,17 +62,17 @@ export function TaskProgressCard({
         {progress.statuses.map((s) => (
           <li
             key={s.key}
-            className="flex flex-col items-center gap-2.5 rounded-[18px] px-2 py-3.5 text-center"
+            className="flex flex-col items-center gap-2.5 rounded-[16px] px-2 py-3 text-center"
             style={{ background: STATUS_BG[s.key] }}
             aria-label={`${s.label} : ${s.count} tâche${s.count > 1 ? "s" : ""}`}
           >
-            <span className="text-[12.5px] font-semibold leading-tight" style={{ color: STATUS_COLOR[s.key] }}>
+            <span className="text-[12px] font-semibold leading-tight" style={{ color: STATUS_COLOR[s.key] }}>
               {s.label}
             </span>
             <span style={{ color: STATUS_COLOR[s.key] }}>
-              <TileIcon name={s.key} className="h-9 w-9" />
+              <TileIcon name={s.key} className="h-7 w-7" />
             </span>
-            <b className="text-[24px] font-extrabold leading-none tracking-[-0.5px]">{s.count}</b>
+            <b className="text-[21px] font-bold leading-none tracking-[-0.5px]">{s.count}</b>
           </li>
         ))}
       </ul>
@@ -80,9 +80,9 @@ export function TaskProgressCard({
       {/* Barre de flux : la part de chaque statut, de « En attente » à « Approuvé », sur une seule ligne. */}
       <div className="flex flex-1 flex-col justify-center pt-6">
         <div className="flex items-baseline justify-between gap-3">
-          <span className="text-[13px] font-medium text-ink-2">Répartition des {progress.total} tâches</span>
-          <span className="text-[13px] text-muted">
-            <b className="text-[20px] font-semibold text-ink">{finishedPct} %</b> terminées
+          <span className="text-[12.5px] font-medium text-ink-2">Répartition des {progress.total} tâches</span>
+          <span className="text-[12.5px] text-muted">
+            <b className="text-[17px] font-semibold text-ink">{finishedPct} %</b> terminées
           </span>
         </div>
         <div
@@ -101,19 +101,19 @@ export function TaskProgressCard({
               />
             ))}
         </div>
-        <ul className="mt-3 grid grid-cols-3 gap-2.5 text-center text-[12px] sm:grid-cols-5">
+        <ul className="mt-3 grid grid-cols-3 gap-2.5 text-center text-[11.5px] sm:grid-cols-5">
           {progress.statuses.map((s) => (
             <li key={s.key}>
               <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-muted">
                 <i className="inline-block h-2 w-2 shrink-0 rounded-full" style={{ background: STATUS_COLOR[s.key] }} />
                 {s.label}
               </span>
-              <b className="mt-0.5 block text-[15px] font-semibold">{s.pct} %</b>
+              <b className="mt-0.5 block text-[14px] font-semibold">{s.pct} %</b>
             </li>
           ))}
         </ul>
         {progress.overdue > 0 && (
-          <p className="mt-4 rounded-full bg-late-soft px-4 py-2 text-[12.5px] font-semibold text-late">
+          <p className="mt-4 rounded-full bg-late-soft px-4 py-2 text-[12px] font-semibold text-late">
             {progress.overdue} tâche{progress.overdue > 1 ? "s" : ""} en retard sur leur échéance
           </p>
         )}

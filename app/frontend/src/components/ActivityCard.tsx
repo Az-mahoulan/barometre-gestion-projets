@@ -16,14 +16,14 @@ export function ActivityCard({ entries, now }: { entries: ActivityEntry[]; now: 
   return (
     <section className="card" aria-label="Activités récentes">
       <CardHeader title="Activités récentes" />
-      {entries.length === 0 && <p className="text-[13px] text-muted">Aucune activité récente.</p>}
+      {entries.length === 0 && <p className="text-[12.5px] text-muted">Aucune activité récente.</p>}
       <ul className="flex flex-col gap-1">
         {entries.map((e) => (
           <li key={e.id} className="flex items-start gap-2.5 py-2">
-            <Avatar initials={e.actor_initials || "·"} size="h-[30px] w-[30px] text-[11px]" />
+            <Avatar initials={e.actor_initials || "·"} size="h-[30px] w-[30px] text-[10.5px]" />
             <div className="min-w-0">
-              <p className="text-[12.5px] leading-snug">{e.message}</p>
-              <small className="text-[11.5px] text-muted">
+              <p className="text-[12px] leading-snug">{e.message}</p>
+              <small className="text-[11px] text-muted">
                 {relative(e.created_at, ref)} · {e.project}
               </small>
             </div>

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { apiPost } from "@/lib/api";
+import { longDate } from "@/lib/format";
 import { useCountries, useDashboard, useMe } from "@/lib/hooks";
 import type { CriticalItem, Period } from "@/lib/types";
 
@@ -21,6 +22,8 @@ import { TeamsTable } from "./TeamsTable";
 import { Topbar } from "./Topbar";
 import { TrendCard } from "./TrendCard";
 import { WeekCard } from "./WeekCard";
+
+const SCOPE_LABEL = { all: "Tous les projets", owned: "Vos projets", assigned: "Projets où vous avez des tâches" };
 
 export function DashboardView() {
   const router = useRouter();
@@ -160,11 +163,12 @@ export function DashboardView() {
   return (
     // Cadre blanc unique (barre latérale + barre du haut) ; le contenu s'y encastre dans un panneau arrondi.
     <div className="min-h-screen bg-surface">
-      <div className="flex min-h-screen bg-surface p-2 sm:p-3">
+      <div className="flex min-h-screen bg-surface p-2">
         <Sidebar
           me={me}
           alerts={data.critical_actions.total}
           members={data.teams.members}
+          subtitle={`${longDate(data.as_of).replace(/^./, (c) => c.toUpperCase())} · ${SCOPE_LABEL[data.scope]}`}
         />
         <main className="flex min-w-0 flex-1 flex-col">
           <Topbar
@@ -182,10 +186,10 @@ export function DashboardView() {
             onLogout={logout}
           />
 
-          <div className="grid flex-1 gap-5 rounded-[24px] bg-bg p-3 sm:p-5 xl:grid-cols-[minmax(0,1fr)_340px]">
-            <div className="flex min-w-0 flex-col gap-5">
+          <div className="grid flex-1 gap-4 rounded-[22px] bg-bg p-3 sm:p-4 xl:grid-cols-[minmax(0,1fr)_316px]">
+            <div className="flex min-w-0 flex-col gap-4">
               <KpiRow kpis={data.kpis} />
-              <div className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+              <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
                 <TrendCard
                   trend={data.trend}
                   projects={data.gantt}
@@ -205,7 +209,7 @@ export function DashboardView() {
               <TeamsTable teams={data.teams} />
             </div>
 
-            <div className="flex min-w-0 flex-col gap-5">
+            <div className="flex min-w-0 flex-col gap-4">
               <AssistantCard
                 summary={buildSummary(data)}
                 canRemind={remindable.length > 0}

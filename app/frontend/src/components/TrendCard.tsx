@@ -2,7 +2,7 @@ import type { GanttProject, TrendMonth } from "@/lib/types";
 
 import { Icon } from "./ui";
 
-const PLOT_H = 220;
+const PLOT_H = 180;
 
 // Couleur d'une barre selon le taux de jalons atteints dans le mois.
 function barColor(pct: number): string {
@@ -45,7 +45,7 @@ export function TrendCard({
   return (
     <section className="card" aria-label="Évolution mois par mois">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="whitespace-nowrap text-[17px] font-bold">Évolution mois par mois</h2>
+        <h2 className="whitespace-nowrap text-[15px] font-bold">Évolution mois par mois</h2>
         <label className="sr-only" htmlFor="trend-project">
           Projet
         </label>
@@ -58,9 +58,9 @@ export function TrendCard({
           ))}
         </select>
       </div>
-      <p className="mt-0.5 text-[12.5px] text-muted">Jalons atteints, en % des jalons prévus chaque mois</p>
+      <p className="mt-0.5 text-[12px] text-muted">Jalons atteints, en % des jalons prévus chaque mois</p>
       {delta !== null && prev && (
-            <p className="mt-2.5 flex items-center gap-2 whitespace-nowrap text-[12.5px] text-muted">
+            <p className="mt-2.5 flex items-center gap-2 whitespace-nowrap text-[12px] text-muted">
               <span
                 className={`grid h-[26px] w-[26px] place-items-center rounded-[8px] ${
                   delta > 0 ? "bg-ok-soft text-ok" : delta < 0 ? "bg-late-soft text-late" : "bg-surface-2 text-ink-2"
@@ -76,25 +76,25 @@ export function TrendCard({
             </p>
           )}
 
-      <div className="mt-10 flex gap-2.5">
-        <div className="flex h-[220px] w-10 flex-col justify-between text-right text-[11.5px] text-muted" aria-hidden="true">
+      <div className="mt-9 flex gap-2.5">
+        <div className="flex h-[180px] w-10 flex-col justify-between text-right text-[11px] text-muted" aria-hidden="true">
           <span>100 %</span>
           <span>50 %</span>
           <span>0 %</span>
         </div>
 
         <div className="relative flex-1">
-          <div className="grid h-[220px]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+          <div className="grid h-[180px]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
             {trend.map((m) => (
               <div key={m.month} className="flex items-end justify-center">
                 {m.state === "future" ? (
                   <div
-                    className="h-[220px] w-3.5 rounded-full bg-track"
+                    className="h-[180px] w-3.5 rounded-full bg-track"
                     title={`${m.label} : à venir (${m.total} jalon${m.total > 1 ? "s" : ""} prévu${m.total > 1 ? "s" : ""})`}
                   />
                 ) : (
                   <div
-                    className="flex h-[220px] w-3.5 items-end overflow-hidden rounded-full bg-track"
+                    className="flex h-[180px] w-3.5 items-end overflow-hidden rounded-full bg-track"
                     title={m.total ? `${m.label} : ${m.achieved}/${m.total} jalons atteints` : `${m.label} : aucun jalon prévu`}
                   >
                     <div
@@ -116,7 +116,7 @@ export function TrendCard({
               preserveAspectRatio="none"
               role="img"
               aria-label={`Courbe de l’achèvement des jalons : ${summary}`}
-              className="pointer-events-none absolute left-0 top-0 h-[220px] w-full overflow-visible"
+              className="pointer-events-none absolute left-0 top-0 h-[180px] w-full overflow-visible"
             >
               {points.slice(1).map((p, i) => {
                 const prev = points[i];
@@ -149,11 +149,11 @@ export function TrendCard({
             </div>
           ))}
 
-          <div className="mt-3 grid text-center text-[12.5px] text-muted" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+          <div className="mt-3 grid text-center text-[12px] text-muted" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
             {trend.map((m) => (
               <span key={m.month} className={m.state === "current" ? "font-semibold text-ink" : ""}>
                 {m.label}
-                {m.state === "current" && <span className="block text-[11.5px] font-normal text-muted">en cours</span>}
+                {m.state === "current" && <span className="block text-[11px] font-normal text-muted">en cours</span>}
               </span>
             ))}
           </div>

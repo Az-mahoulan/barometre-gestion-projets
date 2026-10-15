@@ -19,22 +19,32 @@ export function Sidebar({
   me,
   alerts,
   members,
+  subtitle,
 }: {
   me: Me;
   alerts: number;
   members: Member[];
+  subtitle: string;
 }) {
+  const first = me.name.split(" ")[0];
   const shown = members.slice(0, 4);
   return (
     <aside className="sticky top-3 hidden h-[calc(100vh-24px)] w-[216px] shrink-0 flex-col overflow-y-auto px-2 py-3 [scrollbar-width:none] lg:flex [&::-webkit-scrollbar]:hidden">
-      <div className="flex items-center gap-2.5 px-1 text-[19px] font-extrabold">
+      <div className="flex items-center gap-2.5 px-1 text-[17px] font-bold">
         <span className="grid h-[34px] w-[34px] place-items-center rounded-[10px] bg-side text-lime">
           <Icon name="logo" className="h-5 w-5" />
         </span>
         Baromètre
       </div>
 
-      <div className="mt-7 flex items-center justify-between px-1 text-[12px] font-semibold text-muted">
+      <div className="mt-5 px-1">
+        <p className="text-[19px] font-bold leading-tight tracking-[-0.3px]">
+          {first && first !== "Administration" ? `Bonjour ${first}` : "Bonjour"}
+        </p>
+        <p className="mt-1 text-[11.5px] leading-snug text-muted">{subtitle}</p>
+      </div>
+
+      <div className="mt-5 flex items-center justify-between px-1 text-[11.5px] font-semibold text-muted">
         Menu
         <Icon name="caretup" className="h-4 w-4" />
       </div>
@@ -46,13 +56,13 @@ export function Sidebar({
           <span
             key={n.label}
             aria-current={n.current ? "page" : undefined}
-            className={`flex items-center gap-3 rounded-full py-2 pl-3.5 pr-2 text-[13.5px] ${
+            className={`flex items-center gap-3 rounded-full py-[7px] pl-3 pr-2 text-[13px] ${
               n.current
                 ? "bg-side font-semibold text-white"
                 : "font-medium text-ink-2"
             }`}
           >
-            <Icon name={n.icon} className="h-[19px] w-[19px]" />
+            <Icon name={n.icon} className="h-[18px] w-[18px]" />
             {n.label}
             {n.current && (
               <span className="ml-auto grid h-6 w-6 place-items-center rounded-full bg-white/15">
@@ -75,11 +85,11 @@ export function Sidebar({
             className="-mr-2 rounded-full ring-2 ring-surface"
             title={m.name}
           >
-            <Avatar initials={m.initials} size="h-9 w-9 text-[11px]" />
+            <Avatar initials={m.initials} size="h-9 w-9 text-[10.5px]" />
           </span>
         ))}
         {members.length > shown.length && (
-          <span className="grid h-9 w-9 place-items-center rounded-full bg-surface-2 text-[11px] font-bold ring-2 ring-surface">
+          <span className="grid h-9 w-9 place-items-center rounded-full bg-surface-2 text-[10.5px] font-bold ring-2 ring-surface">
             +{members.length - shown.length}
           </span>
         )}
@@ -87,18 +97,18 @@ export function Sidebar({
 
       <div className="mt-auto rounded-[20px] bg-surface-2 p-4">
         <div className="flex items-center justify-between">
-          <b className="text-[14px]">Assistant</b>
+          <b className="text-[13px]">Assistant</b>
           <span className="grid h-7 w-7 place-items-center rounded-full bg-lime text-ink">
             <Icon name="sparkle" className="h-4 w-4" />
           </span>
         </div>
-        <p className="mt-2 rounded-[12px] bg-surface px-3 py-2 text-[12px] leading-snug text-ink-2">
+        <p className="mt-2 rounded-[12px] bg-surface px-3 py-2 text-[11.5px] leading-snug text-ink-2">
           « Qui est disponible demain ? »
         </p>
-        <p className="mt-1.5 rounded-[12px] bg-surface px-3 py-2 text-[12px] leading-snug text-ink-2">
+        <p className="mt-1.5 rounded-[12px] bg-surface px-3 py-2 text-[11.5px] leading-snug text-ink-2">
           « Crée une tâche pour Koffi »
         </p>
-        <p className="mt-2 text-right text-[11px] text-muted">
+        <p className="mt-2 text-right text-[10.5px] text-muted">
           Conversation bientôt disponible
         </p>
       </div>

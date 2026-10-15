@@ -22,16 +22,16 @@ function Kpi({
   tagTone?: Tone;
 }) {
   return (
-    <div className="min-w-0 rounded-[22px] bg-surface p-4">
+    <div className="min-w-0 rounded-[18px] bg-surface p-3.5">
       <div className="flex items-center gap-2.5">
-        <Tile icon={icon} tone={tone} className="h-9 w-9" />
+        <Tile icon={icon} tone={tone} className="h-8 w-8" />
         <div className="min-w-0">
-          <div className="text-[13px] font-bold leading-tight">{title}</div>
-          <div className="truncate text-[12px] text-muted">{sub}</div>
+          <div className="text-[12.5px] font-bold leading-tight">{title}</div>
+          <div className="truncate text-[11.5px] text-muted">{sub}</div>
         </div>
       </div>
-      <div className="mt-4 flex items-end justify-between gap-2">
-        <span className={`whitespace-nowrap text-[30px] font-extrabold leading-none tracking-[-1px] ${valueClass}`}>{value}</span>
+      <div className="mt-3 flex items-end justify-between gap-2">
+        <span className={`whitespace-nowrap text-[24px] font-bold leading-none tracking-[-1px] ${valueClass}`}>{value}</span>
         {tag && <span className={`chip ${TONES[tagTone ?? tone]}`}>{tag}</span>}
       </div>
     </div>
