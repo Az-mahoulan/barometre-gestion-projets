@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { apiPost } from "@/lib/api";
-import { longDate } from "@/lib/format";
 import { useCountries, useDashboard, useMe } from "@/lib/hooks";
 import type { CriticalItem, Period } from "@/lib/types";
 
@@ -22,12 +21,6 @@ import { TeamsTable } from "./TeamsTable";
 import { Topbar } from "./Topbar";
 import { TrendCard } from "./TrendCard";
 import { WeekCard } from "./WeekCard";
-
-const SCOPE_LABEL = {
-  all: "Tous les projets",
-  owned: "Projets dont vous avez la charge",
-  assigned: "Projets où vous avez des tâches",
-};
 
 export function DashboardView() {
   const router = useRouter();
@@ -172,7 +165,6 @@ export function DashboardView() {
           me={me}
           alerts={data.critical_actions.total}
           members={data.teams.members}
-          subtitle={`${longDate(data.as_of).replace(/^./, (c) => c.toUpperCase())} · ${SCOPE_LABEL[data.scope]}`}
         />
         <main className="flex min-w-0 flex-1 flex-col">
           <Topbar
