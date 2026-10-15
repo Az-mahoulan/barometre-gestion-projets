@@ -215,24 +215,17 @@ export function DashboardView() {
             <div className="min-w-0 xl:col-span-2">
               <KpiRow kpis={data.kpis} />
             </div>
+            {/*
+              Ordre par défaut, pensé pour un gestionnaire de projet (chacun peut ensuite le changer) :
+              colonne principale, du général au détail puis au recul — état du portefeuille, exécution en cours
+              (jalons, activités, tâches), plan (dépendances, calendrier), tendance, ressources ;
+              colonne de droite, de l'urgent au contexte — synthèse, actions à mener, agenda, fil d'activité.
+            */}
             <SortableColumn
               className="flex min-w-0 flex-col gap-4"
               cards={orderCards(
                 [
-                  {
-                    id: "trend",
-                    label: "Évolution",
-                    node: <TrendCard trend={data.trend} projects={data.gantt} value={trendProject} onChange={setTrendProject} />,
-                  },
-                  {
-                    id: "tasks",
-                    label: "Progression des tâches",
-                    node: (
-                      <TaskProgressCard progress={data.task_progress} projects={data.gantt} value={tasksProject} onChange={setTasksProject} />
-                    ),
-                  },
-                  { id: "timeline", label: "Chronologie des projets", node: <TimelineCard projects={data.gantt} asOf={data.as_of} /> },
-                  { id: "gantt", label: "Gantt des jalons", node: <GanttCard projects={data.gantt} asOf={data.as_of} /> },
+                  { id: "projects", label: "Vue d’ensemble des projets", node: <ProjectsTable projects={data.projects} now={data.now} /> },
                   {
                     id: "milestones",
                     label: "Progression des jalons et activités de la semaine",
@@ -244,7 +237,20 @@ export function DashboardView() {
                       </div>
                     ),
                   },
-                  { id: "projects", label: "Vue d’ensemble des projets", node: <ProjectsTable projects={data.projects} now={data.now} /> },
+                  {
+                    id: "tasks",
+                    label: "Progression des tâches",
+                    node: (
+                      <TaskProgressCard progress={data.task_progress} projects={data.gantt} value={tasksProject} onChange={setTasksProject} />
+                    ),
+                  },
+                  { id: "gantt", label: "Gantt des jalons", node: <GanttCard projects={data.gantt} asOf={data.as_of} /> },
+                  { id: "timeline", label: "Chronologie des projets", node: <TimelineCard projects={data.gantt} asOf={data.as_of} /> },
+                  {
+                    id: "trend",
+                    label: "Évolution",
+                    node: <TrendCard trend={data.trend} projects={data.gantt} value={trendProject} onChange={setTrendProject} />,
+                  },
                   { id: "teams", label: "Vue d’ensemble des équipes", node: <TeamsTable teams={data.teams} /> },
                 ],
                 layout.main,
@@ -269,16 +275,16 @@ export function DashboardView() {
                     ),
                   },
                   {
-                    id: "week",
-                    label: "Programmation",
-                    node: <WeekCard week={data.week} asOf={data.as_of} projects={data.gantt} onOffset={setWeek} />,
-                  },
-                  {
                     id: "critical",
                     label: "Actions critiques",
                     node: (
                       <CriticalCard total={data.critical_actions.total} items={data.critical_actions.items} busy={busy} onAction={runAction} />
                     ),
+                  },
+                  {
+                    id: "week",
+                    label: "Programmation",
+                    node: <WeekCard week={data.week} asOf={data.as_of} projects={data.gantt} onOffset={setWeek} />,
                   },
                   { id: "activity", label: "Activité récente", node: <ActivityCard entries={data.recent_activity} now={data.now} /> },
                 ],
