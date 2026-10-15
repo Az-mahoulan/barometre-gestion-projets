@@ -89,16 +89,16 @@ export function TrendCard({
               <div key={m.month} className="flex items-end justify-center">
                 {m.state === "future" ? (
                   <div
-                    className="h-[180px] w-3.5 rounded-full bg-track"
+                    className="h-[180px] w-[60%] max-w-[56px] rounded-[18px] bg-track"
                     title={`${m.label} : à venir (${m.total} jalon${m.total > 1 ? "s" : ""} prévu${m.total > 1 ? "s" : ""})`}
                   />
                 ) : (
                   <div
-                    className="flex h-[180px] w-3.5 items-end overflow-hidden rounded-full bg-track"
+                    className="flex h-[180px] w-[60%] max-w-[56px] items-end overflow-hidden rounded-[18px] bg-track"
                     title={m.total ? `${m.label} : ${m.achieved}/${m.total} jalons atteints` : `${m.label} : aucun jalon prévu`}
                   >
                     <div
-                      className="w-full rounded-full"
+                      className="w-full rounded-[18px]"
                       style={{
                         height: `${m.pct ?? 0}%`,
                         background: barColor(m.pct ?? 0),
