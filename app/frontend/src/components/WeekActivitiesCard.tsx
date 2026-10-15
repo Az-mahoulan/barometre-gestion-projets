@@ -37,9 +37,10 @@ export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[
   const days = Array.from({ length: 7 }, (_, i) => addDays(monday, i));
   const from = iso(monday);
   const to = iso(addDays(monday, 6));
-  // Chaque jour est une colonne ; un instant est placé en % de la semaine.
-  const at = (d: Date) => Math.min(100, Math.max(0, ((d.getTime() - monday.getTime()) / (7 * DAY)) * 100));
-  const nowPct = at(new Date(today.getTime() + DAY / 2));
+  // Comme sur le modèle, chaque date est une ligne verticale (pas une colonne) : du lundi (0 %) au dimanche (100 %).
+  const at = (d: Date) => Math.min(100, Math.max(0, ((d.getTime() - monday.getTime()) / (6 * DAY)) * 100));
+  const lineX = (i: number) => (i / 6) * 100;
+  const nowPct = at(today);
   const todayIn = asOf >= from && asOf <= to;
   const weekPast = today > addDays(monday, 6);
 
@@ -96,11 +97,12 @@ export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[
         </div>
       </div>
 
+      <div className="px-3">
       <div className="relative">
-        {/* Repères des jours : traits verticaux très légers */}
-        <div className="pointer-events-none absolute inset-0 grid grid-cols-7" aria-hidden="true">
-          {days.map((d) => (
-            <div key={d.getTime()} className="border-r border-[#efefea] last:border-r-0" />
+        {/* Une ligne verticale par date */}
+        <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+          {days.map((d, i) => (
+            <span key={d.getTime()} className="absolute inset-y-0 border-l border-[#ececE6]" style={{ left: `${lineX(i)}%` }} />
           ))}
         </div>
 
@@ -108,11 +110,13 @@ export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[
           {items.length === 0 && <li className="py-6 text-center text-[12.5px] text-muted">Aucune activité cette semaine.</li>}
           {items.map(({ a, p, color }) => {
             const start = parseDate(a.start);
-            const end = addDays(parseDate(a.end), 1);
-            const left = at(start);
-            const right = at(end);
+            const end = parseDate(a.end);
             const cutL = start < monday;
-            const cutR = end > addDays(monday, 7);
+            const cutR = end > addDays(monday, 6);
+            // De la ligne du début à celle de la fin ; une activité d'un seul jour garde une petite largeur.
+            const single = !cutL && !cutR && a.start === a.end;
+            const left = single ? Math.max(0, at(start) - 4) : at(start);
+            const right = single ? Math.min(100, at(end) + 4) : at(end);
             // Part écoulée de la barre (jusqu'à aujourd'hui), en % de la barre.
             const done = weekPast ? 100 : todayIn ? Math.min(100, Math.max(0, ((nowPct - left) / Math.max(0.01, right - left)) * 100)) : 0;
             return (
@@ -151,13 +155,18 @@ export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[
         )}
       </div>
 
-      {/* Jours en bas, comme sur le modèle : de simples numéros */}
-      <div className="mt-1 grid grid-cols-7 text-center text-[12px]">
-        {days.map((d) => (
-          <span key={d.getTime()} className={iso(d) === asOf ? "font-bold text-ink" : "text-muted"}>
+      {/* Dates en bas, chacune sous sa ligne */}
+      <div className="relative mt-1 h-5 text-[12px]">
+        {days.map((d, i) => (
+          <span
+            key={d.getTime()}
+            className={`absolute -translate-x-1/2 ${iso(d) === asOf ? "font-bold text-ink" : "text-muted"}`}
+            style={{ left: `${lineX(i)}%` }}
+          >
             {d.getDate()}
           </span>
         ))}
+      </div>
       </div>
     </section>
   );
