@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Baromètre · Maquette v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0..1,0&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#f4f4ef; --card:#ffffff; --side:#1c1d22; --side-2:#2a2b31;
+  --ink:#1c1d22; --ink-2:#4b4e57; --muted:#8a8d96; --line:#ececea;
+  --lime:#d3f26a; --lime-ink:#1c1d22;
+  --peach:#fde3d2; --peach-ink:#c2561c; --lav:#e6e2fd; --lav-ink:#5b48d6;
+  --mint:#e3f6cf; --mint-ink:#3f7d1c; --sky:#dcecfd; --sky-ink:#2563b8;
+  --rose:#fde1e6; --rose-ink:#c0334d; --sand:#fdf0cf; --sand-ink:#a36a00;
+  --ok:#2f8a46; --risk:#e8901c; --late:#d9452f;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:var(--page);color:var(--ink);font-size:14px}
+.ms{font-family:"Material Symbols Rounded";font-weight:400;font-style:normal;font-size:20px;line-height:1;display:inline-block;font-variation-settings:"FILL" 0,"wght" 400;-webkit-font-smoothing:antialiased}
+.ms.fill{font-variation-settings:"FILL" 1,"wght" 400}
+.app{display:grid;grid-template-columns:248px 1fr;gap:20px;padding:20px;min-height:100vh}
+
+/* Menu latéral sombre */
+.side{background:var(--side);border-radius:24px;padding:22px 16px;color:#fff;display:flex;flex-direction:column;position:sticky;top:20px;height:calc(100vh - 40px)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;padding:0 8px 26px}
+.brand .mark{width:34px;height:34px;border-radius:10px;background:var(--lime);color:var(--lime-ink);display:grid;place-items:center}
+.nav a{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:14px;color:#c9cad0;text-decoration:none;font-weight:500;margin-bottom:4px}
+.nav a.on{background:var(--lime);color:var(--lime-ink);font-weight:700}
+.nav a .badge{margin-left:auto;background:var(--peach);color:var(--peach-ink);font-size:11px;font-weight:700;border-radius:999px;width:20px;height:20px;display:grid;place-items:center}
+.side .promo{margin-top:auto;background:var(--lime);color:var(--lime-ink);border-radius:20px;padding:18px;position:relative}
+.side .promo .ic{width:40px;height:40px;border-radius:50%;background:var(--side);color:#fff;display:grid;place-items:center;margin-bottom:12px}
+.side .promo b{display:block;font-size:15px;line-height:1.3}
+.side .promo p{font-size:12px;margin-top:6px;opacity:.75;line-height:1.4}
+
+/* Contenu */
+.top{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.top h1{font-size:28px;font-weight:800;letter-spacing:-.5px}
+.top .sub{color:var(--muted);font-size:13px;margin-top:4px}
+.top .right{margin-left:auto;display:flex;gap:10px;align-items:center}
+.pill{background:var(--card);border-radius:999px;padding:10px 16px;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px;box-shadow:0 1px 0 rgba(0,0,0,.03)}
+.pill.search{width:240px}
+.select{background:var(--card);border-radius:999px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+.iconbtn{width:42px;height:42px;border-radius:50%;background:var(--card);display:grid;place-items:center;position:relative}
+.iconbtn .dot{position:absolute;top:10px;right:11px;width:8px;height:8px;border-radius:50%;background:var(--late);border:2px solid #fff}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--lav);color:var(--lav-ink);display:grid;place-items:center;font-weight:800}
+
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px}
+.col{display:flex;flex-direction:column;gap:20px;min-width:0}
+.card{background:var(--card);border-radius:22px;padding:20px}
+.h{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.h h2{font-size:17px;font-weight:700}
+.h .link{font-size:12.5px;color:var(--ink-2);text-decoration:underline;font-weight:600}
+.chipsel{border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600;display:flex;gap:4px;align-items:center}
+.tile{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;flex-shrink:0}
+.t-peach{background:var(--peach);color:var(--peach-ink)} .t-lav{background:var(--lav);color:var(--lav-ink)}
+.t-mint{background:var(--mint);color:var(--mint-ink)} .t-sky{background:var(--sky);color:var(--sky-ink)}
+.t-rose{background:var(--rose);color:var(--rose-ink)} .t-sand{background:var(--sand);color:var(--sand-ink)}
+.t-lime{background:var(--lime);color:var(--lime-ink)}
+
+/* Indicateurs */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.kpi{background:var(--card);border-radius:22px;padding:16px}
+.kpi .row{display:flex;gap:10px;align-items:center}
+.kpi .t{font-weight:700;font-size:13.5px;white-space:nowrap}
+.kpi .s{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap}
+.kpi .val{display:flex;justify-content:space-between;align-items:flex-end;margin-top:18px}
+.kpi .num{font-size:30px;font-weight:800;letter-spacing:-1px;line-height:1;white-space:nowrap}
+.kpi .tag{font-size:11px;font-weight:700;border-radius:999px;padding:4px 9px;white-space:nowrap}
+
+/* Synthèse de l'assistant (carte sombre) */
+.ai{background:var(--side);color:#fff;border-radius:22px;padding:22px;position:relative;overflow:hidden}
+.ai .lbl{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#c9cad0;font-weight:600}
+.ai h3{font-size:17px;font-weight:700;line-height:1.35;margin:12px 0 16px}
+.ai h3 em{font-style:normal;color:var(--lime)}
+.btn-lime{background:var(--lime);color:var(--lime-ink);border:0;border-radius:999px;padding:10px 16px;font-weight:700;font-size:13px;display:inline-flex;gap:6px;align-items:center}
+.ai .ask{margin-top:16px;background:var(--side-2);border-radius:999px;padding:9px 9px 9px 16px;display:flex;align-items:center;gap:8px;color:#9b9da5;font-size:12.5px}
+.ai .ask span.ms{margin-left:auto;width:32px;height:32px;border-radius:50%;background:var(--lime);color:var(--lime-ink);display:grid;place-items:center;font-size:18px}
+.ai .ring{position:absolute;right:-40px;top:-40px;width:150px;height:150px;border-radius:50%;border:22px solid rgba(211,242,106,.08)}
+
+/* Graphique mensuel */
+.chart{display:grid;grid-template-columns:36px 1fr;gap:10px;height:220px}
+.yax{display:flex;flex-direction:column;justify-content:space-between;font-size:11px;color:var(--muted);text-align:right;padding-bottom:22px}
+.plot{position:relative;display:grid;grid-template-columns:repeat(6,1fr);align-items:end;border-bottom:1px dashed var(--line)}
+.plot .grid-l{position:absolute;inset:0 0 22px;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none}
+.plot .grid-l i{border-top:1px dashed var(--line)}
+.bar{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;position:relative;padding-bottom:22px}
+.bar .b{width:14px;border-radius:999px}
+.bar .m{position:absolute;bottom:0;font-size:12px;color:var(--muted)}
+.bar.cur .m{color:var(--ink);font-weight:700}
+.bar .tip{position:absolute;left:50%;transform:translateX(-50%);background:var(--side);color:#fff;font-size:11.5px;border-radius:8px;padding:5px 8px;white-space:nowrap;font-weight:600}
+.trendnote{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--muted);margin:-6px 0 14px}
+.trendnote .down{width:26px;height:26px;border-radius:8px;background:var(--rose);color:var(--rose-ink);display:grid;place-items:center}
+.trendnote b{color:var(--late)}
+
+/* Programmation */
+.sched li{list-style:none;display:flex;align-items:center;gap:12px;padding:10px 0}
+.sched li b{display:block;font-size:13.5px;font-weight:700}
+.sched li small{font-size:12px;color:var(--muted)}
+.sched .go{margin-left:auto;width:28px;height:28px;border-radius:9px;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-2)}
+
+/* Calendrier */
+.cal .mh{display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:12px}
+.cal .nav2{width:28px;height:28px;border-radius:9px;border:1px solid var(--line);display:grid;place-items:center}
+.cal table{width:100%;border-collapse:separate;border-spacing:0 4px;text-align:center;font-size:12px}
+.cal th{font-weight:600;color:var(--ink-2);background:#f3f3ee;padding:7px 0}
+.cal th:first-child{border-radius:10px 0 0 10px} .cal th:last-child{border-radius:0 10px 10px 0}
+.cal td{padding:6px 0;color:var(--ink-2);position:relative}
+.cal td.out{color:#c4c6cc}
+.cal td.today span{background:var(--lime);font-weight:800;color:var(--ink);border-radius:50%;display:inline-grid;place-items:center;width:28px;height:28px}
+.cal td.ev::after{content:"";position:absolute;left:50%;bottom:0;width:4px;height:4px;border-radius:50%;background:var(--late);transform:translateX(-50%)}
+.cal td.ev2::after{background:var(--sky-ink)}
+
+/* Actions critiques */
+.crit{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:18px;padding:14px;margin-bottom:12px}
+.crit b{display:block;font-size:13.5px;font-weight:700}
+.crit small{font-size:12px;color:var(--muted)}
+.crit .st{margin-left:auto;font-size:11.5px;font-weight:700;border-radius:999px;padding:5px 11px;white-space:nowrap}
+.st-late{background:var(--rose);color:var(--rose-ink)} .st-soon{background:var(--sand);color:var(--sand-ink)} .st-rev{background:var(--lav);color:var(--lav-ink)}
+.h .plus{width:28px;height:28px;border-radius:50%;background:var(--lime);display:grid;place-items:center}
+
+/* Progression des tâches */
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.flow .f{border-radius:18px;padding:14px;text-align:center}
+.flow .f .lab{font-size:12.5px;font-weight:700}
+.flow .f .ms{font-size:34px;margin:10px 0}
+.flow .f .n{font-size:24px;font-weight:800}
+.stack{display:flex;height:12px;gap:3px;margin-top:18px}
+.stack i{border-radius:999px}
+.stackl{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:10px}
+.stackl b{color:var(--ink)}
+
+/* Gantt */
+.gantt{display:grid;grid-template-columns:200px 1fr;font-size:13px}
+.gantt .months{display:grid;grid-template-columns:repeat(6,1fr);font-size:11.5px;color:var(--muted);padding-bottom:8px}
+.gantt .row{display:contents}
+.gantt .nm{padding:10px 0;border-top:1px solid var(--line)}
+.gantt .nm b{display:block;font-weight:600}
+.gantt .nm small{font-size:11.5px;color:var(--muted)}
+.gantt .nm small.late{color:var(--late)}
+.gantt .tr{position:relative;border-top:1px solid var(--line)}
+.gantt .tr .bg{position:absolute;top:50%;height:10px;margin-top:-5px;border-radius:999px;background:#efefe9;overflow:hidden}
+.gantt .tr .bg i{display:block;height:100%;border-radius:999px}
+.gantt .today{position:absolute;top:0;bottom:0;border-left:2px dashed var(--ink);opacity:.5}
+.gantt-wrap{position:relative}
+
+/* Projets (style « cours suivis ») */
+.proj{display:flex;align-items:center;gap:14px;background:var(--card);border-radius:18px;padding:14px 18px;margin-bottom:12px}
+.proj .who{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-top:3px}
+.proj .who i{width:18px;height:18px;border-radius:50%;display:inline-grid;place-items:center;font-size:9px;font-style:normal;font-weight:700}
+.proj .mid{margin-left:auto;width:170px;font-size:12px;color:var(--muted)}
+.proj .mid b{display:block;color:var(--ink);font-size:13px}
+.proj .perf{width:90px;font-size:12px;color:var(--muted)}
+.proj .perf b{display:block;font-size:13px}
+.proj .ring{width:96px;display:flex;align-items:center;gap:8px;font-weight:700}
+.proj .ring svg{width:34px;height:34px}
+.state{font-size:11.5px;font-weight:700;border-radius:999px;padding:5px 11px;width:118px;text-align:center}
+.s-ok{background:var(--mint);color:var(--mint-ink)} .s-risk{background:var(--sand);color:var(--sand-ink)} .s-late{background:var(--rose);color:var(--rose-ink)}
+
+/* Équipe */
+.team{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.mem{border:1px solid var(--line);border-radius:18px;padding:14px}
+.mem .top2{display:flex;gap:10px;align-items:center}
+.mem .av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px}
+.mem b{font-size:13px;display:block}
+.mem small{font-size:11.5px;color:var(--muted)}
+.mem .stt{margin-top:12px;display:inline-flex;gap:6px;align-items:center;font-size:11.5px;font-weight:700;border-radius:999px;padding:4px 10px}
+.mem p{font-size:12px;color:var(--ink-2);margin-top:8px;line-height:1.4;min-height:34px}
+.mem .load{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:10px}
+.mem .load b{display:inline;font-size:11.5px}
+
+/* Activité */
+.act li{list-style:none;display:flex;gap:10px;padding:9px 0;align-items:flex-start}
+.act .av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;flex-shrink:0}
+.act p{font-size:12.5px;line-height:1.4}
+.act small{font-size:11.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Menu latéral -->
+  <aside class="side">
+    <div class="brand"><span class="mark"><span class="ms fill">monitoring</span></span>Baromètre</div>
+    <nav class="nav">
+      <a class="on" href="#"><span class="ms">grid_view</span>Tableau de bord</a>
+      <a href="#"><span class="ms">folder</span>Projets</a>
+      <a href="#"><span class="ms">checklist</span>Mes tâches</a>
+      <a href="#"><span class="ms">calendar_month</span>Calendrier</a>
+      <a href="#"><span class="ms">groups</span>Équipes</a>
+      <a href="#"><span class="ms">notifications</span>Notifications<span class="badge">11</span></a>
+      <a href="#"><span class="ms">bar_chart</span>Rapports</a>
+      <a href="#"><span class="ms">admin_panel_settings</span>Administration</a>
+    </nav>
+    <div class="promo">
+      <span class="ic"><span class="ms">auto_awesome</span></span>
+      <b>Demandez à l’assistant</b>
+      <p>« Qui est disponible demain ? », « Crée une tâche pour Koffi »</p>
+    </div>
+  </aside>
+
+  <main>
+    <!-- En-tête -->
+    <div class="top">
+      <div>
+        <h1>Bonjour Mireille</h1>
+        <div class="sub">Mercredi 14 octobre 2026, tous les projets</div>
+      </div>
+      <div class="right">
+        <div class="pill search"><span class="ms">search</span>Rechercher un projet, une tâche…</div>
+        <div class="select">Tous les pays<span class="ms">expand_more</span></div>
+        <div class="select">Année en cours<span class="ms">expand_more</span></div>
+        <div class="iconbtn"><span class="ms">notifications</span><i class="dot"></i></div>
+        <div class="avatar">MH</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="col">
+
+        <!-- Indicateurs -->
+        <section class="kpis">
+          <div class="kpi"><div class="row"><span class="tile t-lav"><span class="ms">rocket_launch</span></span><div><div class="t">Projets en cours</div><div class="s">sur la période</div></div></div>
+            <div class="val"><span class="num">6</span><span class="tag" style="background:var(--sand);color:var(--sand-ink)">1 à surveiller</span></div></div>
+          <div class="kpi"><div class="row"><span class="tile t-rose"><span class="ms">schedule</span></span><div><div class="t">Projets en retard</div><div class="s">jalons ou tâches</div></div></div>
+            <div class="val"><span class="num" style="color:var(--late)">2</span><span class="tag" style="background:var(--rose);color:var(--rose-ink)">2 jalons dépassés</span></div></div>
+          <div class="kpi"><div class="row"><span class="tile t-mint"><span class="ms">task_alt</span></span><div><div class="t">Projets achevés</div><div class="s">sur la période</div></div></div>
+            <div class="val"><span class="num">2</span><span class="tag" style="background:var(--mint);color:var(--mint-ink)">dans les temps</span></div></div>
+          <div class="kpi"><div class="row"><span class="tile t-peach"><span class="ms">flag</span></span><div><div class="t">Jalons atteints</div><div class="s">15 sur 30</div></div></div>
+            <div class="val"><span class="num">50 %</span><span class="tag" style="background:var(--peach);color:var(--peach-ink)">+8 pts</span></div></div>
+        </section>
+
+        <!-- Évolution + Programmation -->
+        <div style="display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px">
+          <section class="card">
+            <div class="h"><h2>Évolution mois par mois</h2><span class="chipsel">Tous les projets<span class="ms" style="font-size:16px">expand_more</span></span></div>
+            <div class="trendnote"><span class="down"><span class="ms" style="font-size:16px">south_east</span></span><b>−61 pts</b> par rapport à septembre</div>
+            <div class="chart">
+              <div class="yax"><span>100 %</span><span>75 %</span><span>50 %</span><span>25 %</span><span>0 %</span></div>
+              <div class="plot">
+                <div class="grid-l"><i></i><i></i><i></i><i></i><i></i></div>
+                <div class="bar"><i class="b" style="height:100%;background:var(--ok)"></i><span class="m">juil.</span></div>
+                <div class="bar"><i class="b" style="height:100%;background:var(--ok)"></i><span class="m">août</span></div>
+                <div class="bar"><i class="b" style="height:86%;background:var(--risk)"></i><span class="m">sept.</span></div>
+                <div class="bar cur"><span class="tip" style="bottom:calc(25% + 30px)">1 jalon sur 4</span><i class="b" style="height:25%;background:var(--late)"></i><span class="m">oct.</span></div>
+                <div class="bar"><i class="b" style="height:100%;background:#efefe9"></i><span class="m">nov.</span></div>
+                <div class="bar"><i class="b" style="height:100%;background:#efefe9"></i><span class="m">déc.</span></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="h"><h2>Programmation</h2><span class="link">Voir la semaine</span></div>
+            <ul class="sched">
+              <li><span class="tile t-peach"><span class="ms">groups</span></span><div><b>Comité de pilotage</b><small>Aujourd’hui, 15:00 · Réunion</small></div><span class="go"><span class="ms" style="font-size:18px">chevron_right</span></span></li>
+              <li><span class="tile t-lav"><span class="ms">flag</span></span><div><b>Supports prêts</b><small>Ven. 16 oct. · Jalon</small></div><span class="go"><span class="ms" style="font-size:18px">chevron_right</span></span></li>
+              <li><span class="tile t-mint"><span class="ms">fact_check</span></span><div><b>Valider le plan d’échantillonnage</b><small>Jeu. 15 oct. · Ibrahim Sow</small></div><span class="go"><span class="ms" style="font-size:18px">chevron_right</span></span></li>
+              <li><span class="tile t-sky"><span class="ms">table_chart</span></span><div><b>Valider la liste des tableaux</b><small>Sam. 17 oct. · Sèna Agbo</small></div><span class="go"><span class="ms" style="font-size:18px">chevron_right</span></span></li>
+            </ul>
+          </section>
+        </div>
+
+        <!-- Progression des tâches -->
+        <section class="card">
+          <div class="h"><h2>Progression des tâches</h2><span class="chipsel">Tous les projets<span class="ms" style="font-size:16px">expand_more</span></span></div>
+          <div class="flow">
+            <div class="f" style="background:#f3f3ee"><div class="lab" style="color:#5f626b">En attente</div><span class="ms fill" style="color:#5f626b">inventory_2</span><div class="n">16</div></div>
+            <div class="f" style="background:var(--sky)"><div class="lab" style="color:var(--sky-ink)">En cours</div><span class="ms fill" style="color:var(--sky-ink)">manage_accounts</span><div class="n">8</div></div>
+            <div class="f" style="background:#d9f1ec"><div class="lab" style="color:#0f766e">Fait</div><span class="ms fill" style="color:#0f766e">flag</span><div class="n">1</div></div>
+            <div class="f" style="background:var(--sand)"><div class="lab" style="color:var(--sand-ink)">En revue</div><span class="ms fill" style="color:#d97706">youtube_searched_for</span><div class="n">3</div></div>
+            <div class="f" style="background:var(--mint)"><div class="lab" style="color:var(--mint-ink)">Approuvé</div><span class="ms fill" style="color:var(--ok)">check_circle</span><div class="n">22</div></div>
+          </div>
+          <div class="stack">
+            <i style="width:32%;background:#8a8d96"></i><i style="width:16%;background:#2563b8"></i><i style="width:2%;background:#0f766e"></i><i style="width:6%;background:#e8901c"></i><i style="width:44%;background:var(--ok)"></i>
+          </div>
+          <div class="stackl"><span>50 tâches · <b style="color:var(--late)">4 en retard</b></span><span><b>52 %</b> terminées (fait, en revue, approuvé)</span></div>
+        </section>
+
+        <!-- Gantt -->
+        <section class="card">
+          <div class="h"><h2>Gantt des projets</h2><span class="chipsel">Projets<span class="ms" style="font-size:16px">expand_more</span></span></div>
+          <div class="gantt">
+            <div></div>
+            <div class="months"><span>juil.</span><span>août</span><span>sept.</span><span>oct.</span><span>nov.</span><span>déc.</span></div>
+            <div class="nm"><b>Audit qualité des données</b><small>Rapport d’audit, 30 oct.</small></div><div class="tr"><div class="bg" style="left:3%;width:65%"><i style="width:88%;background:var(--ok)"></i></div></div>
+            <div class="nm"><b>Refonte du site web</b><small class="late">Jalon dépassé le 18 sept.</small></div><div class="tr"><div class="bg" style="left:26%;width:58%"><i style="width:50%;background:var(--late)"></i></div></div>
+            <div class="nm"><b>Enquête nationale T4</b><small>Collecte terminée, 20 nov.</small></div><div class="tr"><div class="bg" style="left:34%;width:57%"><i style="width:50%;background:var(--ok)"></i></div></div>
+            <div class="nm"><b>Rapport annuel 2026</b><small>Premier jet, 6 nov.</small></div><div class="tr"><div class="bg" style="left:41%;width:52%"><i style="width:29%;background:var(--ok)"></i></div></div>
+            <div class="nm"><b>Tableau de bord partenaires</b><small class="late">Jalon dépassé le 9 oct.</small></div><div class="tr"><div class="bg" style="left:50%;width:32%"><i style="width:17%;background:var(--late)"></i></div></div>
+            <div class="nm"><b>Formation des enquêteurs</b><small>Supports prêts, 16 oct.</small></div><div class="tr"><div class="bg" style="left:52%;width:18%"><i style="width:20%;background:var(--risk)"></i></div></div>
+          </div>
+        </section>
+
+        <!-- Projets -->
+        <section>
+          <div class="h"><h2>Vue d’ensemble des projets</h2><span class="chipsel">En cours<span class="ms" style="font-size:16px">expand_more</span></span></div>
+          <div class="proj"><span class="tile t-lav"><span class="ms">fact_check</span></span><div><b>Audit qualité des données</b><div class="who"><i class="t-peach">RT</i>Romuald Tossou · Togo</div></div>
+            <div class="mid">Prochain jalon<b>Rapport d’audit, 30 oct.</b></div><div class="perf">Performance<b style="color:var(--ok)">102 %</b></div><span class="state s-ok">Dans les temps</span>
+            <div class="ring"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#efefe9" stroke-width="4"/><circle cx="18" cy="18" r="15" fill="none" stroke="var(--ok)" stroke-width="4" stroke-linecap="round" stroke-dasharray="83 94" transform="rotate(-90 18 18)"/></svg>88 %</div></div>
+          <div class="proj"><span class="tile t-rose"><span class="ms">language</span></span><div><b>Refonte du site web</b><div class="who"><i class="t-lav">MH</i>Mireille Houngbo · Bénin</div></div>
+            <div class="mid">Prochain jalon<b style="color:var(--late)">Contenus rédigés, dépassé</b></div><div class="perf">Performance<b>91 %</b></div><span class="state s-late">En retard</span>
+            <div class="ring"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#efefe9" stroke-width="4"/><circle cx="18" cy="18" r="15" fill="none" stroke="var(--late)" stroke-width="4" stroke-linecap="round" stroke-dasharray="47 94" transform="rotate(-90 18 18)"/></svg>50 %</div></div>
+          <div class="proj"><span class="tile t-sky"><span class="ms">poll</span></span><div><b>Enquête nationale T4</b><div class="who"><i class="t-lav">MH</i>Mireille Houngbo · Bénin</div></div>
+            <div class="mid">Prochain jalon<b>Collecte terminée, 20 nov.</b></div><div class="perf">Performance<b style="color:var(--ok)">122 %</b></div><span class="state s-ok">Dans les temps</span>
+            <div class="ring"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#efefe9" stroke-width="4"/><circle cx="18" cy="18" r="15" fill="none" stroke="var(--ok)" stroke-width="4" stroke-linecap="round" stroke-dasharray="47 94" transform="rotate(-90 18 18)"/></svg>50 %</div></div>
+          <div class="proj"><span class="tile t-sand"><span class="ms">school</span></span><div><b>Formation des enquêteurs</b><div class="who"><i class="t-lav">MH</i>Mireille Houngbo · Bénin</div></div>
+            <div class="mid">Prochain jalon<b>Supports prêts, 16 oct.</b></div><div class="perf">Performance<b style="color:var(--risk)">71 %</b></div><span class="state s-risk">À surveiller</span>
+            <div class="ring"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#efefe9" stroke-width="4"/><circle cx="18" cy="18" r="15" fill="none" stroke="var(--risk)" stroke-width="4" stroke-linecap="round" stroke-dasharray="19 94" transform="rotate(-90 18 18)"/></svg>20 %</div></div>
+        </section>
+
+        <!-- Équipe -->
+        <section class="card">
+          <div class="h"><h2>Vue d’ensemble des équipes</h2><span class="link">3 disponibles sur 8</span></div>
+          <div class="team">
+            <div class="mem"><div class="top2"><span class="av t-mint">KA</span><div><b>Koffi Adjovi</b><small>Développeur web, Bénin</small></div></div>
+              <span class="stt s-ok"><span class="ms" style="font-size:14px">check_circle</span>Disponible</span><p>À distance</p><div class="load"><span>5 tâches</span><b style="color:var(--late)">1 en retard</b></div></div>
+            <div class="mem"><div class="top2"><span class="av t-sky">SA</span><div><b>Sèna Agbo</b><small>Suivi-évaluation, Bénin</small></div></div>
+              <span class="stt" style="background:var(--sky);color:var(--sky-ink)"><span class="ms" style="font-size:14px">flight</span>En mission</span><p>Atelier partenaires à Dakar, jusqu’au 16 oct.</p><div class="load"><span>4 tâches</span><b style="color:var(--late)">1 en retard</b></div></div>
+            <div class="mem"><div class="top2"><span class="av t-lav">MH</span><div><b>Mireille Houngbo</b><small>Responsable de projets</small></div></div>
+              <span class="stt" style="background:var(--lav);color:var(--lav-ink)"><span class="ms" style="font-size:14px">groups</span>En réunion</span><p>Comité de pilotage, jusqu’à 15 h</p><div class="load"><span>3 tâches</span><b></b></div></div>
+            <div class="mem"><div class="top2"><span class="av t-peach">RT</span><div><b>Romuald Tossou</b><small>Contrôleur qualité, Togo</small></div></div>
+              <span class="stt" style="background:#f3f3ee;color:#5f626b"><span class="ms" style="font-size:14px">beach_access</span>En congé</span><p>Congé annuel, retour le 19 oct.</p><div class="load"><span>2 tâches</span><b></b></div></div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Colonne de droite -->
+      <div class="col">
+        <section class="ai">
+          <i class="ring"></i>
+          <div class="lbl"><span class="ms" style="font-size:18px;color:var(--lime)">auto_awesome</span>Synthèse de l’assistant</div>
+          <h3><em>2 projets</em> sont en retard et <em>4 tâches</em> ont dépassé leur échéance. Sèna Agbo, en mission à Dakar, porte 1 de ces retards.</h3>
+          <button class="btn-lime"><span class="ms" style="font-size:18px">campaign</span>Relancer les responsables (6)</button>
+          <div class="ask">Posez une question à l’assistant…<span class="ms">arrow_upward</span></div>
+        </section>
+
+        <section class="card cal">
+          <div class="mh"><span class="nav2"><span class="ms" style="font-size:18px">chevron_left</span></span>Octobre 2026<span class="nav2"><span class="ms" style="font-size:18px">chevron_right</span></span></div>
+          <table>
+            <tr><th>L</th><th>M</th><th>M</th><th>J</th><th>V</th><th>S</th><th>D</th></tr>
+            <tr><td class="out">28</td><td class="out">29</td><td class="out">30</td><td>1</td><td>2</td><td>3</td><td>4</td></tr>
+            <tr><td>5</td><td>6</td><td>7</td><td>8</td><td class="ev">9</td><td>10</td><td>11</td></tr>
+            <tr><td class="ev2">12</td><td>13</td><td class="today"><span>14</span></td><td class="ev2">15</td><td class="ev2">16</td><td class="ev2">17</td><td>18</td></tr>
+            <tr><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td></tr>
+            <tr><td>26</td><td>27</td><td>28</td><td>29</td><td class="ev2">30</td><td>31</td><td class="out">1</td></tr>
+          </table>
+        </section>
+
+        <section>
+          <div class="h"><h2>Actions critiques</h2><span class="plus"><span class="ms" style="font-size:18px">north_east</span></span></div>
+          <div class="crit"><span class="tile t-rose"><span class="ms">flag</span></span><div><b>Contenus rédigés</b><small>Refonte du site web · jalon</small></div><span class="st st-late">26 j de retard</span></div>
+          <div class="crit"><span class="tile t-rose"><span class="ms">schedule</span></span><div><b>Intégration de la page d’accueil</b><small>Koffi Adjovi</small></div><span class="st st-late">5 j de retard</span></div>
+          <div class="crit"><span class="tile t-sand"><span class="ms">event</span></span><div><b>Plan d’échantillonnage</b><small>Ibrahim Sow</small></div><span class="st st-soon">Demain</span></div>
+          <div class="crit"><span class="tile t-lav"><span class="ms">rate_review</span></span><div><b>Questionnaire final</b><small>Enquête nationale T4</small></div><span class="st st-rev">À approuver</span></div>
+        </section>
+
+        <section class="card act">
+          <div class="h"><h2>Activités récentes</h2></div>
+          <ul>
+            <li><span class="av t-lav">MH</span><div><p>Mireille a approuvé « Lancer la collecte »</p><small>il y a 2 h · Enquête nationale T4</small></div></li>
+            <li><span class="av t-sky">SA</span><div><p>Sèna a passé « Atelier de cadrage » en cours</p><small>il y a 3 h · Tableau de bord partenaires</small></div></li>
+            <li><span class="av t-mint">KA</span><div><p>Koffi a terminé « Arborescence du site »</p><small>hier · Refonte du site web</small></div></li>
+            <li><span class="av t-peach">RT</span><div><p>Romuald a commenté « Rapport d’audit »</p><small>hier · Audit qualité des données</small></div></li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>
