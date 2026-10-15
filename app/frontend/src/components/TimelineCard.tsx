@@ -9,6 +9,7 @@ import { Icon } from "./ui";
 
 const MONTHS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
 const NAME_W = 200;
+const COL_MIN = 30; // en dessous, le tableau défile horizontalement
 
 // Une teinte par projet : couleur franche (pastille, losanges), teinte moyenne pour la barre, et une icône.
 const PALETTE = [
@@ -62,12 +63,29 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
     return () => ro.disconnect();
   }, []);
   const colW = width / n;
+
+  // Défilement horizontal quand il y a beaucoup de dates : sans barre, avec un fondu sur le bord caché.
+  const scroller = useRef<HTMLDivElement>(null);
+  const [edges, setEdges] = useState({ left: false, right: false });
+  const measure = () => {
+    const el = scroller.current;
+    if (el) setEdges({ left: el.scrollLeft > 2, right: el.scrollLeft + el.clientWidth < el.scrollWidth - 2 });
+  };
   const labelW = (text: string) => text.length * 6.2 + 12;
 
   // Aujourd'hui : trait entre les dates passées et celles à venir.
   const past = dates.filter((d) => d < asOf).length;
   const todayAt = dates.includes(asOf) ? past + 0.5 : past;
   const showToday = year === currentYear && rows.length > 0;
+
+  // À l'ouverture (et au changement d'année), centre le tableau sur aujourd'hui s'il défile.
+  useEffect(() => {
+    const el = scroller.current;
+    if (!el) return;
+    el.scrollLeft = showToday ? Math.max(0, (todayAt / n) * (el.scrollWidth - NAME_W) - (el.clientWidth - NAME_W) / 2) : 0;
+    measure();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [year, n, width]);
 
   return (
     <section className="card" aria-label="Chronologie des projets">
@@ -84,9 +102,17 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
         </span>
       </div>
 
-      <div ref={area} className="relative overflow-clip rounded-[14px] border border-line bg-[#f7f7f3]">
+      <div
+        ref={scroller}
+        onScroll={measure}
+        className="overflow-x-auto rounded-[14px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        style={{
+          maskImage: `linear-gradient(to right, #000 ${NAME_W}px, ${edges.left ? `transparent ${NAME_W}px, #000 ${NAME_W + 40}px` : "#000 0"}, ${edges.right ? "#000 calc(100% - 48px), transparent" : "#000"})`,
+        }}
+      >
+        <div ref={area} className="relative overflow-clip rounded-[14px] border border-line bg-[#f7f7f3]" style={{ minWidth: NAME_W + n * COL_MIN }}>
         <div className="relative z-20 grid border-b border-[#d6d6ce] bg-[#ebebe5]" style={{ gridTemplateColumns: `${NAME_W}px minmax(0,1fr)` }}>
-          <div className="flex items-center px-4 text-[12px] font-semibold">Projets</div>
+          <div className="sticky left-0 z-20 flex items-center bg-[#ebebe5] px-4 text-[12px] font-semibold">Projets</div>
           <div className="grid" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}>
             {dates.map((d) => {
               const day = parseDate(d);
@@ -128,7 +154,7 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
 
           return (
             <div key={p.id} className="grid border-b border-line last:border-b-0" style={{ gridTemplateColumns: `${NAME_W}px minmax(0,1fr)` }}>
-              <div className="flex min-w-0 items-center gap-2.5 px-4" title={`${p.name} · ${shortDate(p.start)} → ${shortDate(p.end)}`}>
+              <div className="sticky left-0 z-20 flex min-w-0 items-center gap-2.5 bg-[#f7f7f3] px-4" title={`${p.name} · ${shortDate(p.start)} → ${shortDate(p.end)}`}>
                 <span className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-[5px] text-white" style={{ background: color.solid }}>
                   <Icon name={color.icon} className="h-3 w-3" />
                 </span>
@@ -198,6 +224,7 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
             </span>
           </div>
         )}
+        </div>
       </div>
 
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted">
