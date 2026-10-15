@@ -61,10 +61,7 @@ export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[
           <span className="grid h-7 w-7 place-items-center rounded-full border border-line text-ink-2">
             <Icon name="timeline" className="h-4 w-4" />
           </span>
-          Activités de la semaine
-          <span className="text-[12px] font-medium text-muted">
-            {shortDate(from)} – {shortDate(to)}
-          </span>
+          <span title={`${shortDate(from)} – ${shortDate(to)}`}>Activités de la semaine</span>
         </h2>
         <div ref={menuRef} className="relative">
           <button
@@ -78,6 +75,9 @@ export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[
           </button>
           {menu && (
             <div role="menu" className="absolute right-0 top-[calc(100%+6px)] z-30 w-[190px] rounded-[14px] border border-line bg-surface p-1 shadow-[0_12px_28px_-14px_rgba(28,29,34,0.3)]">
+              <p className="px-3 pb-1 pt-1.5 text-[11px] font-semibold text-muted">
+                {shortDate(from)} – {shortDate(to)}
+              </p>
               {[
                 [offset - 1, "Semaine précédente"],
                 [0, "Cette semaine"],
@@ -97,7 +97,7 @@ export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[
         </div>
       </div>
 
-      <div className="px-3">
+      <div className="px-2">
       <div className="relative">
         {/* Une ligne verticale par date */}
         <div className="pointer-events-none absolute inset-0" aria-hidden="true">
@@ -106,7 +106,7 @@ export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[
           ))}
         </div>
 
-        <ul className="relative flex flex-col gap-2.5 py-3">
+        <ul className="relative flex flex-col gap-2 py-2.5">
           {items.length === 0 && <li className="py-6 text-center text-[12.5px] text-muted">Aucune activité cette semaine.</li>}
           {items.map(({ a, p, color }) => {
             const start = parseDate(a.start);
@@ -120,7 +120,7 @@ export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[
             // Part écoulée de la barre (jusqu'à aujourd'hui), en % de la barre.
             const done = weekPast ? 100 : todayIn ? Math.min(100, Math.max(0, ((nowPct - left) / Math.max(0.01, right - left)) * 100)) : 0;
             return (
-              <li key={a.id} className="relative h-[26px]" title={`${a.name} · ${p.name} · ${shortDate(a.start)} → ${shortDate(a.end)} · ${a.tasks_complete}/${a.tasks_total} tâches`}>
+              <li key={a.id} className="relative h-[22px]" title={`${a.name} · ${p.name} · ${shortDate(a.start)} → ${shortDate(a.end)} · ${a.tasks_complete}/${a.tasks_total} tâches`}>
                 <div
                   className="absolute inset-y-0 overflow-hidden"
                   style={{
@@ -130,15 +130,20 @@ export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[
                     background: HATCH,
                   }}
                 >
-                  <div
-                    className="absolute inset-y-0 left-0"
-                    style={{ width: `${done}%`, background: color.solid }}
-                  />
-                  <span className={`relative flex h-full items-center gap-1.5 truncate px-3 text-[11.5px] font-medium ${done > 0 ? "text-white" : "text-ink-2"}`}>
+                  {/* Nom en gris foncé sur la partie hachurée… */}
+                  <span className="relative flex h-full items-center gap-1.5 px-2.5 text-[11px] font-medium text-ink-2">
                     {/* Activité pas encore commencée : la couleur du projet reste visible par une pastille. */}
                     {done === 0 && <i className="h-2 w-2 shrink-0 rounded-full" style={{ background: color.solid }} />}
                     <span className="truncate">{a.name}</span>
                   </span>
+                  {/* … et en blanc sur la partie pleine : même texte, découpé à la limite d'aujourd'hui. */}
+                  {done > 0 && (
+                    <div className="absolute inset-y-0 left-0 overflow-hidden" style={{ width: `${done}%`, background: color.solid }}>
+                      <span className="flex h-full items-center px-2.5 text-[11px] font-medium text-white" style={{ width: `${10000 / done}%` }}>
+                        <span className="truncate">{a.name}</span>
+                      </span>
+                    </div>
+                  )}
                 </div>
               </li>
             );

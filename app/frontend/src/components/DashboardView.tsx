@@ -205,7 +205,6 @@ export function DashboardView() {
                 value={tasksProject}
                 onChange={setTasksProject}
               />
-              <WeekActivitiesCard projects={data.gantt} asOf={data.as_of} />
               <TimelineCard projects={data.gantt} asOf={data.as_of} />
               <GanttCard projects={data.gantt} asOf={data.as_of} />
               <ProjectsTable projects={data.projects} />
@@ -220,6 +219,7 @@ export function DashboardView() {
                 onRemind={() => setConfirmAll(true)}
               />
               <WeekCard week={data.week} asOf={data.as_of} projects={data.gantt} onOffset={setWeek} />
+              <WeekActivitiesCard projects={data.gantt} asOf={data.as_of} />
               <CriticalCard
                 total={data.critical_actions.total}
                 items={data.critical_actions.items}
