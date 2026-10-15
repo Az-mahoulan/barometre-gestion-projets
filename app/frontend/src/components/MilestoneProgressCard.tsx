@@ -49,13 +49,11 @@ export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProje
   const [value, setValue] = useState("");
   const project = projects.find((p) => String(p.id) === value);
 
-  // Un projet : tous ses jalons. Tous les projets : les jalons non atteints des projets en cours, par échéance.
-  const rows = project
-    ? project.milestones.map((m) => ({ m, p: project }))
-    : projects
-        .filter((p) => p.status === "active")
-        .flatMap((p) => p.milestones.filter((m) => !m.achieved).map((m) => ({ m, p })))
-        .sort((a, b) => a.m.date.localeCompare(b.m.date));
+  // Seulement les jalons en cours d'exécution : période commencée, échéance pas encore passée, non atteints.
+  const running = (m: Milestone) => !m.achieved && m.start <= asOf && asOf <= m.date;
+  const rows = (project ? [project] : projects.filter((p) => p.status === "active"))
+    .flatMap((p) => p.milestones.filter(running).map((m) => ({ m, p })))
+    .sort((a, b) => a.m.date.localeCompare(b.m.date));
 
   // Largeur réelle d'une bande : sert à placer les pourcentages sans chevauchement.
   const list = useRef<HTMLUListElement>(null);
@@ -79,7 +77,7 @@ export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProje
       />
 
       {rows.length === 0 ? (
-        <p className="text-[12.5px] text-muted">Aucun jalon à suivre.</p>
+        <p className="text-[12.5px] text-muted">Aucun jalon en cours d’exécution.</p>
       ) : (
         <ul ref={list} className="mt-2 flex max-h-[560px] flex-col gap-7 overflow-y-auto py-1 [scrollbar-width:none]">
           {rows.map(({ m, p }) => {

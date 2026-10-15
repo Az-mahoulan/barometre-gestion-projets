@@ -127,7 +127,11 @@ def test_seeded_demo_matches_mockup(admin, client_for, settings):
     k = data["kpis"]
     assert (k["active_projects"], k["late_projects"], k["completed_projects"], k["milestones_pct"]) == (6, 2, 2, 50)
     assert data["task_progress"]["total"] == 50
-    assert data["critical_actions"]["total"] == 11
+    # 10 depuis le 15/10/2026 : la tâche « Rapport d'audit » de démonstration est « en cours » (et non plus en revue).
+    assert data["critical_actions"]["total"] == 10
+    # Progression des jalons : seules les tâches prévues dans la période du jalon comptent.
+    rapport = next(m for p in data["gantt"] if p["name"] == "Audit qualité des données" for m in p["milestones"] if m["name"] == "Rapport d’audit")
+    assert (rapport["tasks_complete"], rapport["tasks_total"]) == (3, 5)
 
 
 def test_admin_account_is_not_listed_as_team_member(admin, worker, client_for):

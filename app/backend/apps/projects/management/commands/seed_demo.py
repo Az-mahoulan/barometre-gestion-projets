@@ -79,7 +79,7 @@ PROJECTS = [
      [("Préparation", "07-06", "08-14"), ("Audit terrain", "08-17", "09-25"), ("Rapport et suivi", "09-28", "10-30")],
      [("Cadrage de l’audit", "07-10", 1), ("Plan d’audit", "07-31", 1), ("Audit terrain", "09-25", 1), ("Rapport d’audit", "10-30", 0)],
      [("Plan d’audit", "romuald", "approved", "07-30", "n", 0), ("Échantillonnage", "romuald", "approved", "08-14", "n", 0), ("Visites de contrôle", "adjoa", "approved", "09-18", "n", 1),
-      ("Analyse des écarts", "ibrahim", "approved", "09-30", "n", 2), ("Restitution aux équipes", "romuald", "done", "10-09", "n", 2), ("Rapport d’audit", "romuald", "review", "10-28", "h", 2),
+      ("Analyse des écarts", "ibrahim", "approved", "09-30", "n", 2), ("Restitution aux équipes", "romuald", "done", "10-09", "n", 2), ("Rapport d’audit", "romuald", "doing", "10-28", "h", 2),
       ("Relire le rapport d’audit", "aicha", "review", "10-16", "h", 2), ("Plan d’actions correctives", "mireille", "todo", "10-30", "n", 2)]),
     ("Formation des enquêteurs", "BJ", "mireille", "10-05", "11-06", "active",
      [("Préparation", "10-05", "10-16"), ("Sessions", "10-19", "10-30"), ("Évaluation", "11-02", "11-06")],
@@ -151,6 +151,13 @@ DELIVERABLES = [
     ("Évaluation 2025", "Note aux bailleurs", "08-21", True),
 ]
 
+# Rattachements plus justes que la règle par dates : (projet, activité) -> jalon.
+ACTIVITY_MILESTONES = {
+    ("Refonte du site web", "Développement"): "Version bêta",
+    ("Rapport annuel 2026", "Rédaction"): "Premier jet",
+    ("Tableau de bord partenaires", "Prototype"): "Prototype",
+}
+
 LOGS = [(2, "mireille", "a approuvé « Lancer la collecte »", "Enquête nationale T4"), (3, "sena", "a passé « Atelier de cadrage » en cours", "Tableau de bord partenaires"),
         (26, "koffi", "a terminé « Arborescence du site »", "Refonte du site web"), (27, "romuald", "a commenté « Rapport d’audit »", "Audit qualité des données"),
         (50, "adjoa", "a ajouté 3 tâches à « Enquête nationale T4 »", "Enquête nationale T4"), (72, "aicha", "a importé un Gantt dans « Rapport annuel 2026 »", "Rapport annuel 2026")]
@@ -209,10 +216,11 @@ class Command(BaseCommand):
             ProjectActivity.objects.create(project=projects[name], name=title, start_date=d(start), end_date=d(end))
 
         # Chaque activité contribue au premier jalon de son projet qui suit sa fin (sinon au dernier).
-        for a in ProjectActivity.objects.all():
+        for a in ProjectActivity.objects.select_related("project"):
             ms = list(Milestone.objects.filter(project_id=a.project_id).order_by("due_date", "id"))
             if ms:
-                a.milestone = next((m for m in ms if m.due_date >= a.end_date), ms[-1])
+                target = ACTIVITY_MILESTONES.get((a.project.name, a.name))
+                a.milestone = next((m for m in ms if m.name == target), None) or next((m for m in ms if m.due_date >= a.end_date), ms[-1])
                 a.save(update_fields=["milestone"])
 
         for name, title, due, delivered in DELIVERABLES:

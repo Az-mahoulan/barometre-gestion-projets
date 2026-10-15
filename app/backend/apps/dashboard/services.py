@@ -143,14 +143,16 @@ def _milestones_payload(p, today: date) -> list[dict]:
     rows, previous = [], p.start_date
     for m in p.milestones.all():
         act_ids = {a.id for a in p.activities.all() if a.milestone_id == m.id}
-        ts = [t for t in tasks if t.activity_id in act_ids]
+        # Tâches des activités rattachées, prévues pendant la période du jalon (après le jalon précédent).
+        start = min(previous, m.due_date)
+        ts = [t for t in tasks if t.activity_id in act_ids and (t.due_date > start or start == p.start_date)]
         done = sum(1 for t in ts if t.is_complete)
         progress = done / len(ts) if ts else (1.0 if m.is_achieved else 0.0)
         counts = Counter(t.assignee for t in ts if t.assignee is not None)
         members = [u for u, _ in counts.most_common()] or [p.owner]
         lead = members[0]
         rows.append(
-            {"id": m.id, "name": m.name, "date": m.due_date, "start": min(previous, m.due_date),
+            {"id": m.id, "name": m.name, "date": m.due_date, "start": start,
              "achieved": m.is_achieved, "overdue": not m.is_achieved and m.due_date < today,
              "depends_on": [d.id for d in m.depends_on.all() if d.project_id == p.id],
              "activities": len(act_ids), "tasks_total": len(ts), "tasks_complete": done,
