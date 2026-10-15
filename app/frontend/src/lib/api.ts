@@ -30,6 +30,11 @@ export function isWaking(e: unknown): boolean {
   return e instanceof ApiError && WAKING_STATUSES.includes(e.status);
 }
 
+/** Demande au navigateur de visiter directement le serveur Django, ce qui le réveille (voir app/reveil/route.ts). */
+export function wakeBackend() {
+  fetch("/reveil", { mode: "no-cors", cache: "no-store" }).catch(() => undefined);
+}
+
 /** Relance l'appel toutes les 5 s tant que le serveur se réveille (2 min au plus). */
 export async function retryWhileWaking<T>(call: () => Promise<T>, onWaiting?: () => void, signal?: AbortSignal): Promise<T> {
   for (let attempt = 0; ; attempt++) {
@@ -37,6 +42,7 @@ export async function retryWhileWaking<T>(call: () => Promise<T>, onWaiting?: ()
       return await call();
     } catch (e) {
       if (!isWaking(e) || attempt >= 24 || signal?.aborted) throw e;
+      if (attempt % 3 === 0) wakeBackend();
       onWaiting?.();
       await new Promise((resolve) => setTimeout(resolve, 5000));
     }
