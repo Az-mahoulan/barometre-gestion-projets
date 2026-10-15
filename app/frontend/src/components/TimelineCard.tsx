@@ -145,7 +145,7 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
             const w = labelW(k.label);
             const end = (col(k.date) + 1) * colW;
             const side = k.date > p.end && end + 4 + w <= width;
-            const box: [number, number] = side ? [end, end + 4 + w] : x + w > width ? [x - w, x + 6] : [x - 6, x + w];
+            const box: [number, number] = side ? [end, end + 4 + w] : x + 12 + w > width ? [x - 12 - w, x] : [x, x + 12 + w];
             if (!side && placed.some(([s, t]) => box[0] < t && s < box[1])) continue;
             if (!side) placed.push(box);
             named.set(k.label + k.date, side ? "side" : "below");
@@ -161,7 +161,7 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
                 <span className={`truncate text-[12px] font-medium ${p.status !== "active" ? "text-muted" : "text-ink-2"}`}>{p.name}</span>
               </div>
 
-              <div className={`relative ${below ? "h-[56px]" : "h-[42px]"}`}>
+              <div className={`relative ${below ? "h-[58px]" : "h-[42px]"}`}>
                 <div className="absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }} aria-hidden="true">
                   {dates.map((d) => (
                     <div key={d} className="border-l border-line" />
@@ -182,7 +182,7 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
                 {keys.map((k) => {
                   const xPct = ((col(k.date) + 0.5) / n) * 100;
                   const where = named.get(k.label + k.date);
-                  const flip = (col(k.date) + 0.5) * colW + labelW(k.label) > width;
+                  const flip = (col(k.date) + 0.5) * colW + 12 + labelW(k.label) > width;
                   return (
                     <div key={k.label + k.date}>
                       {/* Date clé : une portion de la barre, dans la version franche de sa couleur. */}
@@ -197,12 +197,23 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
                         </span>
                       )}
                       {where === "below" && (
-                        <span
-                          className="absolute top-[35px] whitespace-nowrap text-[10.5px] font-medium text-ink-2"
-                          style={{ left: `${xPct}%`, transform: flip ? "translateX(calc(-100% + 6px))" : "translateX(-6px)" }}
-                        >
-                          {k.label}
-                        </span>
+                        <>
+                          {/* Petite liaison courbe entre la marque et son étiquette. */}
+                          <svg
+                            className="absolute top-[32px] h-[11px] w-[13px] overflow-visible"
+                            style={{ left: `${xPct}%`, transform: flip ? "translateX(-100%) scaleX(-1)" : undefined, transformOrigin: "center" }}
+                            viewBox="0 0 13 11"
+                            aria-hidden="true"
+                          >
+                            <path d="M0.75 0 C0.75 6.5 4 10 12 10" fill="none" stroke={color.solid} strokeWidth="1.5" strokeLinecap="round" />
+                          </svg>
+                          <span
+                            className="absolute top-[35px] whitespace-nowrap text-[10.5px] font-medium text-ink-2"
+                            style={{ left: `${xPct}%`, transform: flip ? "translateX(calc(-100% - 14px))" : "translateX(14px)" }}
+                          >
+                            {k.label}
+                          </span>
+                        </>
                       )}
                     </div>
                   );
