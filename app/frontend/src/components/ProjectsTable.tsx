@@ -75,6 +75,27 @@ function Glass({ done, total, id, color, still }: { done: number; total: number;
   );
 }
 
+/** Photos des personnes qui travaillent sur le projet (responsable en premier), superposées. */
+function Team({ team }: { team: ProjectRow["team"] }) {
+  const MAX = 6;
+  const shown = team.slice(0, MAX);
+  const rest = team.length - shown.length;
+  return (
+    <span className="mt-1 flex items-center" title={team.map((m) => m.name).join(", ")} aria-label={`Équipe : ${team.map((m) => m.name).join(", ")}`}>
+      {shown.map((m, i) => (
+        <span key={m.name} className={`rounded-full ring-2 ring-surface ${i > 0 ? "-ml-1.5" : ""}`}>
+          <Avatar initials={m.initials} seed={m.name} size="h-[22px] w-[22px] text-[9px]" />
+        </span>
+      ))}
+      {rest > 0 && (
+        <span className="-ml-1.5 grid h-[22px] min-w-[22px] place-items-center rounded-full bg-surface-2 px-1 text-[10px] font-semibold text-ink-2 ring-2 ring-surface">
+          +{rest}
+        </span>
+      )}
+    </span>
+  );
+}
+
 export function ProjectsTable({ projects, now }: { projects: ProjectRow[]; now: string }) {
   return (
     <section aria-label="Vue d’ensemble des projets">
@@ -94,12 +115,7 @@ export function ProjectsTable({ projects, now }: { projects: ProjectRow[]; now: 
               <Tile icon="project" tone={TILE_TONES[i % TILE_TONES.length]} />
               <div className="min-w-0">
                 <b className="block truncate text-[13px] font-bold">{p.name}</b>
-                <span className="mt-0.5 flex items-center gap-1.5 text-[11.5px] text-muted">
-                  <Avatar initials={p.owner_initials} seed={p.owner} size="h-[18px] w-[18px] text-[8.5px]" />
-                  <span className="truncate">
-                    {p.owner} · {p.country}
-                  </span>
-                </span>
+                <Team team={p.team} />
               </div>
             </div>
 

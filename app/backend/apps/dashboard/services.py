@@ -323,6 +323,16 @@ def build_activity(projects) -> list[dict]:
     ]
 
 
+def _project_team(project) -> list[dict]:
+    people = [project.owner] + [t.assignee for t in project.tasks.all() if t.assignee is not None]
+    seen, team = set(), []
+    for u in people:
+        if u.id not in seen:
+            seen.add(u.id)
+            team.append({"name": u.display_name, "initials": u.initials})
+    return team
+
+
 def build_projects_overview(projects, stats) -> list[dict]:
     rows = []
     for p in sorted(projects, key=lambda p: (p.status != Project.Status.ACTIVE, p.start_date, p.name)):
@@ -335,6 +345,8 @@ def build_projects_overview(projects, stats) -> list[dict]:
                 "tasks_total": s["tasks_total"], "activities": len(p.activities.all()),
                 "milestones_achieved": s["milestones_achieved"], "milestones_total": s["milestones_total"],
                 "performance": s["performance"],
+                # Équipe du projet : le responsable puis chaque personne ayant une tâche dans le projet.
+                "team": _project_team(p),
                 "deliverables_done": sum(1 for x in p.deliverables.all() if x.is_delivered),
                 "deliverables_total": len(p.deliverables.all()),
                 "next_milestone": _next_milestone_payload(s["next_milestone"], today_date()),

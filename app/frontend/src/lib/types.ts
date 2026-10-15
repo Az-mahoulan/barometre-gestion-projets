@@ -136,6 +136,7 @@ export interface ProjectRow {
   milestones_achieved: number;
   milestones_total: number;
   performance: number | null;
+  team: { name: string; initials: string }[];
   deliverables_done: number;
   deliverables_total: number;
   next_milestone: NextMilestone | null;
