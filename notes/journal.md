@@ -76,3 +76,4 @@
 - 15/10/2026 — Progression des jalons : seulement les jalons en cours d’exécution (période commencée, échéance non passée) ; l’avancement ne compte que les tâches prévues dans la période du jalon. Démo plus réaliste (migration 0009 gardée) : « Rapport d’audit » en cours, activités Développement → Version bêta, Rédaction → Premier jet, Prototype → Prototype. Test de la démo : 10 actions critiques (au lieu de 11).
 - 15/10/2026 — Progression des jalons : nom du projet retiré des bandes (visible au survol) ; carte de même hauteur que « Activités de la semaine », liste défilante avec fondu en bas.
 - 15/10/2026 — « Activités de la semaine » déplacée à côté de « Progression des jalons » (même ligne, colonne principale) ; pourcentages jamais posés sur le trait du prévu.
+- 15/10/2026 — Progression des jalons : % prévu affiché au-dessus du trait (« prévu · 82 % » sur la première bande, puis le seul pourcentage).
