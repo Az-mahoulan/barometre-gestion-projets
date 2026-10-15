@@ -106,7 +106,7 @@ def _visible_projects(user, country: str | None):
     qs = (
         visible_projects(user)
         .select_related("country", "owner")
-        .prefetch_related("tasks__assignee", "milestones__depends_on", "activities", "key_dates")
+        .prefetch_related("tasks__assignee", "milestones__depends_on", "activities", "key_dates", "deliverables")
     )
     if country:
         qs = qs.filter(country__code=country)
@@ -335,6 +335,8 @@ def build_projects_overview(projects, stats) -> list[dict]:
                 "tasks_total": s["tasks_total"], "activities": len(p.activities.all()),
                 "milestones_achieved": s["milestones_achieved"], "milestones_total": s["milestones_total"],
                 "performance": s["performance"],
+                "deliverables_done": sum(1 for x in p.deliverables.all() if x.is_delivered),
+                "deliverables_total": len(p.deliverables.all()),
                 "next_milestone": _next_milestone_payload(s["next_milestone"], today_date()),
             }
         )

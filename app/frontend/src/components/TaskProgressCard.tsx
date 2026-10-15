@@ -46,9 +46,9 @@ export function TaskProgressCard({
   // Deux dispositions : en ligne (tuiles + barre) ou en colonne (liste + anneau) ; le choix est retenu sur l'appareil.
   const [layout, setLayout] = useState<"rows" | "columns">(() => {
     try {
-      return localStorage.getItem("progression-disposition") === "columns" ? "columns" : "rows";
+      return localStorage.getItem("progression-disposition") === "rows" ? "rows" : "columns";
     } catch {
-      return "rows"; // stockage indisponible : disposition par défaut
+      return "columns"; // stockage indisponible : disposition par défaut (diagramme)
     }
   });
   const choose = (l: "rows" | "columns") => {

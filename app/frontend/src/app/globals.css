@@ -137,3 +137,46 @@ body {
   font-size: 12.5px;
   font-weight: 500;
 }
+
+/* Verre des livrables : le liquide monte jusqu'à son niveau puis tangue doucement. */
+@keyframes verre-monte {
+  from {
+    transform: translateY(40px);
+  }
+}
+@keyframes verre-vague {
+  to {
+    transform: translateX(-16px);
+  }
+}
+@keyframes verre-tangue {
+  0%,
+  100% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+}
+.verre-niveau {
+  animation: verre-monte 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.verre-tangue {
+  transform-box: view-box;
+  transform-origin: 16px 24px;
+  animation: verre-tangue 3.2s ease-in-out infinite;
+}
+.verre-vague {
+  animation: verre-vague 1.6s linear infinite;
+}
+.verre-vague-2 {
+  animation: verre-vague 2.6s linear infinite reverse;
+}
+@media (prefers-reduced-motion: reduce) {
+  .verre-niveau,
+  .verre-tangue,
+  .verre-vague,
+  .verre-vague-2 {
+    animation: none;
+  }
+}

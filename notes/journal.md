@@ -60,3 +60,4 @@
 
 - 15/10/2026 — Progression des tâches (colonne) : retour aux étiquettes latérales reliées par un trait coudé, désormais encadrées en pointillé (statut au-dessus, pourcentage centré dessous) ; anneau d3-shape conservé.
 - 15/10/2026 — Anneau des tâches strictement proportionnel (suppression de la taille minimale de 24° qui égalisait 2 % et 6 %) ; traits d’étiquettes à 45° puis horizontaux.
+- 15/10/2026 — Vue « diagramme » par défaut pour la progression des tâches. Livrables : nouveau modèle `Deliverable` (intitulé, échéance, date de remise ; saisie dans l’admin, livrables de démonstration via migration 0007 gardée) ; dans la vue d’ensemble des projets, un verre dont le liquide monte au niveau livrés ÷ prévus puis tangue (animation coupée si « réduire les animations »), avec le compte « 3/4 ».

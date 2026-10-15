@@ -3,6 +3,7 @@ from django.contrib import admin
 from .models import (
     ActivityLog,
     CalendarEvent,
+    Deliverable,
     Milestone,
     Project,
     ProjectActivity,
@@ -25,6 +26,11 @@ class MilestoneInline(admin.TabularInline):
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
+class DeliverableInline(admin.TabularInline):
+    model = Deliverable
+    extra = 0
+
+
 class KeyDateInline(admin.TabularInline):
     model = ProjectKeyDate
     extra = 0
@@ -39,7 +45,7 @@ class ActivityInline(admin.TabularInline):
 class ProjectAdmin(admin.ModelAdmin):
     list_display = ("name", "country", "owner", "start_date", "end_date", "status")
     list_filter = ("status", "country")
-    inlines = [ActivityInline, MilestoneInline, KeyDateInline]
+    inlines = [ActivityInline, MilestoneInline, DeliverableInline, KeyDateInline]
 
 
 @admin.register(Task)

@@ -30,6 +30,48 @@ function Ring({ value, color }: { value: number; color: string }) {
   );
 }
 
+// Vague répétée (période 16) : la translation d'une période donne un mouvement sans à-coup.
+const WAVE = `M -16 0 ${Array.from({ length: 6 }, () => "q 4 -1.6 8 0 t 8 0").join(" ")} L 80 44 L -16 44 Z`;
+
+/** Verre de livrables : le niveau du liquide suit la part des livrables remis ; le liquide tangue doucement. */
+function Glass({ done, total, id }: { done: number; total: number; id: number }) {
+  const ratio = total > 0 ? done / total : 0;
+  const y = 38 - ratio * 30; // fond du verre à 38, bord utile à 8
+  const clip = `verre-${id}`;
+  return (
+    <svg viewBox="0 0 32 40" className="h-10 w-8 shrink-0" aria-hidden="true">
+      <defs>
+        <clipPath id={clip}>
+          <path d="M 5.5 3 L 26.5 3 L 24 35.5 Q 23.8 38 21.3 38 L 10.7 38 Q 8.2 38 8 35.5 Z" />
+        </clipPath>
+      </defs>
+      <path d="M 5.5 3 L 26.5 3 L 24 35.5 Q 23.8 38 21.3 38 L 10.7 38 Q 8.2 38 8 35.5 Z" fill="#eef5fd" />
+      {ratio > 0 && (
+        <g clipPath={`url(#${clip})`}>
+          <g className="verre-niveau">
+            <g className="verre-tangue">
+              <g transform={`translate(0 ${y})`}>
+                <g transform="translate(-6 -1.2)">
+                  <path className="verre-vague-2" d={WAVE} fill="#9cc6f5" />
+                </g>
+                <path className="verre-vague" d={WAVE} fill="#2f8be0" />
+              </g>
+            </g>
+          </g>
+        </g>
+      )}
+      <path
+        d="M 5.5 3 L 26.5 3 L 24 35.5 Q 23.8 38 21.3 38 L 10.7 38 Q 8.2 38 8 35.5 Z"
+        fill="none"
+        stroke="#8a93a3"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path d="M 9 7 L 10.6 31" stroke="#fff" strokeOpacity="0.8" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function ProjectsTable({ projects }: { projects: ProjectRow[] }) {
   return (
     <section aria-label="Vue d’ensemble des projets">
@@ -44,7 +86,7 @@ export function ProjectsTable({ projects }: { projects: ProjectRow[] }) {
 
       <ul className="flex flex-col gap-3">
         {projects.map((p, i) => (
-          <li key={p.id} className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-[18px] bg-surface px-[18px] py-3.5">
+          <li key={p.id} className="flex flex-wrap items-center gap-x-3 gap-y-3 rounded-[18px] bg-surface px-[18px] py-3.5">
             <div className="flex min-w-[200px] flex-1 items-center gap-3">
               <Tile icon="project" tone={TILE_TONES[i % TILE_TONES.length]} />
               <div className="min-w-0">
@@ -74,6 +116,20 @@ export function ProjectsTable({ projects }: { projects: ProjectRow[] }) {
               <b className={`block text-[12.5px] ${p.performance === null ? "text-muted" : perfClass(p.performance)}`}>
                 {p.performance === null ? "–" : `${p.performance} %`}
               </b>
+            </div>
+
+            <div
+              className="flex w-[80px] items-center gap-1.5"
+              title={`${p.deliverables_done} livrable${p.deliverables_done > 1 ? "s" : ""} remis sur ${p.deliverables_total}`}
+              aria-label={`Livrables : ${p.deliverables_done} sur ${p.deliverables_total}`}
+            >
+              <Glass done={p.deliverables_done} total={p.deliverables_total} id={p.id} />
+              <span className="text-[11.5px] text-muted">
+                Livrables
+                <b className="block text-[13px] font-bold text-ink">
+                  {p.deliverables_total > 0 ? `${p.deliverables_done}/${p.deliverables_total}` : "–"}
+                </b>
+              </span>
             </div>
 
             <div className="w-[108px]">

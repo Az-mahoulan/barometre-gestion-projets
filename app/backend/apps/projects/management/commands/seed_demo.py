@@ -13,6 +13,7 @@ from apps.accounts.models import Country, Presence, User
 from apps.projects.models import (
     ActivityLog,
     CalendarEvent,
+    Deliverable,
     Milestone,
     Project,
     ProjectActivity,
@@ -122,6 +123,34 @@ SHORT_ACTIVITIES = [("Rapport annuel 2026", "Relecture du chapitre 1", "10-12", 
                     ("Tableau de bord partenaires", "Maquette des indicateurs", "10-16", "10-21"),
                     ("Formation des enquêteurs", "Répétition générale", "10-19", "10-22")]
 
+DELIVERABLES = [
+    ("Enquête nationale T4", "Questionnaire validé", "09-20", True),
+    ("Enquête nationale T4", "Plan d’échantillonnage", "09-30", True),
+    ("Enquête nationale T4", "Base de données brute", "11-20", False),
+    ("Enquête nationale T4", "Rapport préliminaire", "12-05", False),
+    ("Enquête nationale T4", "Note de synthèse", "12-15", False),
+    ("Refonte du site web", "Arborescence", "09-04", True),
+    ("Refonte du site web", "Maquettes graphiques", "09-25", True),
+    ("Refonte du site web", "Contenus rédigés", "10-09", True),
+    ("Refonte du site web", "Site en recette", "11-13", False),
+    ("Rapport annuel 2026", "Plan détaillé", "10-02", True),
+    ("Rapport annuel 2026", "Chapitres rédigés", "11-20", False),
+    ("Rapport annuel 2026", "Maquette imprimable", "12-11", False),
+    ("Tableau de bord partenaires", "Liste des indicateurs", "10-09", True),
+    ("Tableau de bord partenaires", "Prototype", "11-06", False),
+    ("Tableau de bord partenaires", "Version 1", "11-27", False),
+    ("Audit qualité des données", "Grille d’audit", "07-24", True),
+    ("Audit qualité des données", "Constats par source", "09-11", True),
+    ("Audit qualité des données", "Plan correctif", "10-09", True),
+    ("Audit qualité des données", "Rapport d’audit", "10-30", False),
+    ("Formation des enquêteurs", "Supports de formation", "10-09", True),
+    ("Formation des enquêteurs", "Évaluation des stagiaires", "11-06", False),
+    ("Cartographie des partenaires", "Carte interactive", "08-14", True),
+    ("Cartographie des partenaires", "Annuaire des partenaires", "09-25", True),
+    ("Évaluation 2025", "Rapport d’évaluation", "07-31", True),
+    ("Évaluation 2025", "Note aux bailleurs", "08-21", True),
+]
+
 LOGS = [(2, "mireille", "a approuvé « Lancer la collecte »", "Enquête nationale T4"), (3, "sena", "a passé « Atelier de cadrage » en cours", "Tableau de bord partenaires"),
         (26, "koffi", "a terminé « Arborescence du site »", "Refonte du site web"), (27, "romuald", "a commenté « Rapport d’audit »", "Audit qualité des données"),
         (50, "adjoa", "a ajouté 3 tâches à « Enquête nationale T4 »", "Enquête nationale T4"), (72, "aicha", "a importé un Gantt dans « Rapport annuel 2026 »", "Rapport annuel 2026")]
@@ -178,6 +207,9 @@ class Command(BaseCommand):
 
         for name, title, start, end in SHORT_ACTIVITIES:
             ProjectActivity.objects.create(project=projects[name], name=title, start_date=d(start), end_date=d(end))
+
+        for name, title, due, delivered in DELIVERABLES:
+            Deliverable.objects.create(project=projects[name], name=title, due_date=d(due), delivered_on=d(due) if delivered else None)
 
         for name, day, label in KEY_DATES:
             ProjectKeyDate.objects.create(project=projects[name], date=d(day), label=label)

@@ -131,6 +131,26 @@ class ProjectKeyDate(models.Model):
         return f"{self.project} · {self.label}"
 
 
+class Deliverable(models.Model):
+    """Livrable attendu d'un projet (rapport, outil, base de données…) ; livré quand la date de remise est renseignée."""
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="deliverables")
+    name = models.CharField("Intitulé", max_length=160)
+    due_date = models.DateField("Échéance")
+    delivered_on = models.DateField("Livré le", null=True, blank=True)
+
+    class Meta:
+        verbose_name = "livrable"
+        ordering = ["due_date", "id"]
+
+    def __str__(self) -> str:
+        return f"{self.project} · {self.name}"
+
+    @property
+    def is_delivered(self) -> bool:
+        return self.delivered_on is not None
+
+
 class CalendarEvent(models.Model):
     class Kind(models.TextChoices):
         MEETING = "meeting", "Réunion"
