@@ -231,7 +231,7 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
           >
             <span className="absolute inset-y-0 w-[2px] -translate-x-1/2 bg-lime" />
             <span className="absolute bottom-1 -translate-x-1/2 whitespace-nowrap rounded-full bg-lime px-1.5 text-[9.5px] font-bold text-ink">
-              Aujourd’hui
+              Aujourd’hui · {shortDate(asOf)}
             </span>
           </div>
         )}
