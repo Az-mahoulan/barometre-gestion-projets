@@ -148,12 +148,21 @@ export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[
                           </span>
                         </div>
                       )}
-                      {continues && (
-                        <span className={`absolute inset-y-0 right-1.5 flex items-center ${done >= 100 ? "text-white" : "text-ink-2"}`} aria-label="Se poursuit la semaine suivante">
-                          <Icon name="right" className="h-4 w-4" />
-                        </span>
-                      )}
                     </div>
+                    {/* Se poursuit la semaine suivante : traînée de chevrons qui s'estompent, comme un chemin qui continue. */}
+                    {continues && right < 100 && (
+                      <span
+                        className="absolute inset-y-0 flex items-center justify-center"
+                        style={{ left: `${right}%`, width: `${100 - right}%`, color: color.solid }}
+                        aria-label="Se poursuit la semaine suivante"
+                      >
+                        {[0.95, 0.55, 0.25].map((o, i) => (
+                          <span key={i} className="-mx-[5px]" style={{ opacity: o }}>
+                            <Icon name="right" className="h-[18px] w-[18px]" />
+                          </span>
+                        ))}
+                      </span>
+                    )}
                   </li>
                 );
               })}
