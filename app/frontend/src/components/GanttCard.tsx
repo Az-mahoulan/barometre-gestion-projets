@@ -1,187 +1,179 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
-import { monthShort, parseDate, shortDate } from "@/lib/format";
+import { parseDate, shortDate } from "@/lib/format";
 import type { GanttProject } from "@/lib/types";
 
-import { CardHeader, HEALTH_BAR } from "./ui";
+import { ProjectPicker } from "./ProjectPicker";
 
-function firstOfMonth(d: Date, offset = 0) {
-  return new Date(d.getFullYear(), d.getMonth() + offset, 1);
+const MONTHS = ["Janv.", "Févr.", "Mars", "Avr.", "Mai", "Juin", "Juil.", "Août", "Sept.", "Oct.", "Nov.", "Déc."];
+const NAME_W = 210;
+const DAY = 86_400_000;
+
+// Statut d'un jalon : atteint, à venir ou dépassé.
+const STATUS = {
+  done: { bar: "#8fd6b0", solid: "#1f7a4d", label: "Atteint" },
+  todo: { bar: "#a9c4f2", solid: "#2a56c6", label: "À venir" },
+  late: { bar: "#f2a397", solid: "#c7321f", label: "Dépassé" },
+} as const;
+type Status = keyof typeof STATUS;
+
+type Milestone = GanttProject["milestones"][number];
+const statusOf = (m: Milestone): Status => (m.achieved ? "done" : m.overdue ? "late" : "todo");
+
+/** Segments d'un projet : du début (ou du jalon précédent) jusqu'à chaque jalon. */
+function segments(p: GanttProject) {
+  const ms = [...p.milestones].sort((a, b) => a.date.localeCompare(b.date));
+  return ms.map((m, i) => ({ m, from: i === 0 ? p.start : ms[i - 1].date, to: m.date }));
 }
 
 interface Row {
-  key: string | number;
+  key: string;
   label: string;
-  sub?: string;
-  subLate?: boolean;
-  start: Date;
-  end: Date;
-  progress: number;
-  color: string;
-  muted?: boolean;
-  tip: string;
+  sub: string;
+  segs: ReturnType<typeof segments>;
+  start?: string; // vue « Tous les projets » : début et fin du projet
+  end?: string;
 }
 
+/** Gantt des jalons : tous les projets en cours (une ligne par projet) ou un projet (une ligne par jalon). */
 export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: string }) {
-  const [tab, setTab] = useState<"projects" | "detail">("projects");
-  const [selected, setSelected] = useState<number | null>(null);
-  const today = parseDate(asOf);
+  const [value, setValue] = useState("");
+  const project = projects.find((p) => String(p.id) === value);
+  const list = project ? [project] : projects.filter((p) => p.status === "active");
 
-  const active = projects.filter((p) => p.status === "active");
-  const current = projects.find((p) => p.id === selected) ?? active[0] ?? projects[0];
-
-  const { rows, from, to } = useMemo(() => {
-    const list: Row[] =
-      tab === "projects"
-        ? projects.map((p) => ({
-            key: p.id,
-            label: p.name,
-            sub: p.next_milestone
-              ? `${p.next_milestone.overdue ? "Jalon dépassé" : p.next_milestone.name} · ${shortDate(p.next_milestone.date)}`
-              : p.status === "active"
-                ? "Tous les jalons sont atteints"
-                : "Achevé",
-            subLate: p.next_milestone?.overdue,
-            start: parseDate(p.start),
-            end: parseDate(p.end),
-            progress: p.progress,
-            color: HEALTH_BAR[p.health],
-            muted: p.status !== "active",
-            tip: `${p.name} · ${shortDate(p.start)} → ${shortDate(p.end)} · ${Math.round(p.progress * 100)} % réalisé`,
-          }))
-        : (current?.activities ?? []).map((a) => ({
-            key: a.id,
-            label: a.name,
-            sub: `${a.tasks_complete}/${a.tasks_total} tâches`,
-            start: parseDate(a.start),
-            end: parseDate(a.end),
-            progress: a.progress,
-            color: current ? HEALTH_BAR[current.health] : "var(--bar-ok)",
-            tip: `${a.name} · ${shortDate(a.start)} → ${shortDate(a.end)}`,
-          }));
-    const pool = tab === "projects" ? list.filter((r) => !r.muted) : list;
-    const base = pool.length ? pool : list;
-    if (!base.length) return { rows: list, from: firstOfMonth(today), to: firstOfMonth(today, 5) };
-    const min = new Date(Math.min(...base.map((r) => r.start.getTime())));
-    const max = new Date(Math.max(...base.map((r) => r.end.getTime())));
-    const a = firstOfMonth(min);
-    const b = firstOfMonth(max, 1);
-    return { rows: list.filter((r) => r.end >= a && r.start < b), from: a, to: b };
-  }, [tab, projects, current, today]);
-
+  // Période affichée : du premier début à la dernière échéance (et jusqu'à aujourd'hui si un jalon est en retard).
+  const starts = list.map((p) => p.start);
+  const ends = list.flatMap((p) => [p.end, ...p.milestones.map((m) => m.date), ...(p.milestones.some((m) => m.overdue) ? [asOf] : [])]);
+  const first = starts.length ? parseDate(starts.sort()[0]) : parseDate(asOf);
+  const last = ends.length ? parseDate(ends.sort().at(-1)!) : parseDate(asOf);
+  const from = new Date(first.getFullYear(), first.getMonth(), 1);
+  const to = new Date(last.getFullYear(), last.getMonth() + 1, 1);
   const span = to.getTime() - from.getTime();
-  const pos = (d: Date) => Math.min(100, Math.max(0, ((d.getTime() - from.getTime()) / span) * 100));
+  const pos = (iso: string, endOfDay = false) => ((parseDate(iso).getTime() + (endOfDay ? DAY : 0) - from.getTime()) / span) * 100;
+
   const months: Date[] = [];
-  for (let m = new Date(from); m < to; m = firstOfMonth(m, 1)) months.push(m);
-  const todayPos = today >= from && today < to ? pos(today) : null;
-  const ownTodayLine = todayPos !== null;
+  for (let m = new Date(from); m < to; m = new Date(m.getFullYear(), m.getMonth() + 1, 1)) months.push(m);
+  const monthLeft = (m: Date) => ((m.getTime() - from.getTime()) / span) * 100;
+  const todayLeft = pos(asOf) + (DAY / span) * 50;
+  const showToday = parseDate(asOf) >= from && parseDate(asOf) < to;
+
+  const rows: Row[] = project
+    ? segments(project).map((s) => ({ key: s.m.name + s.m.date, label: s.m.name, sub: shortDate(s.m.date), segs: [s] }))
+    : list.map((p) => {
+        const done = p.milestones.filter((m) => m.achieved).length;
+        return { key: String(p.id), label: p.name, sub: `${done}/${p.milestones.length} jalons`, segs: segments(p), end: p.end, start: p.start };
+      });
 
   return (
-    <section className="card pb-3" aria-label="Gantt des projets">
-      <CardHeader
-        title="Gantt des projets"
-        aside={
-          <div className="flex gap-1 rounded-full bg-surface-2 p-1 text-[12px] font-semibold text-ink-2" role="group" aria-label="Vue">
-            {(
-              [
-                ["projects", "Projets"],
-                ["detail", "Par activité"],
-              ] as const
-            ).map(([key, label]) => (
-              <button
-                key={key}
-                aria-pressed={tab === key}
-                onClick={() => setTab(key)}
-                className={`rounded-full px-3.5 py-1 ${tab === key ? "bg-side text-white" : ""}`}
+    <section className="card" aria-label="Gantt des jalons">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-[15px] font-bold">Gantt des jalons</h2>
+        <ProjectPicker projects={projects} value={value} onChange={setValue} label="Jalons du projet" />
+      </div>
+
+      <div className="relative overflow-clip rounded-[14px] border border-line bg-[#f7f7f3]">
+        <div className="relative z-20 grid border-b border-[#d6d6ce] bg-[#ebebe5]" style={{ gridTemplateColumns: `${NAME_W}px minmax(0,1fr)` }}>
+          <div className="flex items-center px-4 py-2.5 text-[12px] font-semibold">{project ? "Jalons" : "Projets"}</div>
+          <div className="relative">
+            {months.map((m) => (
+              <span
+                key={m.getTime()}
+                className="absolute inset-y-0 flex items-center border-l border-[#d6d6ce] pl-2 text-[11.5px] font-semibold text-ink-2"
+                style={{ left: `${monthLeft(m)}%` }}
               >
-                {label}
-              </button>
+                {MONTHS[m.getMonth()]}
+              </span>
             ))}
           </div>
-        }
-      />
-
-      {tab === "detail" && (
-        <div className="mb-2">
-          <label className="sr-only" htmlFor="gantt-project">
-            Projet
-          </label>
-          <select id="gantt-project" className="field" value={current?.id} onChange={(e) => setSelected(Number(e.target.value))}>
-            {projects.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
         </div>
-      )}
 
-      {rows.length === 0 ? (
-        <p className="py-6 text-sm text-muted">Aucun projet pour ces filtres.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <div className="relative min-w-[640px] pb-6">
-            <div className="flex h-6 items-center text-[11px] text-muted">
-              <div className="w-[200px] shrink-0" />
-              <div className="relative h-6 flex-1">
+        {rows.length === 0 && <p className="px-4 py-6 text-center text-[12.5px] text-muted">Aucun jalon à afficher.</p>}
+        {rows.map((r) => (
+          <div key={r.key} className="grid border-b border-line last:border-b-0" style={{ gridTemplateColumns: `${NAME_W}px minmax(0,1fr)` }}>
+            <div className="flex min-w-0 items-center justify-between gap-2 px-4">
+              <span className="truncate text-[12px] font-medium text-ink-2" title={r.label}>
+                {r.label}
+              </span>
+              <span className="shrink-0 text-[10.5px] text-muted">{r.sub}</span>
+            </div>
+            <div className="relative h-[40px]">
+              <div className="absolute inset-0" aria-hidden="true">
                 {months.map((m) => (
-                  <span key={m.getTime()} className="absolute" style={{ left: `${pos(m)}%` }}>
-                    {monthShort(m)}
-                  </span>
+                  <span key={m.getTime()} className="absolute inset-y-0 border-l border-line" style={{ left: `${monthLeft(m)}%` }} />
                 ))}
               </div>
-            </div>
 
-            {rows.map((r) => (
-              <div key={r.key} className="flex h-[46px] items-center border-t border-line">
-                <div className="w-[200px] shrink-0 overflow-hidden whitespace-nowrap pr-2">
-                  <span className="block truncate text-[12.5px]">{r.label}</span>
-                  {r.sub && <span className={`block text-[11px] ${r.subLate ? "text-late" : "text-muted"}`}>{r.sub}</span>}
-                </div>
-                <div className="relative h-[46px] flex-1">
-                  <div
-                    title={r.tip}
-                    className="absolute top-[18px] h-2.5 overflow-hidden rounded-full"
-                    style={{
-                      left: `${pos(r.start)}%`,
-                      width: `${Math.max(1, pos(r.end) - pos(r.start))}%`,
-                      background: "var(--track)",
-                      opacity: r.muted ? 0.55 : 1,
-                    }}
-                  >
-                    <div className="h-full rounded-full" style={{ width: `${r.progress * 100}%`, background: r.color }} />
+              {/* Fin de projet au-delà du dernier jalon (vue « Tous les projets »). */}
+              {r.end && r.segs.length > 0 && r.end > r.segs.at(-1)!.to && (
+                <span
+                  className="absolute top-[12px] h-[16px] rounded-[2px] bg-[#e4e4dd]"
+                  style={{ left: `${pos(r.segs.at(-1)!.to, true)}%`, width: `${pos(r.end, true) - pos(r.segs.at(-1)!.to, true)}%` }}
+                  title={`Fin du projet · ${shortDate(r.end)}`}
+                />
+              )}
+              {r.end && r.start && r.segs.length === 0 && (
+                <span
+                  className="absolute top-[12px] h-[16px] rounded-[2px] bg-[#e4e4dd]"
+                  style={{ left: `${pos(r.start)}%`, width: `${pos(r.end, true) - pos(r.start)}%` }}
+                  title="Aucun jalon"
+                />
+              )}
+
+              {r.segs.map((s, i) => {
+                const st = STATUS[statusOf(s.m)];
+                const left = pos(s.from, i > 0);
+                const right = pos(s.to, true);
+                return (
+                  <div key={s.m.name + s.m.date}>
+                    <span
+                      className="absolute top-[12px] h-[16px] rounded-[2px]"
+                      style={{ left: `calc(${left}% + ${i > 0 ? 1.5 : 0}px)`, width: `calc(${Math.max(0.4, right - left)}% - ${i > 0 ? 1.5 : 0}px)`, background: st.bar }}
+                      title={`${s.m.name} · ${shortDate(s.m.date)} · ${st.label}`}
+                    />
+                    {/* Échéance : portion de couleur franche au bout de la barre. */}
+                    <span className="absolute top-[12px] h-[16px] w-[5px] rounded-[2px]" style={{ left: `calc(${right}% - 5px)`, background: st.solid }} />
+                    {/* Retard : pointillé de l'échéance jusqu'à aujourd'hui. */}
+                    {s.m.overdue && (
+                      <span
+                        className="absolute top-[19px] h-0 border-t-2 border-dashed"
+                        style={{ left: `${right}%`, width: `${Math.max(0, todayLeft - right)}%`, borderColor: st.solid }}
+                        title={`${Math.round((parseDate(asOf).getTime() - parseDate(s.m.date).getTime()) / DAY)} j de retard`}
+                      />
+                    )}
                   </div>
-                </div>
-              </div>
-            ))}
-
-            {ownTodayLine && (
-              <div className="pointer-events-none absolute bottom-6 top-6" style={{ left: 200, right: 0 }}>
-                <div className="absolute bottom-0 top-0 border-l border-ink" style={{ left: `${todayPos}%` }} />
-                <span className="absolute -bottom-5 -translate-x-1/2 text-[11px] font-medium" style={{ left: `${todayPos}%` }}>
-                  Aujourd’hui
-                </span>
-              </div>
-            )}
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        ))}
 
-      <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted">
-        {(
-          [
-            ["Dans les temps", "var(--bar-ok)"],
-            ["À surveiller", "var(--bar-risk)"],
-            ["En retard", "var(--bar-late)"],
-          ] as const
-        ).map(([label, color]) => (
-          <span key={label} className="inline-flex items-center gap-1.5">
-            <i className="inline-block h-[5px] w-3.5 rounded-sm" style={{ background: color }} />
-            {label}
+        {showToday && rows.length > 0 && (
+          <div
+            className="pointer-events-none absolute inset-y-0 z-10"
+            style={{ left: `calc(${NAME_W}px + (100% - ${NAME_W}px) * ${todayLeft / 100})` }}
+            aria-hidden="true"
+          >
+            <span className="absolute inset-y-0 w-[2px] -translate-x-1/2 bg-lime" />
+            <span className="absolute bottom-1 -translate-x-1/2 whitespace-nowrap rounded-full bg-lime px-1.5 text-[9.5px] font-bold text-ink">
+              Aujourd’hui · {shortDate(asOf)}
+            </span>
+          </div>
+        )}
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted">
+        {(Object.keys(STATUS) as Status[]).map((k) => (
+          <span key={k} className="inline-flex items-center gap-1.5">
+            <i className="h-2 w-5 rounded-[1px]" style={{ background: STATUS[k].bar, boxShadow: `inset -3px 0 0 ${STATUS[k].solid}` }} />
+            Jalon {STATUS[k].label.toLowerCase()}
           </span>
         ))}
+        <span className="inline-flex items-center gap-1.5">
+          <i className="w-4 border-t-2 border-dashed border-[#c7321f]" />
+          Retard
+        </span>
       </div>
     </section>
   );
