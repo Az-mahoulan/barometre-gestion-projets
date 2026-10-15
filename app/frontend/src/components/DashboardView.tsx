@@ -138,11 +138,10 @@ export function DashboardView() {
 
   return (
     <div className="flex min-h-screen gap-5 p-3 sm:p-5">
-      <Sidebar me={me} alerts={data.critical_actions.total} />
+      <Sidebar me={me} alerts={data.critical_actions.total} members={data.teams.members} subtitle={`${longDate(data.as_of).replace(/^./, (c) => c.toUpperCase())} · ${SCOPE_LABEL[data.scope]}`} />
       <main className="min-w-0 flex-1">
         <Topbar
           me={me}
-          subtitle={`${longDate(data.as_of).replace(/^./, (c) => c.toUpperCase())} · ${SCOPE_LABEL[data.scope]}`}
           countries={countries}
           country={country}
           period={period}

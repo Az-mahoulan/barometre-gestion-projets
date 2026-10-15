@@ -1,8 +1,8 @@
 "use client";
 
-import type { Me } from "@/lib/types";
+import type { Me, Member } from "@/lib/types";
 
-import { Icon } from "./ui";
+import { Avatar, Icon } from "./ui";
 
 const NAV = [
   { icon: "grid", label: "Tableau de bord", current: true },
@@ -15,40 +15,77 @@ const NAV = [
   { icon: "shield", label: "Administration", adminOnly: true },
 ];
 
-export function Sidebar({ me, alerts }: { me: Me; alerts: number }) {
+export function Sidebar({ me, alerts, members, subtitle }: { me: Me; alerts: number; members: Member[]; subtitle: string }) {
+  const first = me.name.split(" ")[0];
+  const shown = members.slice(0, 4);
   return (
-    <aside className="sticky top-5 hidden h-[calc(100vh-40px)] w-[248px] shrink-0 flex-col rounded-[24px] bg-side px-4 py-[22px] text-white lg:flex">
-      <div className="flex items-center gap-2.5 px-2 pb-6 text-[20px] font-extrabold">
-        <span className="grid h-[34px] w-[34px] place-items-center rounded-[10px] bg-lime text-ink">
+    <aside className="sticky top-5 hidden h-[calc(100vh-40px)] w-[256px] shrink-0 flex-col overflow-y-auto rounded-[24px] bg-surface px-4 py-5 lg:flex">
+      <div className="flex items-center gap-2.5 px-1 text-[19px] font-extrabold">
+        <span className="grid h-[34px] w-[34px] place-items-center rounded-[10px] bg-side text-lime">
           <Icon name="logo" className="h-5 w-5" />
         </span>
         Baromètre
       </div>
 
-      <nav aria-label="Navigation principale" className="flex flex-col gap-1">
+      <div className="mt-6 px-1">
+        <p className="text-[24px] font-extrabold leading-[1.15] tracking-[-0.5px]">
+          {first && first !== "Administration" ? `Bonjour ${first},` : "Bonjour,"}
+          <br />
+          bonne journée
+        </p>
+        <p className="mt-2 text-[12px] text-muted">{subtitle}</p>
+      </div>
+
+      <div className="mt-6 flex items-center justify-between px-1 text-[12px] font-semibold text-muted">
+        Menu
+        <Icon name="caretup" className="h-4 w-4" />
+      </div>
+      <nav aria-label="Navigation principale" className="mt-2 flex flex-col gap-1">
         {NAV.filter((n) => !n.adminOnly || me.role === "admin").map((n) => (
           <span
             key={n.label}
             aria-current={n.current ? "page" : undefined}
-            className={`flex items-center gap-3 rounded-[14px] px-3.5 py-[11px] text-[14px] ${
-              n.current ? "bg-lime font-bold text-ink" : "font-medium text-[#c9cad0]"
+            className={`flex items-center gap-3 rounded-full py-2 pl-3.5 pr-2 text-[13.5px] ${
+              n.current ? "bg-side font-semibold text-white" : "font-medium text-ink-2"
             }`}
           >
-            <Icon name={n.icon} className="h-5 w-5" />
+            <Icon name={n.icon} className="h-[19px] w-[19px]" />
             {n.label}
+            {n.current && (
+              <span className="ml-auto grid h-6 w-6 place-items-center rounded-full bg-white/15">
+                <Icon name="go" className="h-3.5 w-3.5" />
+              </span>
+            )}
             {n.badge && alerts > 0 && (
-              <span className="ml-auto grid h-5 min-w-5 place-items-center rounded-full bg-peach-soft px-1 text-[11px] font-bold text-peach">{alerts}</span>
+              <span className="ml-auto grid h-5 min-w-5 place-items-center rounded-full bg-[#f26b3a] px-1 text-[10.5px] font-bold text-white">{alerts}</span>
             )}
           </span>
         ))}
       </nav>
 
-      <div className="mt-auto rounded-[20px] bg-lime p-[18px] text-ink">
-        <span className="mb-3 grid h-10 w-10 place-items-center rounded-full bg-side text-white">
-          <Icon name="sparkle" className="h-5 w-5" />
-        </span>
-        <b className="block text-[15px] leading-snug">Demandez à l’assistant</b>
-        <p className="mt-1.5 text-[12px] leading-snug opacity-75">« Qui est disponible demain ? », « Crée une tâche pour Koffi » : bientôt disponible.</p>
+      <div className="mt-6 flex items-center px-1">
+        {shown.map((m) => (
+          <span key={m.id} className="-mr-2 rounded-full ring-2 ring-surface" title={m.name}>
+            <Avatar initials={m.initials} size="h-9 w-9 text-[11px]" />
+          </span>
+        ))}
+        {members.length > shown.length && (
+          <span className="grid h-9 w-9 place-items-center rounded-full bg-surface-2 text-[11px] font-bold ring-2 ring-surface">
+            +{members.length - shown.length}
+          </span>
+        )}
+      </div>
+
+      <div className="mt-auto rounded-[20px] bg-surface-2 p-4">
+        <div className="flex items-center justify-between">
+          <b className="text-[14px]">Assistant</b>
+          <span className="grid h-7 w-7 place-items-center rounded-full bg-lime text-ink">
+            <Icon name="sparkle" className="h-4 w-4" />
+          </span>
+        </div>
+        <p className="mt-2 rounded-[12px] bg-surface px-3 py-2 text-[12px] leading-snug text-ink-2">« Qui est disponible demain ? »</p>
+        <p className="mt-1.5 rounded-[12px] bg-surface px-3 py-2 text-[12px] leading-snug text-ink-2">« Crée une tâche pour Koffi »</p>
+        <p className="mt-2 text-right text-[11px] text-muted">Conversation bientôt disponible</p>
       </div>
     </aside>
   );

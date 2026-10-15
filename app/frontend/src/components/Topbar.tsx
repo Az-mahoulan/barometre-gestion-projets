@@ -6,7 +6,6 @@ import { Avatar, Icon } from "./ui";
 
 export function Topbar({
   me,
-  subtitle,
   countries,
   country,
   period,
@@ -16,7 +15,6 @@ export function Topbar({
   onLogout,
 }: {
   me: Me;
-  subtitle: string;
   countries: Country[];
   country: string;
   period: Period;
@@ -25,25 +23,21 @@ export function Topbar({
   onPeriod: (p: Period) => void;
   onLogout: () => void;
 }) {
-  const first = me.name.split(" ")[0];
   return (
-    <header className="mb-5 flex flex-wrap items-center gap-3">
-      <div className="mr-auto">
-        <h1 className="text-[28px] font-extrabold leading-tight tracking-[-0.5px]">
-          Bonjour{me.name !== me.role_label && first !== "Administration" ? ` ${first}` : ""}
-        </h1>
-        <p className="mt-1 text-[13px] text-muted">{subtitle}</p>
-      </div>
-
-      <label className="flex h-[42px] w-full max-w-[260px] items-center gap-2 rounded-full bg-surface px-4 text-[13px] text-muted">
+    <header className="mb-5 flex flex-wrap items-center gap-2.5 rounded-[22px] bg-surface p-2.5 pl-4">
+      <label className="flex h-10 min-w-[200px] flex-1 items-center gap-2 rounded-full bg-surface-2 pl-3.5 pr-1.5 text-[13px] text-muted">
         <Icon name="search" />
         <span className="sr-only">Rechercher</span>
-        <input className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted" placeholder="Rechercher (bientôt)" disabled />
+        <input className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted" placeholder="Rechercher un projet, une tâche… (bientôt)" disabled />
+        <span className="grid h-7 w-7 place-items-center rounded-full bg-surface text-ink-2" aria-hidden="true">
+          <Icon name="tune" className="h-4 w-4" />
+        </span>
       </label>
+
       <label className="sr-only" htmlFor="f-country">
         Pays
       </label>
-      <select id="f-country" className="field h-[42px] border-0" value={country} onChange={(e) => onCountry(e.target.value)}>
+      <select id="f-country" className="field h-10 border-line" value={country} onChange={(e) => onCountry(e.target.value)}>
         <option value="">Tous les pays</option>
         {countries.map((c) => (
           <option key={c.code} value={c.code}>
@@ -54,21 +48,28 @@ export function Topbar({
       <label className="sr-only" htmlFor="f-period">
         Période
       </label>
-      <select id="f-period" className="field h-[42px] border-0" value={period} onChange={(e) => onPeriod(e.target.value as Period)}>
+      <select id="f-period" className="field h-10 border-line" value={period} onChange={(e) => onPeriod(e.target.value as Period)}>
         <option value="year">Année en cours</option>
         <option value="quarter">Trimestre en cours</option>
         <option value="month">Mois en cours</option>
       </select>
-      <span className="relative grid h-[42px] w-[42px] place-items-center rounded-full bg-surface" aria-label={`${alerts} actions à traiter`} role="img">
+
+      <span className="relative grid h-10 w-10 place-items-center rounded-full border border-line text-ink-2" role="img" aria-label={`${alerts} actions à traiter`}>
         <Icon name="bell" className="h-5 w-5" />
-        {alerts > 0 && <i className="absolute right-[11px] top-[10px] h-2 w-2 rounded-full border-2 border-surface bg-late" />}
+        {alerts > 0 && <i className="absolute right-[9px] top-[8px] h-2 w-2 rounded-full border-2 border-surface bg-[#f26b3a]" />}
       </span>
-      <span title={`${me.name}, ${me.role_label}`}>
-        <Avatar initials={me.initials} size="h-[42px] w-[42px] text-[13px]" />
-      </span>
-      <button onClick={onLogout} className="grid h-[42px] w-[42px] place-items-center rounded-full bg-surface text-ink-2 hover:text-ink" aria-label="Se déconnecter" title="Se déconnecter">
+      <button onClick={onLogout} className="grid h-10 w-10 place-items-center rounded-full border border-line text-ink-2 hover:text-ink" aria-label="Se déconnecter" title="Se déconnecter">
         <Icon name="logout" className="h-5 w-5" />
       </button>
+
+      <div className="flex items-center gap-2.5 rounded-full border border-line py-1 pl-1 pr-3">
+        <Avatar initials={me.initials} size="h-9 w-9 text-[12px]" />
+        <div className="leading-tight">
+          <b className="block text-[13px] font-bold">{me.name}</b>
+          <small className="text-[11.5px] text-muted">{me.role_label}</small>
+        </div>
+        <Icon name="caretdown" className="h-4 w-4 text-muted" />
+      </div>
     </header>
   );
 }

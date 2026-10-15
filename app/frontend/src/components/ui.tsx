@@ -41,6 +41,10 @@ import SouthEast from "@mui/icons-material/SouthEast";
 import TaskAltOutlined from "@mui/icons-material/TaskAltOutlined";
 import TrendingFlat from "@mui/icons-material/TrendingFlat";
 import WorkOutlineOutlined from "@mui/icons-material/WorkOutlineOutlined";
+import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUp from "@mui/icons-material/KeyboardArrowUp";
+import NorthEastRounded from "@mui/icons-material/NorthEastRounded";
+import TuneOutlined from "@mui/icons-material/TuneOutlined";
 import type SvgIcon from "@mui/material/SvgIcon";
 
 import type { Health } from "@/lib/types";
@@ -85,6 +89,10 @@ const ICONS: Record<string, typeof SvgIcon> = {
   training: SchoolOutlined,
   project: FolderOpenOutlined,
   work: WorkOutlineOutlined,
+  tune: TuneOutlined,
+  caretdown: KeyboardArrowDown,
+  caretup: KeyboardArrowUp,
+  go: NorthEastRounded,
 };
 
 const TILE_ICONS: Record<string, typeof SvgIcon> = {
