@@ -3,11 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 
 import { parseDate, shortDate } from "@/lib/format";
-import { projectColor } from "@/lib/projectColors";
 import type { GanttProject } from "@/lib/types";
 
 import { ProjectPicker } from "./ProjectPicker";
-import { Avatar, CardHeader } from "./ui";
+import { CardHeader } from "./ui";
 
 type Milestone = GanttProject["milestones"][number];
 
@@ -20,32 +19,21 @@ function expectedAt(m: Milestone, asOf: string) {
   return Math.min(1, Math.max(0, (now - start) / (end - start)));
 }
 
+// Couleurs selon l'écart au prévu, sur le principe de l'évolution mois par mois (rouge, vert moins franc, vert).
+const TOLERANCE = 0.05; // ± 5 points : conforme au prévu
+const STATUS = {
+  below: { color: "#c7321f", label: "Sous le prévu" },
+  on: { color: "#6fbf8f", label: "Conforme" },
+  above: { color: "#1f7a4d", label: "Au-dessus" },
+} as const;
+type Status = keyof typeof STATUS;
+
 const showMarkAt = (e: number) => e > 0 && e < 1;
 
-/** Membres du jalon : deux photos, puis le nombre de personnes restantes. */
-function Members({ members }: { members: Milestone["members"] }) {
-  const shown = members.slice(0, 2);
-  const rest = members.length - shown.length;
-  const edge = "shadow-[0_0_0_1.5px_var(--surface)]";
-  return (
-    <span className="flex shrink-0 items-center" title={members.map((u) => u.name).join(", ")}>
-      {shown.map((u, i) => (
-        <span key={u.name} className={`grid h-7 w-7 shrink-0 rounded-full ${edge} ${i > 0 ? "-ml-2" : ""}`}>
-          <Avatar initials={u.initials} seed={u.name} size="h-7 w-7 text-[10px]" />
-        </span>
-      ))}
-      {rest > 0 && (
-        <span className={`-ml-2 grid h-7 min-w-7 place-items-center rounded-full bg-surface px-1 text-[10.5px] font-bold text-ink-2 ${edge}`}>
-          +{rest}
-        </span>
-      )}
-    </span>
-  );
-}
-
 /**
- * Progression des jalons : une bande de même longueur par jalon. La partie plus pure montre l'avancement réel
- * (tâches des activités rattachées) ; le trait épais marque l'avancement prévu à date. Tout est écrit dans la bande.
+ * Progression des jalons : une bande de même longueur par jalon. La partie pleine montre l'avancement réel
+ * (tâches des activités rattachées), colorée selon l'écart au prévu ; le trait épais marque l'avancement prévu à date.
+ * Nom et pourcentages au-dessus de la bande, échéance dedans.
  */
 export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProject[]; asOf: string }) {
   const [value, setValue] = useState("");
@@ -92,64 +80,59 @@ export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProje
         <p className="text-[12.5px] text-muted">Aucun jalon en cours d’exécution.</p>
       ) : (
         <div className="relative mt-2 flex min-h-0 flex-1 flex-col">
-        <ul ref={list} className="flex min-h-0 flex-1 flex-col gap-7 overflow-y-auto pb-6 pt-5 [scrollbar-width:none]">
+        <ul ref={list} className="flex min-h-0 flex-1 flex-col gap-9 overflow-y-auto pb-6 pt-6 [scrollbar-width:none]">
           {rows.map(({ m, p }, i) => {
-            const c = projectColor(projects, p.id);
             const pct = Math.round(m.progress * 100);
             const expected = expectedAt(m, asOf);
             const exp = Math.round(expected * 100);
-            const behind = !m.achieved && m.progress < expected - 0.05;
-            const ahead = !m.achieved && expected > 0 && m.progress > expected + 0.05;
-
-            const fillPx = (pct / 100) * bandW;
-            const markPx = expected * bandW;
+            const status: Status = m.progress < expected - TOLERANCE ? "below" : m.progress > expected + TOLERANCE ? "above" : "on";
+            const color = STATUS[status].color;
             const showMark = showMarkAt(expected);
-            // Pourcentages au-dessus de leur repère : réalisé au bout de la partie remplie, prévu au-dessus du trait.
-            // Trop proches : celui de gauche s'aligne à droite de son repère, l'autre à gauche, pour ne pas se chevaucher.
-            const LABEL_W = i === 0 ? 84 : 44;
-            const close = showMark && Math.abs(fillPx - markPx) < LABEL_W;
-            const realFirst = fillPx <= markPx;
-            const clamp = (x: number) => Math.min(Math.max(x, 26), bandW - 26);
-            const place = (x: number, isLeft: boolean) =>
-              close ? { left: x, transform: isLeft ? "translateX(calc(-100% - 3px))" : "translateX(3px)" } : { left: clamp(x), transform: "translateX(-50%)" };
+
+            // Ligne au-dessus de la bande : nom du jalon à gauche, puis les pourcentages au-dessus de leur repère
+            // (réalisé au bout de la partie remplie, prévu au-dessus du trait), sans jamais se chevaucher.
+            const nameEnd = Math.min(m.name.length * 6.5 + 12, bandW * 0.55);
+            const realText = `${i === 0 ? "réalisé · " : ""}${pct} %${status === "below" ? " ▼" : status === "above" ? " ▲" : ""}`;
+            const expText = `${i === 0 ? "prévu · " : ""}${exp} %`;
+            const width = (t: string) => t.length * 6.1 + 4;
+            const labels = [
+              { key: "real", text: realText, x: (pct / 100) * bandW, w: width(realText) },
+              ...(showMark ? [{ key: "exp", text: expText, x: expected * bandW, w: width(expText) }] : []),
+            ]
+              .map((l) => ({ ...l, left: l.x - l.w / 2 }))
+              .sort((u, v) => u.x - v.x);
+            labels.forEach((l, k) => {
+              const min = k === 0 ? nameEnd : labels[k - 1].left + labels[k - 1].w + 8;
+              l.left = Math.min(Math.max(l.left, min), bandW - l.w);
+            });
             return (
               <li
                 key={m.id}
-                className="relative h-9 w-full shrink-0 rounded-[10px] [text-shadow:0_1px_1px_rgba(0,0,0,0.18)] sm:w-[80%]"
-                style={{ background: `color-mix(in srgb, ${c.solid} 55%, white)` }}
+                className="relative h-9 w-full shrink-0 rounded-[10px] sm:w-[80%]"
+                style={{ background: `color-mix(in srgb, ${color} 30%, white)` }}
                 title={`${p.name} · ${m.name} : ${pct} % réalisé, ${exp} % prévu à date (${m.tasks_complete}/${m.tasks_total} tâches) · échéance ${shortDate(m.date)}`}
               >
-                {/* Avancement réel : même teinte, plus pure */}
-                {pct > 0 && <span className={`absolute inset-y-0 left-0 ${pct >= 97 ? "rounded-[10px]" : "rounded-l-[10px]"}`} style={{ width: `${pct}%`, background: c.solid }} />}
-                {/* Avancement prévu à date : trait épais sur toute la hauteur, couleur foncée du projet */}
-                {showMark && (
-                  <span className="absolute inset-y-0 w-[5px] -translate-x-1/2" style={{ left: `${expected * 100}%`, background: `color-mix(in srgb, ${c.solid} 55%, black)` }} aria-hidden="true" />
-                )}
-                <div className="relative flex h-full items-center gap-2.5 pl-3.5 pr-1">
-                  <span className="min-w-0 flex-1 truncate text-[12.5px] font-semibold text-white">{m.name}</span>
-                  {/* Membres du jalon en fin de bande, juste avant l'échéance */}
-                  <Members members={m.members} />
-                  <span className="w-12 shrink-0 pr-2 text-right text-[11px] font-semibold text-white">{shortDate(m.date)}</span>
-                </div>
-                {/* % réalisé : au-dessus du bout de la partie remplie */}
-                <span
-                  className={`absolute -top-[19px] whitespace-nowrap text-[10.5px] font-bold ${behind ? "text-late" : ahead ? "text-ok" : ""}`}
-                  style={{ ...place(fillPx, realFirst), ...(behind || ahead ? {} : { color: c.solid }) }}
-                  title={behind ? "En retard sur le prévu" : ahead ? "En avance sur le prévu" : undefined}
-                >
-                  {i === 0 ? `réalisé · ${pct} %` : `${pct} %`}
-                  {behind && <span className="ml-0.5 text-[9px]">▼</span>}
-                  {ahead && <span className="ml-0.5 text-[9px]">▲</span>}
+                <span className="absolute -top-[20px] left-0 truncate text-[12px] font-semibold text-ink" style={{ maxWidth: nameEnd - 8 }}>
+                  {m.name}
                 </span>
-                {/* % prévu : au-dessus du trait (en toutes lettres sur la première bande, pour la lecture) */}
-                {showMark && (
+                {labels.map((l) => (
                   <span
+                    key={l.key}
                     className="absolute -top-[19px] whitespace-nowrap text-[10.5px] font-bold"
-                    style={{ ...place(markPx, !realFirst), color: `color-mix(in srgb, ${c.solid} 55%, black)` }}
+                    style={{ left: l.left, color: l.key === "real" ? color : "var(--ink-2)" }}
                   >
-                    {i === 0 ? `prévu · ${exp} %` : `${exp} %`}
+                    {l.text}
                   </span>
+                ))}
+                {/* Avancement réel : couleur pleine selon l'écart au prévu */}
+                {pct > 0 && (
+                  <span className={`absolute inset-y-0 left-0 ${pct >= 97 ? "rounded-[10px]" : "rounded-l-[10px]"}`} style={{ width: `${pct}%`, background: color }} />
                 )}
+                {/* Avancement prévu à date : trait épais sur toute la hauteur */}
+                {showMark && (
+                  <span className="absolute inset-y-0 w-[5px] -translate-x-1/2 bg-ink" style={{ left: `${expected * 100}%` }} aria-hidden="true" />
+                )}
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-ink-2">{shortDate(m.date)}</span>
               </li>
             );
           })}
@@ -160,15 +143,16 @@ export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProje
       )}
 
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted">
+        {(Object.keys(STATUS) as Status[]).map((k) => (
+          <span key={k} className="inline-flex items-center gap-1.5">
+            <i className="h-2.5 w-5 rounded-[3px]" style={{ background: STATUS[k].color }} />
+            {STATUS[k].label}
+          </span>
+        ))}
         <span className="inline-flex items-center gap-1.5">
-          <i className="h-2.5 w-6 rounded-[3px] bg-[#1e6bff]" />
-          Avancement réel
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <i className="h-3.5 w-[5px] bg-[#0e3a8c]" />
+          <i className="h-3.5 w-[5px] bg-ink" />
           Prévu à date
         </span>
-        <span>▲ en avance · ▼ en retard sur le prévu</span>
       </div>
     </section>
   );

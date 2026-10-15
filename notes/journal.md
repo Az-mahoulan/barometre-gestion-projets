@@ -81,3 +81,4 @@
 - 15/10/2026 — Progression des jalons : ▲ vert quand le réalisé dépasse le prévu (symétrique du ▼ rouge).
 - 15/10/2026 — Progression des jalons : bandes moins arrondies (10 px au lieu de pilule).
 - 15/10/2026 — Progression des jalons : photos des membres en fin de bande, juste avant l’échéance ; le nom du jalon ouvre la bande.
+- 15/10/2026 — Progression des jalons : photos retirées ; nom du jalon au-dessus de la bande, aligné avec les pourcentages ; échéance seule dans la bande ; couleurs uniformes selon l’écart au prévu (rouge sous le prévu, vert clair conforme à ± 5 points, vert au-dessus), trait du prévu noir.
