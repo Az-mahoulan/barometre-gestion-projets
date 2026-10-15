@@ -85,3 +85,4 @@
 - 15/10/2026 — Progression des jalons : « comme prévu » en jaune (au lieu du vert clair), vert réservé au-dessus du prévu.
 - 15/10/2026 — Progression des jalons : fond léger sur la zone défilante, axe des pourcentages (0 à 100 %) en haut et repères verticaux discrets à 25, 50 et 75 %.
 - 15/10/2026 — Palette des projets (activités de la semaine, chronologie) sans vert, orange ni rouge, réservés aux états : framboise, fuchsia, indigo et ardoise remplacent rose, vert, orange et rouge-orangé.
+- 15/10/2026 — Progression des jalons : repère vertical à 100 % ajouté.

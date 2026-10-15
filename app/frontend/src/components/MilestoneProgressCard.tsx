@@ -93,9 +93,9 @@ export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProje
             ))}
           </div>
           <div className="relative flex min-h-0 flex-1 flex-col">
-          {/* Repères verticaux discrets à 25, 50 et 75 % */}
+          {/* Repères verticaux discrets à 25, 50, 75 et 100 % */}
           <div className="pointer-events-none absolute inset-y-0 left-0 w-full sm:w-[80%]" aria-hidden="true">
-            {[25, 50, 75].map((v) => (
+            {[25, 50, 75, 100].map((v) => (
               <span key={v} className="absolute inset-y-0 border-l border-dashed border-line-strong/60" style={{ left: `${v}%` }} />
             ))}
           </div>
