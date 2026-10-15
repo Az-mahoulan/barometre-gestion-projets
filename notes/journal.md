@@ -66,3 +66,4 @@
 - 15/10/2026 — Décompte sans les secondes ; sablier sorti de l’étiquette, posé juste à côté (couleur de l’état) ; bord du verre des livrables en pointillé.
 - 15/10/2026 — Verre des livrables revenu au trait plein ; décompte raccourci (« 2s 2j 10h59 ») ; fond doux de la teinte de l’état englobant étiquette, sablier et décompte.
 - 15/10/2026 — Sablier placé au début du décompte (sous l’étiquette) ; « sem » rétabli (« 2sem 2j 10h59 »).
+- 15/10/2026 — Vue d’ensemble des projets : colonnes réordonnées (livrables, performance, prochain jalon, jalons, échéance) ; liquide du verre adouci (couleur de l’état à 70 % mêlée de blanc).

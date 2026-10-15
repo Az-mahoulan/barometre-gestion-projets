@@ -48,7 +48,7 @@ function Glass({ done, total, id, color, still }: { done: number; total: number;
         </clipPath>
       </defs>
       <path d="M 5.5 3 L 26.5 3 L 24 35.5 Q 23.8 38 21.3 38 L 10.7 38 Q 8.2 38 8 35.5 Z" fill="var(--track)" />
-      {still && <rect x="0" y="5" width="32" height="40" fill={color} clipPath={`url(#${clip})`} />}
+      {still && <rect x="0" y="5" width="32" height="40" fill={`color-mix(in srgb, ${color} 70%, white)`} clipPath={`url(#${clip})`} />}
       {!still && ratio > 0 && (
         <g clipPath={`url(#${clip})`}>
           <g className="verre-niveau">
@@ -57,7 +57,7 @@ function Glass({ done, total, id, color, still }: { done: number; total: number;
                 <g transform="translate(-6 -1.2)">
                   <path className="verre-vague-2" d={WAVE} fill={color} fillOpacity="0.4" />
                 </g>
-                <path className="verre-vague" d={WAVE} fill={color} />
+                <path className="verre-vague" d={WAVE} fill={`color-mix(in srgb, ${color} 70%, white)`} />
               </g>
             </g>
           </g>
@@ -90,7 +90,7 @@ export function ProjectsTable({ projects, now }: { projects: ProjectRow[]; now: 
       <ul className="flex flex-col gap-3">
         {projects.map((p, i) => (
           <li key={p.id} className="flex flex-wrap items-center gap-x-3 gap-y-3 rounded-[18px] bg-surface px-[18px] py-3.5">
-            <div className="flex min-w-[190px] flex-1 items-center gap-3">
+            <div className="flex min-w-[170px] flex-1 items-center gap-3">
               <Tile icon="project" tone={TILE_TONES[i % TILE_TONES.length]} />
               <div className="min-w-0">
                 <b className="block truncate text-[13px] font-bold">{p.name}</b>
@@ -101,6 +101,27 @@ export function ProjectsTable({ projects, now }: { projects: ProjectRow[]; now: 
                   </span>
                 </span>
               </div>
+            </div>
+
+            <div
+              className="flex w-[104px] items-center gap-2"
+              title={`${p.deliverables_done} livrable${p.deliverables_done > 1 ? "s" : ""} remis sur ${p.deliverables_total}`}
+              aria-label={`Livrables : ${p.deliverables_done} sur ${p.deliverables_total}`}
+            >
+              <Glass done={p.deliverables_done} total={p.deliverables_total} id={p.id} color={HEALTH_BAR[p.health]} still={p.health === "completed"} />
+              <span className="text-[11.5px] text-muted">
+                Livrables
+                <b className="block text-[13px] font-bold text-ink">
+                  {p.deliverables_total > 0 ? `${p.deliverables_done}/${p.deliverables_total}` : "–"}
+                </b>
+              </span>
+            </div>
+
+            <div className="w-[78px] text-[11.5px] text-muted">
+              Performance
+              <b className={`block text-[12.5px] ${p.performance === null ? "text-muted" : perfClass(p.performance)}`}>
+                {p.performance === null ? "–" : `${p.performance} %`}
+              </b>
             </div>
 
             <div className="w-[136px] text-[11.5px] text-muted" title={`${shortDate(p.start)} → ${shortDate(p.end)}`}>
@@ -114,31 +135,6 @@ export function ProjectsTable({ projects, now }: { projects: ProjectRow[]; now: 
               )}
             </div>
 
-            <div className="w-[78px] text-[11.5px] text-muted">
-              Performance
-              <b className={`block text-[12.5px] ${p.performance === null ? "text-muted" : perfClass(p.performance)}`}>
-                {p.performance === null ? "–" : `${p.performance} %`}
-              </b>
-            </div>
-
-            <div
-              className="flex w-[80px] items-center gap-1.5"
-              title={`${p.deliverables_done} livrable${p.deliverables_done > 1 ? "s" : ""} remis sur ${p.deliverables_total}`}
-              aria-label={`Livrables : ${p.deliverables_done} sur ${p.deliverables_total}`}
-            >
-              <Glass done={p.deliverables_done} total={p.deliverables_total} id={p.id} color={HEALTH_BAR[p.health]} still={p.health === "completed"} />
-              <span className="text-[11.5px] text-muted">
-                Livrables
-                <b className="block text-[13px] font-bold text-ink">
-                  {p.deliverables_total > 0 ? `${p.deliverables_done}/${p.deliverables_total}` : "–"}
-                </b>
-              </span>
-            </div>
-
-            <div className="w-[150px]">
-              <Deadline health={p.health} start={p.start} end={p.end} now={now} />
-            </div>
-
             <div className="flex w-[104px] items-center gap-2" title={`${p.tasks_complete} tâches avancées sur ${p.tasks_total} · jalons ${p.milestones_achieved}/${p.milestones_total}`}>
               <Ring value={p.progress} color={HEALTH_BAR[p.health]} />
               <span>
@@ -147,6 +143,10 @@ export function ProjectsTable({ projects, now }: { projects: ProjectRow[]; now: 
                   {p.milestones_achieved}/{p.milestones_total} jalons
                 </small>
               </span>
+            </div>
+
+            <div className="w-[150px]">
+              <Deadline health={p.health} start={p.start} end={p.end} now={now} />
             </div>
           </li>
         ))}
