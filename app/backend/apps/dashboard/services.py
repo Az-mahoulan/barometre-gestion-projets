@@ -147,14 +147,17 @@ def _milestones_payload(p, today: date) -> list[dict]:
         done = sum(1 for t in ts if t.is_complete)
         progress = done / len(ts) if ts else (1.0 if m.is_achieved else 0.0)
         counts = Counter(t.assignee for t in ts if t.assignee is not None)
-        lead = counts.most_common(1)[0][0] if counts else p.owner
+        members = [u for u, _ in counts.most_common()] or [p.owner]
+        lead = members[0]
         rows.append(
             {"id": m.id, "name": m.name, "date": m.due_date, "start": min(previous, m.due_date),
              "achieved": m.is_achieved, "overdue": not m.is_achieved and m.due_date < today,
              "depends_on": [d.id for d in m.depends_on.all() if d.project_id == p.id],
              "activities": len(act_ids), "tasks_total": len(ts), "tasks_complete": done,
              "progress": 1.0 if m.is_achieved else progress,
-             "lead": {"name": lead.display_name, "initials": lead.initials}}
+             "lead": {"name": lead.display_name, "initials": lead.initials},
+             # Membres du jalon (personnes ayant des tâches dans ses activités, les plus impliquées d'abord).
+             "members": [{"name": u.display_name, "initials": u.initials} for u in members]}
         )
         previous = m.due_date
     return rows

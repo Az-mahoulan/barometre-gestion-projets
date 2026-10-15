@@ -75,6 +75,8 @@ export interface GanttProject {
     progress: number;
     /** Personne la plus impliquée (le plus de tâches), sinon le responsable du projet. */
     lead: { name: string; initials: string };
+    /** Membres du jalon, les plus impliqués d'abord. */
+    members: { name: string; initials: string }[];
   }[];
   activities: GanttActivity[];
   /** Dates clés renseignées par le gestionnaire (revue, rencontre, lancement…), distinctes des jalons. */
