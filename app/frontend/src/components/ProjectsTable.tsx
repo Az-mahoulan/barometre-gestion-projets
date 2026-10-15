@@ -75,6 +75,9 @@ function Glass({ done, total, id, color, still }: { done: number; total: number;
   );
 }
 
+// Contour discret de chaque photo : un liseré blanc puis un fin trait gris, pour bien séparer les visages superposés.
+const EDGE = "shadow-[0_0_0_1.5px_var(--surface),0_0_0_2.5px_#d3d6dd]";
+
 /** Photos des personnes qui travaillent sur le projet (responsable en premier), superposées. */
 function Team({ team }: { team: ProjectRow["team"] }) {
   const MAX = 6;
@@ -83,12 +86,12 @@ function Team({ team }: { team: ProjectRow["team"] }) {
   return (
     <span className="mt-1 flex items-center" title={team.map((m) => m.name).join(", ")} aria-label={`Équipe : ${team.map((m) => m.name).join(", ")}`}>
       {shown.map((m, i) => (
-        <span key={m.name} className={`rounded-full ring-2 ring-surface ${i > 0 ? "-ml-1.5" : ""}`}>
+        <span key={m.name} className={`rounded-full ${EDGE} ${i > 0 ? "-ml-1.5" : ""}`}>
           <Avatar initials={m.initials} seed={m.name} size="h-[22px] w-[22px] text-[9px]" />
         </span>
       ))}
       {rest > 0 && (
-        <span className="-ml-1.5 grid h-[22px] min-w-[22px] place-items-center rounded-full bg-surface-2 px-1 text-[10px] font-semibold text-ink-2 ring-2 ring-surface">
+        <span className={`-ml-1.5 grid h-[22px] min-w-[22px] place-items-center rounded-full bg-surface-2 px-1 text-[10px] font-semibold text-ink-2 ${EDGE}`}>
           +{rest}
         </span>
       )}

@@ -68,3 +68,4 @@
 - 15/10/2026 — Sablier placé au début du décompte (sous l’étiquette) ; « sem » rétabli (« 2sem 2j 10h59 »).
 - 15/10/2026 — Vue d’ensemble des projets : colonnes réordonnées (livrables, performance, prochain jalon, jalons, échéance) ; liquide du verre adouci (couleur de l’état à 70 % mêlée de blanc).
 - 15/10/2026 — Vue d’ensemble des projets : sous le nom, photos superposées de l’équipe (responsable puis personnes ayant une tâche dans le projet, 6 au plus puis « +n », noms au survol) à la place de « responsable · pays ».
+- 15/10/2026 — Photos de l’équipe : contour discret (liseré blanc + fin trait gris) pour séparer les visages superposés.
