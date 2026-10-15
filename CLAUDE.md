@@ -19,3 +19,4 @@ Projet indépendant d'AGRITRACK (aucun lien technique ni documentaire). Langue d
 - Travailler chaque élément ; éviter tout rendu « générique ». Avancer par petites modifications publiées une à une.
 - Éléments « flottants » (pastille ou tuile posée sur un plus gros) : à juger au cas par cas selon les couleurs et l'endroit. Apprécié : la pastille blanche du filtre « Tous les projets ». Rejeté : la tuile blanche avec ombre sur le fond rose de l'alerte de retard (remplacée par un cercle en pointillé intégré au fond).
 - Pas de fond noir pour les menus déroulants ; panneaux clairs, compacts, sans barre de défilement visible.
+- Idées validées pour plus tard : `notes/a-faire.md` (à relire avant de proposer une nouvelle étape).
