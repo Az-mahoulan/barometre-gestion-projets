@@ -166,8 +166,8 @@ export function DashboardView() {
 
   return (
     // Cadre blanc unique (barre latérale + barre du haut) ; le contenu s'y encastre dans un panneau arrondi.
-    <div className="min-h-screen bg-[#e6e6e0] p-2 sm:p-4">
-      <div className="flex min-h-[calc(100vh-32px)] rounded-[30px] bg-surface p-2 sm:p-3">
+    <div className="min-h-screen bg-surface">
+      <div className="flex min-h-screen bg-surface p-2 sm:p-3">
         <Sidebar
           me={me}
           alerts={data.critical_actions.total}
