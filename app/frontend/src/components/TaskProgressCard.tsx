@@ -104,13 +104,10 @@ export function TaskProgressCard({
           ))}
         </ul>
         {progress.overdue > 0 && (
-          <div className="mt-4 flex items-center gap-3 rounded-[16px] bg-late-soft p-2.5 pr-3" role="status">
-            <span className="relative grid h-10 w-10 shrink-0 place-items-center rounded-[12px] bg-surface text-late shadow-[0_1px_2px_rgba(192,51,77,0.15)]">
+          <div className="mt-4 flex items-center gap-3 rounded-[16px] bg-late-soft px-3 py-2.5" role="status">
+            {/* Icône intégrée au fond : cercle en pointillé, sans tuile flottante ni ombre. */}
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border-[1.5px] border-dashed border-late/50 text-late">
               <Icon name="alarm" className="h-5 w-5" />
-              <span className="absolute -right-0.5 -top-0.5 flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-late opacity-60 motion-safe:animate-ping" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-late ring-2 ring-surface" />
-              </span>
             </span>
             <div className="min-w-0 flex-1">
               <p className="text-[13px] font-bold text-late">
@@ -120,7 +117,10 @@ export function TaskProgressCard({
                 Échéance dépassée · {Math.round((progress.overdue / total) * 100)} % des tâches
               </p>
             </div>
-            <span className="chip shrink-0 bg-late text-white">À relancer</span>
+            <span className="inline-flex shrink-0 items-center gap-1 border-l border-dashed border-late/40 pl-3 text-[12px] font-semibold text-late">
+              À relancer
+              <Icon name="go" className="h-3.5 w-3.5" />
+            </span>
           </div>
         )}
       </div>

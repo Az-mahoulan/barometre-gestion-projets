@@ -13,3 +13,9 @@ Projet indépendant d'AGRITRACK (aucun lien technique ni documentaire). Langue d
 - `docs/` : cadrage, recherche, architecture. `maquette/` : maquettes (HTML interactif, version dessinée). `ressources/` : références visuelles.
 - Les calculs du tableau de bord vivent côté serveur (`app/backend/apps/dashboard/services.py`) ; les droits par rôle dans `apps/projects/access.py`.
 - Ne jamais lancer `seed_demo` en production. Aucun secret dans le code : variables d'environnement (`app/.env.example`).
+
+## Design (préférences de l'utilisateur)
+
+- Travailler chaque élément ; éviter tout rendu « générique ». Avancer par petites modifications publiées une à une.
+- Pas d'éléments qui « flottent » sur un plus gros (tuile blanche avec ombre posée sur un fond coloré) : intégrer au fond (contour en pointillé, séparateur, même plan).
+- Pas de fond noir pour les menus déroulants ; panneaux clairs, compacts, sans barre de défilement visible.
