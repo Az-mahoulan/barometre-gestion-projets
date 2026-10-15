@@ -100,59 +100,55 @@ export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProje
             const exp = Math.round(expected * 100);
             const behind = !m.achieved && m.progress < expected - 0.05;
 
-            // Placement (px, estimé) : membres + nom à gauche, échéance à droite.
-            const membersW = 28 + Math.min(m.members.length - 1, 2) * 20;
-            const nameW = m.name.length * 6.6;
-            const leftEnd = 6 + membersW + 10 + nameW + 10;
             const fillPx = (pct / 100) * bandW;
             const markPx = expected * bandW;
-            const PCT_W = 40;
-            // % atteint : dans la partie réalisée (à son extrémité) s'il y a la place, sinon juste après le nom.
-            const pctInside = fillPx >= leftEnd + PCT_W;
-            let pctLeft = fillPx - PCT_W - 4;
-            // Jamais sur le trait du prévu : le pourcentage se décale juste avant le trait.
-            if (pctInside && markPx > pctLeft - 6 && markPx < pctLeft + PCT_W + 6) pctLeft = markPx - PCT_W - 8;
-            // Après le nom : si le trait du prévu tombe dessus, le pourcentage passe juste après le trait.
-            const inlineShift = !pctInside && showMarkAt(expected) && markPx > leftEnd - 14 && markPx < leftEnd + PCT_W + 6 ? markPx + 10 - (leftEnd - 4) : 0;
             const showMark = showMarkAt(expected);
-            const pctLabel = (
-              <b className={`shrink-0 text-[12.5px] font-bold ${m.overdue || behind ? "text-late" : "text-ink"}`}>{pct} %</b>
-            );
+            // Pourcentages au-dessus de leur repère : réalisé au bout de la partie remplie, prévu au-dessus du trait.
+            // Trop proches : celui de gauche s'aligne à droite de son repère, l'autre à gauche, pour ne pas se chevaucher.
+            const LABEL_W = i === 0 ? 84 : 44;
+            const close = showMark && Math.abs(fillPx - markPx) < LABEL_W;
+            const realFirst = fillPx <= markPx;
+            const clamp = (x: number) => Math.min(Math.max(x, 26), bandW - 26);
+            const place = (x: number, isLeft: boolean) =>
+              close ? { left: x, transform: isLeft ? "translateX(calc(-100% - 3px))" : "translateX(3px)" } : { left: clamp(x), transform: "translateX(-50%)" };
             return (
               <li
                 key={m.id}
-                className="relative h-9 w-full shrink-0 rounded-full sm:w-[80%]"
-                style={{ background: `color-mix(in srgb, ${c.bar} 28%, white)` }}
+                className="relative h-9 w-full shrink-0 rounded-full [text-shadow:0_1px_1px_rgba(0,0,0,0.18)] sm:w-[80%]"
+                style={{ background: `color-mix(in srgb, ${c.solid} 55%, white)` }}
                 title={`${p.name} · ${m.name} : ${pct} % réalisé, ${exp} % prévu à date (${m.tasks_complete}/${m.tasks_total} tâches) · échéance ${shortDate(m.date)}`}
               >
                 {/* Avancement réel : même teinte, plus pure */}
-                {pct > 0 && <span className={`absolute inset-y-0 left-0 ${pct >= 97 ? "rounded-full" : "rounded-l-full"}`} style={{ width: `${pct}%`, background: c.bar }} />}
+                {pct > 0 && <span className={`absolute inset-y-0 left-0 ${pct >= 97 ? "rounded-full" : "rounded-l-full"}`} style={{ width: `${pct}%`, background: c.solid }} />}
                 {/* Avancement prévu à date : trait épais sur toute la hauteur, couleur foncée du projet */}
                 {showMark && (
-                  <span className="absolute inset-y-0 w-[5px] -translate-x-1/2" style={{ left: `${expected * 100}%`, background: c.solid }} aria-hidden="true" />
+                  <span className="absolute inset-y-0 w-[5px] -translate-x-1/2" style={{ left: `${expected * 100}%`, background: `color-mix(in srgb, ${c.solid} 55%, black)` }} aria-hidden="true" />
                 )}
                 <div className="relative flex h-full items-center gap-2.5 pl-1">
                   <Members members={m.members} />
-                  <span className="truncate text-[12.5px] font-semibold text-ink">
+                  <span className="truncate text-[12.5px] font-semibold text-white">
                     {m.name}
                   </span>
-                  {!pctInside && <span style={{ marginLeft: inlineShift }}>{pctLabel}</span>}
                 </div>
-                {pctInside && (
-                  <span className="absolute top-1/2 w-10 -translate-y-1/2 text-right" style={{ left: pctLeft }}>
-                    {pctLabel}
-                  </span>
-                )}
+                {/* % réalisé : au-dessus du bout de la partie remplie */}
+                <span
+                  className={`absolute -top-[19px] whitespace-nowrap text-[10.5px] font-bold ${behind ? "text-late" : ""}`}
+                  style={{ ...place(fillPx, realFirst), ...(behind ? {} : { color: c.solid }) }}
+                  title={behind ? "En retard sur le prévu" : undefined}
+                >
+                  {i === 0 ? `réalisé · ${pct} %` : `${pct} %`}
+                  {behind && <span className="ml-0.5 text-[9px]">▼</span>}
+                </span>
                 {/* % prévu : au-dessus du trait (en toutes lettres sur la première bande, pour la lecture) */}
                 {showMark && (
                   <span
-                    className="absolute -top-[19px] -translate-x-1/2 whitespace-nowrap text-[10.5px] font-bold"
-                    style={{ left: Math.min(Math.max(markPx, 24), bandW - 24), color: c.solid }}
+                    className="absolute -top-[19px] whitespace-nowrap text-[10.5px] font-bold"
+                    style={{ ...place(markPx, !realFirst), color: `color-mix(in srgb, ${c.solid} 55%, black)` }}
                   >
                     {i === 0 ? `prévu · ${exp} %` : `${exp} %`}
                   </span>
                 )}
-                <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-[11px] ${m.overdue ? "font-semibold text-late" : "text-ink-2"}`}>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-white">
                   {shortDate(m.date)}
                 </span>
               </li>
@@ -166,14 +162,14 @@ export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProje
 
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted">
         <span className="inline-flex items-center gap-1.5">
-          <i className="h-2.5 w-6 rounded-full bg-[#9cc0ff]" />
+          <i className="h-2.5 w-6 rounded-full bg-[#1e6bff]" />
           Avancement réel
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <i className="h-3.5 w-[5px] bg-[#1e6bff]" />
+          <i className="h-3.5 w-[5px] bg-[#0e3a8c]" />
           Prévu à date
         </span>
-        <span>Date : échéance du jalon</span>
+        <span>▼ en retard sur le prévu</span>
       </div>
     </section>
   );
