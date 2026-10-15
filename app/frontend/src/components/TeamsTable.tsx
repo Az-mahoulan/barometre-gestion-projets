@@ -4,20 +4,20 @@ import { useEffect, useRef, useState } from "react";
 
 import type { Dashboard, Member } from "@/lib/types";
 
-import { Icon } from "./ui";
+import { Icon, TONES, toneFor, type Tone } from "./ui";
 
-const STATUS: Record<Member["status"], { icon: string; label: string; dot: string }> = {
-  available: { icon: "taskalt", label: "Disponibles", dot: "var(--ok)" },
-  meeting: { icon: "users", label: "En réunion", dot: "var(--lav)" },
-  mission: { icon: "mission", label: "En mission", dot: "var(--info)" },
-  training: { icon: "training", label: "En formation", dot: "var(--risk)" },
-  leave: { icon: "leave", label: "En congé", dot: "#9aa0a8" },
+const STATUS: Record<Member["status"], { icon: string; label: string; tone: Tone }> = {
+  available: { icon: "taskalt", label: "Disponibles", tone: "mint" },
+  meeting: { icon: "users", label: "En réunion", tone: "lav" },
+  mission: { icon: "mission", label: "En mission", tone: "sky" },
+  training: { icon: "training", label: "En formation", tone: "sand" },
+  leave: { icon: "leave", label: "En congé", tone: "gray" },
 };
 
-// Teintes sobres, dans le ton du tableau de bord : cartes grises claires, carte choisie et fiche en vert-citron très léger.
-const CARD = "#f4f4ef";
-const PICKED = "#eef5d3";
-const R = 16; // rayon des courbures (cartes, onglet, fiche)
+// Fonds blancs sur le gris de la page (comme la vue d'ensemble des projets) ; seuls les éléments importants sont colorés.
+const CARD = "var(--surface)";
+const PICKED = "var(--surface)";
+const R = 18; // rayon des courbures (cartes, onglet, fiche)
 
 /** Vue d'ensemble des équipes : cartes des membres à gauche ; la carte choisie se prolonge en onglet jusqu'à la fiche. */
 export function TeamsTable({ teams }: { teams: Dashboard["teams"] }) {
@@ -53,7 +53,7 @@ export function TeamsTable({ teams }: { teams: Dashboard["teams"] }) {
   const counts = (Object.keys(STATUS) as Member["status"][]).map((k) => [k, teams.members.filter((m) => m.status === k).length] as const);
 
   return (
-    <section className="card" aria-label="Vue d’ensemble des équipes">
+    <section aria-label="Vue d’ensemble des équipes">
       <div className="grid gap-y-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
         {/* Titres des deux colonnes, comme sur le modèle */}
         <div className="flex items-center justify-between gap-2 md:pr-4">
@@ -124,20 +124,22 @@ export function TeamsTable({ teams }: { teams: Dashboard["teams"] }) {
                       >
                         <span
                           className={`grid h-10 w-10 shrink-0 place-items-center rounded-[12px] text-[11.5px] font-bold ${
-                            active ? "bg-side text-white" : "border border-line bg-surface text-ink-2"
+                            active ? "bg-side text-white" : TONES[toneFor(m.initials)]
                           }`}
                         >
                           {m.initials}
                         </span>
                         <span className="min-w-0 flex-1">
                           <b className="block truncate text-[13px] font-semibold">{m.name}</b>
-                          <small className="flex items-center gap-1.5 truncate text-[11.5px] text-muted">
-                            <i className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: STATUS[m.status].dot }} />
-                            <span className="truncate">{m.status_label}</span>
-                          </small>
+                          <span className={`chip mt-1 !py-0.5 !text-[10.5px] ${TONES[STATUS[m.status].tone]}`}>
+                            <Icon name={STATUS[m.status].icon} className="h-3 w-3" />
+                            {m.status_label}
+                          </span>
                         </span>
-                        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${active ? "bg-surface text-ink" : "border border-line bg-surface text-ink-2"}`}>
-                          {m.open_tasks} tâche{m.open_tasks > 1 ? "s" : ""}
+                        <span className="shrink-0 text-right text-[11px] leading-tight text-muted">
+                          <b className="block text-[12.5px] font-semibold text-ink">{m.open_tasks}</b>
+                          tâche{m.open_tasks > 1 ? "s" : ""}
+                          {m.overdue_tasks > 0 && <b className="block font-semibold text-late">{m.overdue_tasks} en retard</b>}
                         </span>
                       </button>
                       {/* Courbures inversées de l'onglet, à la jonction avec la fiche (en haut sauf pour la 1re carte, et en bas) */}
@@ -199,19 +201,19 @@ function Detail({ m, squareTopLeft }: { m: Member; squareTopLeft: boolean }) {
             {m.country ? ` · ${m.country}` : ""}
           </small>
         </div>
-        <span className="shrink-0 rounded-full border border-ink/25 px-2.5 py-1 text-[11px] font-semibold text-ink-2">{m.initials}</span>
+        <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-[12px] text-[12.5px] font-bold ${TONES[toneFor(m.initials)]}`}>{m.initials}</span>
       </div>
 
       <div className="mt-3 flex flex-wrap gap-1.5">
-        <span className="chip bg-surface text-ink-2">
+        <span className={`chip ${TONES[st.tone]}`}>
           <Icon name={st.icon} className="h-3.5 w-3.5" />
           {m.status_label}
         </span>
-        <span className="chip bg-surface text-ink-2">
+        <span className="chip bg-surface-2 text-ink-2">
           <Icon name="pin" className="h-3.5 w-3.5" />
           {m.place_label}
         </span>
-        {m.overdue_tasks > 0 && <span className="chip bg-surface text-late">{m.overdue_tasks} en retard</span>}
+        {m.overdue_tasks > 0 && <span className="chip bg-late-soft text-late">{m.overdue_tasks} en retard</span>}
       </div>
 
       <dl className="mt-4 grid grid-cols-[88px_minmax(0,1fr)] gap-x-3 gap-y-2.5 text-[12.5px]">
