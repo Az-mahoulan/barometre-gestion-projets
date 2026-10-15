@@ -84,8 +84,8 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
         </span>
       </div>
 
-      <div ref={area} className="relative overflow-clip rounded-[14px] border border-line">
-        <div className="relative z-20 grid border-b border-line bg-[#f6f6f2]" style={{ gridTemplateColumns: `${NAME_W}px minmax(0,1fr)` }}>
+      <div ref={area} className="relative overflow-clip rounded-[14px] border border-line bg-[#f7f7f3]">
+        <div className="relative z-20 grid border-b border-line bg-[#ebebe5]" style={{ gridTemplateColumns: `${NAME_W}px minmax(0,1fr)` }}>
           <div className="flex items-center px-4 text-[12px] font-semibold">Projets</div>
           <div className="grid" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}>
             {dates.map((d) => {
@@ -128,14 +128,14 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
 
           return (
             <div key={p.id} className="grid border-b border-line last:border-b-0" style={{ gridTemplateColumns: `${NAME_W}px minmax(0,1fr)` }}>
-              <div className="flex min-w-0 items-center gap-2.5 bg-[#fafaf7] px-4" title={`${p.name} · ${shortDate(p.start)} → ${shortDate(p.end)}`}>
+              <div className="flex min-w-0 items-center gap-2.5 px-4" title={`${p.name} · ${shortDate(p.start)} → ${shortDate(p.end)}`}>
                 <span className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-[5px] text-white" style={{ background: color.solid }}>
                   <Icon name={color.icon} className="h-3 w-3" />
                 </span>
                 <span className={`truncate text-[12px] font-medium ${p.status !== "active" ? "text-muted" : "text-ink-2"}`}>{p.name}</span>
               </div>
 
-              <div className={`relative ${below ? "h-[50px]" : "h-[40px]"}`}>
+              <div className={`relative ${below ? "h-[56px]" : "h-[42px]"}`}>
                 <div className="absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }} aria-hidden="true">
                   {dates.map((d) => (
                     <div key={d} className="border-l border-line" />
@@ -143,7 +143,7 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
                 </div>
 
                 <div
-                  className="absolute top-[13px] h-[14px]"
+                  className="absolute top-[10px] h-[22px]"
                   style={{
                     left: cutL ? 0 : `calc(${left}% + 4px)`,
                     width: `calc(${right - left}% - ${(cutL ? 0 : 4) + (cutR ? 0 : 4)}px)`,
@@ -161,18 +161,18 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
                     <div key={k.label + k.date}>
                       {/* Date clé : une portion de la barre, dans la version franche de sa couleur. */}
                       <i
-                        className="absolute top-[13px] h-[14px] rounded-[2px]"
+                        className="absolute top-[10px] h-[22px] rounded-[2px]"
                         style={{ left: `calc(${(col(k.date) / n) * 100}% + 3px)`, width: `calc(${100 / n}% - 6px)`, background: color.solid }}
                         title={`${k.label} · ${shortDate(k.date)}`}
                       />
                       {where === "side" && (
-                        <span className="absolute top-[12px] whitespace-nowrap text-[11px] font-medium text-ink-2" style={{ left: `calc(${((col(k.date) + 1) / n) * 100}% + 2px)` }}>
+                        <span className="absolute top-[13px] whitespace-nowrap text-[11px] font-medium text-ink-2" style={{ left: `calc(${((col(k.date) + 1) / n) * 100}% + 2px)` }}>
                           {k.label}
                         </span>
                       )}
                       {where === "below" && (
                         <span
-                          className="absolute top-[30px] whitespace-nowrap text-[10.5px] font-medium text-ink-2"
+                          className="absolute top-[35px] whitespace-nowrap text-[10.5px] font-medium text-ink-2"
                           style={{ left: `${xPct}%`, transform: flip ? "translateX(calc(-100% + 6px))" : "translateX(-6px)" }}
                         >
                           {k.label}
