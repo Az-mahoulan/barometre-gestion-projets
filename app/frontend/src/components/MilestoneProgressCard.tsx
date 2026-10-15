@@ -99,6 +99,7 @@ export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProje
             const expected = expectedAt(m, asOf);
             const exp = Math.round(expected * 100);
             const behind = !m.achieved && m.progress < expected - 0.05;
+            const ahead = !m.achieved && expected > 0 && m.progress > expected + 0.05;
 
             const fillPx = (pct / 100) * bandW;
             const markPx = expected * bandW;
@@ -132,12 +133,13 @@ export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProje
                 </div>
                 {/* % réalisé : au-dessus du bout de la partie remplie */}
                 <span
-                  className={`absolute -top-[19px] whitespace-nowrap text-[10.5px] font-bold ${behind ? "text-late" : ""}`}
-                  style={{ ...place(fillPx, realFirst), ...(behind ? {} : { color: c.solid }) }}
-                  title={behind ? "En retard sur le prévu" : undefined}
+                  className={`absolute -top-[19px] whitespace-nowrap text-[10.5px] font-bold ${behind ? "text-late" : ahead ? "text-ok" : ""}`}
+                  style={{ ...place(fillPx, realFirst), ...(behind || ahead ? {} : { color: c.solid }) }}
+                  title={behind ? "En retard sur le prévu" : ahead ? "En avance sur le prévu" : undefined}
                 >
                   {i === 0 ? `réalisé · ${pct} %` : `${pct} %`}
                   {behind && <span className="ml-0.5 text-[9px]">▼</span>}
+                  {ahead && <span className="ml-0.5 text-[9px]">▲</span>}
                 </span>
                 {/* % prévu : au-dessus du trait (en toutes lettres sur la première bande, pour la lecture) */}
                 {showMark && (
@@ -169,7 +171,7 @@ export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProje
           <i className="h-3.5 w-[5px] bg-[#0e3a8c]" />
           Prévu à date
         </span>
-        <span>▼ en retard sur le prévu</span>
+        <span>▲ en avance · ▼ en retard sur le prévu</span>
       </div>
     </section>
   );
