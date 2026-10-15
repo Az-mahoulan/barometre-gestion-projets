@@ -191,15 +191,12 @@ export function DashboardView() {
               <KpiRow kpis={data.kpis} />
             </div>
             <div className="flex min-w-0 flex-col gap-4">
-              <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-                <TrendCard
-                  trend={data.trend}
-                  projects={data.gantt}
-                  value={trendProject}
-                  onChange={setTrendProject}
-                />
-                <WeekCard week={data.week} asOf={data.as_of} projects={data.gantt} onOffset={setWeek} />
-              </div>
+              <TrendCard
+                trend={data.trend}
+                projects={data.gantt}
+                value={trendProject}
+                onChange={setTrendProject}
+              />
               <TaskProgressCard
                 progress={data.task_progress}
                 projects={data.gantt}
@@ -218,6 +215,7 @@ export function DashboardView() {
                 reminders={remindable.length}
                 onRemind={() => setConfirmAll(true)}
               />
+              <WeekCard week={data.week} asOf={data.as_of} projects={data.gantt} onOffset={setWeek} />
               <CriticalCard
                 total={data.critical_actions.total}
                 items={data.critical_actions.items}
