@@ -212,3 +212,15 @@ def test_gantt_lists_key_dates(admin, project, client_for):
     ProjectKeyDate.objects.create(project=project, date=date(2026, 10, 22), label="Revue avec le partenaire")
     rows = client_for(admin).get("/api/v1/dashboard/").json()["gantt"]
     assert next(r for r in rows if r["id"] == project.id)["key_dates"] == [{"label": "Revue avec le partenaire", "date": "2026-10-22"}]
+
+
+def test_gantt_lists_milestone_dependencies(admin, project, client_for):
+    from apps.projects.models import Milestone
+
+    a = Milestone.objects.create(project=project, name="Maquettes", due_date=date(2026, 10, 1))
+    b = Milestone.objects.create(project=project, name="Version bêta", due_date=date(2026, 10, 30))
+    b.depends_on.add(a)
+    rows = client_for(admin).get("/api/v1/dashboard/").json()["gantt"]
+    ms = {m["name"]: m for m in next(r for r in rows if r["id"] == project.id)["milestones"]}
+    assert ms["Version bêta"]["depends_on"] == [a.id]
+    assert ms["Maquettes"]["depends_on"] == []

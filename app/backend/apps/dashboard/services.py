@@ -106,7 +106,7 @@ def _visible_projects(user, country: str | None):
     qs = (
         visible_projects(user)
         .select_related("country", "owner")
-        .prefetch_related("tasks__assignee", "milestones", "activities", "key_dates")
+        .prefetch_related("tasks__assignee", "milestones__depends_on", "activities", "key_dates")
     )
     if country:
         qs = qs.filter(country__code=country)
@@ -158,8 +158,9 @@ def build_gantt(projects, stats, today: date) -> list[dict]:
                 "start": p.start_date, "end": p.end_date, "progress": s["progress"],
                 "next_milestone": _next_milestone_payload(s["next_milestone"], today),
                 "milestones": [
-                    {"name": m.name, "date": m.due_date, "achieved": m.is_achieved,
-                     "overdue": not m.is_achieved and m.due_date < today}
+                    {"id": m.id, "name": m.name, "date": m.due_date, "achieved": m.is_achieved,
+                     "overdue": not m.is_achieved and m.due_date < today,
+                     "depends_on": [d.id for d in m.depends_on.all() if d.project_id == p.id]}
                     for m in p.milestones.all()
                 ],
                 "activities": activities,

@@ -14,6 +14,15 @@ from .models import (
 class MilestoneInline(admin.TabularInline):
     model = Milestone
     extra = 0
+    fields = ("name", "due_date", "achieved_on", "depends_on")
+    fk_name = "project"
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        # « Dépend de » : seulement les jalons du même projet.
+        if db_field.name == "depends_on":
+            project_id = request.resolver_match.kwargs.get("object_id") if request.resolver_match else None
+            kwargs["queryset"] = Milestone.objects.filter(project_id=project_id) if project_id else Milestone.objects.none()
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
 class KeyDateInline(admin.TabularInline):

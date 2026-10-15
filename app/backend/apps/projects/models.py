@@ -98,6 +98,10 @@ class Milestone(models.Model):
     name = models.CharField("Nom", max_length=160)
     due_date = models.DateField("Échéance")
     achieved_on = models.DateField("Atteint le", null=True, blank=True)
+    # Dépendances déclarées par le gestionnaire : ce jalon ne peut aboutir qu'après ceux-ci (même projet).
+    depends_on = models.ManyToManyField(
+        "self", symmetrical=False, blank=True, related_name="dependents", verbose_name="Dépend de"
+    )
 
     class Meta:
         verbose_name = "jalon"

@@ -104,6 +104,13 @@ EVENTS = [("10-12", "10:00", "Point hebdomadaire", "meeting", ["mireille", "koff
 KEY_DATES = [("Tableau de bord partenaires", "10-22", "Revue partenaire"), ("Audit qualité des données", "10-27", "Revue qualité"),
              ("Enquête nationale T4", "11-05", "Rencontre bailleur"), ("Rapport annuel 2026", "12-22", "Lancement public")]
 
+# Dépendances entre jalons : projet -> [(jalon, dépend de)]
+DEPENDENCIES = {
+    "Refonte du site web": [("Version bêta", "Contenus rédigés"), ("Version bêta", "Maquettes validées"), ("Mise en ligne", "Version bêta")],
+    "Tableau de bord partenaires": [("Prototype", "Cadrage validé"), ("Livraison v1", "Prototype")],
+    "Enquête nationale T4": [("Collecte terminée", "Collecte lancée"), ("Rapport préliminaire", "Collecte terminée")],
+}
+
 LOGS = [(2, "mireille", "a approuvé « Lancer la collecte »", "Enquête nationale T4"), (3, "sena", "a passé « Atelier de cadrage » en cours", "Tableau de bord partenaires"),
         (26, "koffi", "a terminé « Arborescence du site »", "Refonte du site web"), (27, "romuald", "a commenté « Rapport d’audit »", "Audit qualité des données"),
         (50, "adjoa", "a ajouté 3 tâches à « Enquête nationale T4 »", "Enquête nationale T4"), (72, "aicha", "a importé un Gantt dans « Rapport annuel 2026 »", "Rapport annuel 2026")]
@@ -148,8 +155,11 @@ class Command(BaseCommand):
             p = Project.objects.create(name=name, country=countries[cc], owner=users[owner], start_date=d(start), end_date=d(end), status=status)
             projects[name] = p
             acts = [ProjectActivity.objects.create(project=p, name=n, start_date=d(s), end_date=d(e)) for n, s, e in activities]
+            made = {}
             for n, due, achieved in milestones:
-                Milestone.objects.create(project=p, name=n, due_date=d(due), achieved_on=d(due) if achieved else None)
+                made[n] = Milestone.objects.create(project=p, name=n, due_date=d(due), achieved_on=d(due) if achieved else None)
+            for after, before in DEPENDENCIES.get(name, []):
+                made[after].depends_on.add(made[before])
             for title, who, st, due, prio, act in tasks:
                 Task.objects.create(project=p, activity=acts[act], title=title, assignee=users[who], status=st, due_date=d(due), priority=prio)
 

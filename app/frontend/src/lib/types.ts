@@ -56,7 +56,7 @@ export interface GanttProject {
   end: string;
   progress: number;
   next_milestone: NextMilestone | null;
-  milestones: { name: string; date: string; achieved: boolean; overdue: boolean }[];
+  milestones: { id: number; name: string; date: string; achieved: boolean; overdue: boolean; depends_on: number[] }[];
   activities: GanttActivity[];
   /** Dates clés renseignées par le gestionnaire (revue, rencontre, lancement…), distinctes des jalons. */
   key_dates: { label: string; date: string }[];

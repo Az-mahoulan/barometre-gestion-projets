@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { parseDate, shortDate } from "@/lib/format";
 import type { GanttProject } from "@/lib/types";
 
 import { ProjectPicker } from "./ProjectPicker";
+import { Icon } from "./ui";
 
 const MONTHS = ["Janv.", "Févr.", "Mars", "Avr.", "Mai", "Juin", "Juil.", "Août", "Sept.", "Oct.", "Nov.", "Déc."];
 const NAME_W = 210;
 const DAY = 86_400_000;
+const ROW_H = 40;
 
 // Statut d'un jalon : atteint, à venir ou dépassé.
 const STATUS = {
@@ -28,10 +30,35 @@ function segments(p: GanttProject) {
   return ms.map((m, i) => ({ m, from: i === 0 ? p.start : ms[i - 1].date, to: m.date }));
 }
 
+/**
+ * Jalons menacés : pas encore atteints et dépendant (directement ou en chaîne) d'un jalon en retard.
+ * Renvoie, pour chaque jalon en retard, la liste des jalons qu'il menace.
+ */
+function threats(p: GanttProject) {
+  const byId = new Map(p.milestones.map((m) => [m.id, m]));
+  const dependents = new Map<number, number[]>();
+  for (const m of p.milestones) for (const d of m.depends_on) dependents.set(d, [...(dependents.get(d) ?? []), m.id]);
+  const result = new Map<number, Milestone[]>();
+  for (const late of p.milestones.filter((m) => m.overdue)) {
+    const seen = new Set<number>();
+    const stack = [...(dependents.get(late.id) ?? [])];
+    while (stack.length) {
+      const id = stack.pop()!;
+      if (seen.has(id)) continue;
+      seen.add(id);
+      stack.push(...(dependents.get(id) ?? []));
+    }
+    const hit = [...seen].map((id) => byId.get(id)!).filter((m) => m && !m.achieved);
+    if (hit.length) result.set(late.id, hit.sort((a, b) => a.date.localeCompare(b.date)));
+  }
+  return result;
+}
+
 interface Row {
   key: string;
   label: string;
   sub: string;
+  alert?: string; // vue « Tous les projets » : jalons menacés par un retard
   segs: ReturnType<typeof segments>;
   start?: string; // vue « Tous les projets » : début et fin du projet
   end?: string;
@@ -59,12 +86,56 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
   const todayLeft = pos(asOf) + (DAY / span) * 50;
   const showToday = parseDate(asOf) >= from && parseDate(asOf) < to;
 
+  const risks = project ? threats(project) : new Map<number, Milestone[]>();
+  const threatened = new Set([...risks.values()].flat().map((m) => m.id));
+
   const rows: Row[] = project
     ? segments(project).map((s) => ({ key: s.m.name + s.m.date, label: s.m.name, sub: shortDate(s.m.date), segs: [s] }))
     : list.map((p) => {
         const done = p.milestones.filter((m) => m.achieved).length;
-        return { key: String(p.id), label: p.name, sub: `${done}/${p.milestones.length} jalons`, segs: segments(p), end: p.end, start: p.start };
+        const menaces = new Set([...threats(p).values()].flat().map((m) => m.id)).size;
+        return {
+          key: String(p.id),
+          label: p.name,
+          sub: `${done}/${p.milestones.length} jalons`,
+          alert: menaces ? `${menaces} menacé${menaces > 1 ? "s" : ""}` : undefined,
+          segs: segments(p),
+          end: p.end,
+          start: p.start,
+        };
       });
+
+  // Liaisons de dépendance (vue d'un projet) : tracées en pixels, d'après la largeur réelle de la zone des barres.
+  const area = useRef<HTMLDivElement>(null);
+  const head = useRef<HTMLDivElement>(null);
+  const [box, setBox] = useState({ w: 0, top: 0 });
+  useEffect(() => {
+    const el = area.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setBox({ w: Math.max(0, el.clientWidth - NAME_W), top: head.current?.offsetHeight ?? 0 }));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const links = project
+    ? segments(project).flatMap((s, i, all) =>
+        s.m.depends_on.flatMap((dep) => {
+          const j = all.findIndex((t) => t.m.id === dep);
+          if (j < 0) return [];
+          const pre = all[j].m;
+          const x1 = (pos(pre.date, true) / 100) * box.w;
+          const x2 = (pos(s.from) / 100) * box.w;
+          const y1 = j * ROW_H + ROW_H / 2;
+          const y2 = i * ROW_H + ROW_H / 2;
+          const elbow = x2 >= x1 + 14;
+          const yTurn = i > j ? i * ROW_H : (i + 1) * ROW_H;
+          const d = elbow
+            ? `M${x1} ${y1} H${x1 + 7} V${y2} H${x2 - 1}`
+            : `M${x1} ${y1} H${x1 + 7} V${yTurn} H${x2 - 9} V${y2} H${x2 - 1}`;
+          const red = pre.overdue || threatened.has(pre.id);
+          return [{ key: `${pre.id}-${s.m.id}`, d, red }];
+        }),
+      )
+    : [];
 
   return (
     <section className="card" aria-label="Gantt des jalons">
@@ -73,8 +144,21 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
         <ProjectPicker projects={projects} value={value} onChange={setValue} label="Jalons du projet" />
       </div>
 
-      <div className="relative overflow-clip rounded-[14px] border border-line bg-[#f7f7f3]">
-        <div className="relative z-20 grid border-b border-[#d6d6ce] bg-[#ebebe5]" style={{ gridTemplateColumns: `${NAME_W}px minmax(0,1fr)` }}>
+      {/* Retards qui menacent d'autres jalons (dépendances déclarées). */}
+      {[...risks.entries()].map(([lateId, hit]) => {
+        const late = project?.milestones.find((m) => m.id === lateId);
+        return (
+          <p key={lateId} className="mb-3 flex items-center gap-2.5 rounded-[12px] bg-late-soft px-3 py-2 text-[12px] text-ink-2" role="status">
+            <Icon name="alarm" className="h-4 w-4 shrink-0 text-late" />
+            <span>
+              Le retard de <b className="text-late">« {late?.name} »</b> menace {hit.length} jalon{hit.length > 1 ? "s" : ""} : {hit.map((m) => m.name).join(", ")}.
+            </span>
+          </p>
+        );
+      })}
+
+      <div ref={area} className="relative overflow-clip rounded-[14px] border border-line bg-[#f7f7f3]">
+        <div ref={head} className="relative z-20 grid border-b border-[#d6d6ce] bg-[#ebebe5]" style={{ gridTemplateColumns: `${NAME_W}px minmax(0,1fr)` }}>
           <div className="flex items-center px-4 py-2.5 text-[12px] font-semibold">{project ? "Jalons" : "Projets"}</div>
           <div className="relative">
             {months.map((m) => (
@@ -96,7 +180,10 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
               <span className="truncate text-[12px] font-medium text-ink-2" title={r.label}>
                 {r.label}
               </span>
-              <span className="shrink-0 text-[10.5px] text-muted">{r.sub}</span>
+              <span className="shrink-0 text-right text-[10.5px] leading-tight text-muted">
+                {project && threatened.has(r.segs[0]?.m.id) ? <b className="font-semibold text-late">menacé</b> : r.sub}
+                {r.alert && <b className="block font-semibold text-late">{r.alert}</b>}
+              </span>
             </div>
             <div className="relative h-[40px]">
               <div className="absolute inset-0" aria-hidden="true">
@@ -129,8 +216,15 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
                   <div key={s.m.name + s.m.date}>
                     <span
                       className="absolute top-[12px] h-[16px] rounded-[2px]"
-                      style={{ left: `calc(${left}% + ${i > 0 ? 1.5 : 0}px)`, width: `calc(${Math.max(0.4, right - left)}% - ${i > 0 ? 1.5 : 0}px)`, background: st.bar }}
-                      title={`${s.m.name} · ${shortDate(s.m.date)} · ${st.label}`}
+                      style={{
+                        left: `calc(${left}% + ${i > 0 ? 1.5 : 0}px)`,
+                        width: `calc(${Math.max(0.4, right - left)}% - ${i > 0 ? 1.5 : 0}px)`,
+                        background: st.bar,
+                        // Jalon menacé par un retard en amont : contour en pointillé rouge.
+                        outline: threatened.has(s.m.id) ? "1.5px dashed #c7321f" : undefined,
+                        outlineOffset: 2,
+                      }}
+                      title={`${s.m.name} · ${shortDate(s.m.date)} · ${threatened.has(s.m.id) ? "menacé par un retard" : st.label}`}
                     />
                     {/* Échéance : portion de couleur franche au bout de la barre. */}
                     <span className="absolute top-[12px] h-[16px] w-[5px] rounded-[2px]" style={{ left: `calc(${right}% - 5px)`, background: st.solid }} />
@@ -148,6 +242,33 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
             </div>
           </div>
         ))}
+
+        {links.length > 0 && box.w > 0 && (
+          <svg
+            className="pointer-events-none absolute z-[5] overflow-visible"
+            style={{ left: NAME_W, top: box.top, width: box.w, height: rows.length * ROW_H }}
+            aria-hidden="true"
+          >
+            <defs>
+              {(["#8a8f98", "#c7321f"] as const).map((c) => (
+                <marker key={c} id={`dep-${c.slice(1)}`} viewBox="0 0 6 6" refX="5" refY="3" markerWidth="6" markerHeight="6" orient="auto">
+                  <path d="M0 0 L6 3 L0 6 Z" fill={c} />
+                </marker>
+              ))}
+            </defs>
+            {links.map((l) => (
+              <path
+                key={l.key}
+                d={l.d}
+                fill="none"
+                stroke={l.red ? "#c7321f" : "#8a8f98"}
+                strokeWidth="1.5"
+                strokeLinejoin="round"
+                markerEnd={`url(#dep-${l.red ? "c7321f" : "8a8f98"})`}
+              />
+            ))}
+          </svg>
+        )}
 
         {showToday && rows.length > 0 && (
           <div
@@ -174,6 +295,21 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
           <i className="w-4 border-t-2 border-dashed border-[#c7321f]" />
           Retard
         </span>
+        {project && (
+          <>
+        <span className="inline-flex items-center gap-1.5">
+          <svg width="18" height="8" aria-hidden="true">
+            <path d="M1 1 H6 V6 H14" fill="none" stroke="#8a8f98" strokeWidth="1.5" />
+            <path d="M13 3.5 L17 6 L13 8.5 Z" fill="#8a8f98" />
+          </svg>
+          Dépendance
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <i className="h-2 w-4 rounded-[1px] bg-[#a9c4f2] outline-[1.5px] outline-offset-1 outline-dashed outline-[#c7321f]" />
+          Menacé
+        </span>
+          </>
+        )}
       </div>
     </section>
   );
