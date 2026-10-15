@@ -186,9 +186,12 @@ export function DashboardView() {
             onLogout={logout}
           />
 
-          <div className="grid flex-1 gap-4 rounded-[22px] bg-bg p-3 sm:p-4 xl:grid-cols-[minmax(0,1fr)_316px]">
-            <div className="flex min-w-0 flex-col gap-4">
+          {/* Indicateurs sur toute la largeur, puis deux colonnes : la colonne de droite commence sous eux (forme en L). */}
+          <div className="grid flex-1 content-start gap-4 rounded-[22px] bg-bg p-3 sm:p-4 xl:grid-cols-[minmax(0,1fr)_316px]">
+            <div className="min-w-0 xl:col-span-2">
               <KpiRow kpis={data.kpis} />
+            </div>
+            <div className="flex min-w-0 flex-col gap-4">
               <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
                 <TrendCard
                   trend={data.trend}
