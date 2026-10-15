@@ -111,6 +111,22 @@ class Milestone(models.Model):
         return self.achieved_on is not None
 
 
+class ProjectKeyDate(models.Model):
+    """Date clé renseignée par le gestionnaire du projet (revue, rencontre, lancement…), distincte des jalons."""
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="key_dates")
+    date = models.DateField("Date")
+    label = models.CharField("Libellé", max_length=120)
+
+    class Meta:
+        verbose_name = "date clé"
+        verbose_name_plural = "dates clés"
+        ordering = ["date", "id"]
+
+    def __str__(self) -> str:
+        return f"{self.project} · {self.label}"
+
+
 class CalendarEvent(models.Model):
     class Kind(models.TextChoices):
         MEETING = "meeting", "Réunion"

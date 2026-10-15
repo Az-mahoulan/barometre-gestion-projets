@@ -15,6 +15,7 @@ from apps.projects.models import (
     Milestone,
     Project,
     ProjectActivity,
+    ProjectKeyDate,
     Task,
 )
 
@@ -99,6 +100,10 @@ EVENTS = [("10-12", "10:00", "Point hebdomadaire", "meeting", ["mireille", "koff
           ("10-27", "15:00", "Revue qualité", "meeting", ["romuald", "aicha"], "Audit qualité des données"),
           ("11-05", "09:30", "Rencontre bailleur", "meeting", ["mireille", "adjoa"], "Enquête nationale T4")]
 
+# Dates clés renseignées par les gestionnaires : projet, date, libellé
+KEY_DATES = [("Tableau de bord partenaires", "10-22", "Revue partenaire"), ("Audit qualité des données", "10-27", "Revue qualité"),
+             ("Enquête nationale T4", "11-05", "Rencontre bailleur"), ("Rapport annuel 2026", "12-22", "Lancement public")]
+
 LOGS = [(2, "mireille", "a approuvé « Lancer la collecte »", "Enquête nationale T4"), (3, "sena", "a passé « Atelier de cadrage » en cours", "Tableau de bord partenaires"),
         (26, "koffi", "a terminé « Arborescence du site »", "Refonte du site web"), (27, "romuald", "a commenté « Rapport d’audit »", "Audit qualité des données"),
         (50, "adjoa", "a ajouté 3 tâches à « Enquête nationale T4 »", "Enquête nationale T4"), (72, "aicha", "a importé un Gantt dans « Rapport annuel 2026 »", "Rapport annuel 2026")]
@@ -147,6 +152,9 @@ class Command(BaseCommand):
                 Milestone.objects.create(project=p, name=n, due_date=d(due), achieved_on=d(due) if achieved else None)
             for title, who, st, due, prio, act in tasks:
                 Task.objects.create(project=p, activity=acts[act], title=title, assignee=users[who], status=st, due_date=d(due), priority=prio)
+
+        for name, day, label in KEY_DATES:
+            ProjectKeyDate.objects.create(project=projects[name], date=d(day), label=label)
 
         tz = timezone.get_current_timezone()
         for day, hour, title, kind, who, project in EVENTS:

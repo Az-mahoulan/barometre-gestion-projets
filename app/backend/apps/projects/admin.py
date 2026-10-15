@@ -6,12 +6,18 @@ from .models import (
     Milestone,
     Project,
     ProjectActivity,
+    ProjectKeyDate,
     Task,
 )
 
 
 class MilestoneInline(admin.TabularInline):
     model = Milestone
+    extra = 0
+
+
+class KeyDateInline(admin.TabularInline):
+    model = ProjectKeyDate
     extra = 0
 
 
@@ -24,7 +30,7 @@ class ActivityInline(admin.TabularInline):
 class ProjectAdmin(admin.ModelAdmin):
     list_display = ("name", "country", "owner", "start_date", "end_date", "status")
     list_filter = ("status", "country")
-    inlines = [ActivityInline, MilestoneInline]
+    inlines = [ActivityInline, MilestoneInline, KeyDateInline]
 
 
 @admin.register(Task)

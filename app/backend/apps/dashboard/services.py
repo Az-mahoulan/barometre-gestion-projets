@@ -106,7 +106,7 @@ def _visible_projects(user, country: str | None):
     qs = (
         visible_projects(user)
         .select_related("country", "owner")
-        .prefetch_related("tasks__assignee", "milestones", "activities", "events")
+        .prefetch_related("tasks__assignee", "milestones", "activities", "key_dates")
     )
     if country:
         qs = qs.filter(country__code=country)
@@ -163,12 +163,8 @@ def build_gantt(projects, stats, today: date) -> list[dict]:
                     for m in p.milestones.all()
                 ],
                 "activities": activities,
-                # Moments hors programmation (revues, rencontres) rattachés au projet.
-                "events": [
-                    {"title": e.title, "date": timezone.localtime(e.starts_at).date(), "kind": e.kind,
-                     "kind_label": e.get_kind_display()}
-                    for e in sorted(p.events.all(), key=lambda e: e.starts_at)
-                ],
+                # Dates clés renseignées par le gestionnaire (revue, rencontre, lancement…).
+                "key_dates": [{"label": k.label, "date": k.date} for k in p.key_dates.all()],
             }
         )
     return rows
