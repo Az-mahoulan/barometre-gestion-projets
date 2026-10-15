@@ -24,7 +24,7 @@ export function Topbar({
   onLogout: () => void;
 }) {
   return (
-    <header className="mb-5 flex flex-wrap items-center gap-2.5 rounded-[22px] bg-surface p-2.5 pl-4">
+    <header className="flex flex-wrap items-center gap-2.5 px-2 pb-3 pt-1.5">
       <label className="flex h-10 min-w-[200px] flex-1 items-center gap-2 rounded-full bg-surface-2 pl-3.5 pr-1.5 text-[13px] text-muted">
         <Icon name="search" />
         <span className="sr-only">Rechercher</span>

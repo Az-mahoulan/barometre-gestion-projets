@@ -23,7 +23,11 @@ import { Topbar } from "./Topbar";
 import { TrendCard } from "./TrendCard";
 import { WeekCard } from "./WeekCard";
 
-const SCOPE_LABEL = { all: "Tous les projets", owned: "Projets dont vous avez la charge", assigned: "Projets où vous avez des tâches" };
+const SCOPE_LABEL = {
+  all: "Tous les projets",
+  owned: "Projets dont vous avez la charge",
+  assigned: "Projets où vous avez des tâches",
+};
 
 export function DashboardView() {
   const router = useRouter();
@@ -35,14 +39,18 @@ export function DashboardView() {
   const [week, setWeek] = useState(0);
   const [trendProject, setTrendProject] = useState("");
   const [tasksProject, setTasksProject] = useState("");
-  const { data, error, loading, refresh } = useDashboard({ country, period, week, trendProject, tasksProject }, !!me);
+  const { data, error, loading, refresh } = useDashboard(
+    { country, period, week, trendProject, tasksProject },
+    !!me,
+  );
 
   const [toast, setToast] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [confirmAll, setConfirmAll] = useState(false);
 
   useEffect(() => {
-    if (meError?.status === 401 || meError?.status === 403) router.replace("/login");
+    if (meError?.status === 401 || meError?.status === 403)
+      router.replace("/login");
   }, [meError, router]);
 
   useEffect(() => {
@@ -62,7 +70,9 @@ export function DashboardView() {
     setBusy(key);
     try {
       if (item.action === "remind") {
-        const res = await apiPost<{ detail: string }>(`/tasks/${item.task_id}/remind/`);
+        const res = await apiPost<{ detail: string }>(
+          `/tasks/${item.task_id}/remind/`,
+        );
         setToast(res.detail);
       } else if (item.action === "approve") {
         await apiPost(`/tasks/${item.task_id}/status/`, { status: "approved" });
@@ -76,13 +86,20 @@ export function DashboardView() {
     }
   }
 
-  const remindable = data?.critical_actions.items.filter((i) => i.action === "remind" && i.task_id) ?? [];
+  const remindable =
+    data?.critical_actions.items.filter(
+      (i) => i.action === "remind" && i.task_id,
+    ) ?? [];
 
   async function remindAll() {
     setBusy("all");
     try {
-      await Promise.all(remindable.map((i) => apiPost(`/tasks/${i.task_id}/remind/`)));
-      setToast(`${remindable.length} relance${remindable.length > 1 ? "s enregistrées" : " enregistrée"}.`);
+      await Promise.all(
+        remindable.map((i) => apiPost(`/tasks/${i.task_id}/remind/`)),
+      );
+      setToast(
+        `${remindable.length} relance${remindable.length > 1 ? "s enregistrées" : " enregistrée"}.`,
+      );
       refresh();
     } catch (e) {
       setToast((e as Error).message);
@@ -98,7 +115,10 @@ export function DashboardView() {
         <div>
           <p className="font-medium">Le serveur ne répond pas.</p>
           <p className="mt-1 text-sm text-muted">{meError.message}</p>
-          <button className="btn btn-dark mt-4" onClick={() => window.location.reload()}>
+          <button
+            className="btn btn-dark mt-4"
+            onClick={() => window.location.reload()}
+          >
             Réessayer
           </button>
         </div>
@@ -108,11 +128,17 @@ export function DashboardView() {
 
   if (!me || (loading && !data)) {
     return (
-      <div className="grid min-h-screen place-items-center p-6 text-center text-muted" role="status">
+      <div
+        className="grid min-h-screen place-items-center p-6 text-center text-muted"
+        role="status"
+      >
         {waking ? (
           <div>
             <p className="font-medium text-ink">Démarrage du serveur…</p>
-            <p className="mt-1 text-sm">Après une période d’inactivité, cela prend environ une minute. La page s’affichera toute seule.</p>
+            <p className="mt-1 text-sm">
+              Après une période d’inactivité, cela prend environ une minute. La
+              page s’affichera toute seule.
+            </p>
           </div>
         ) : (
           "Chargement…"
@@ -125,7 +151,9 @@ export function DashboardView() {
     return (
       <div className="grid min-h-screen place-items-center p-6 text-center">
         <div>
-          <p className="font-medium">Impossible de charger le tableau de bord.</p>
+          <p className="font-medium">
+            Impossible de charger le tableau de bord.
+          </p>
           <p className="mt-1 text-sm text-muted">{error.message}</p>
           <button className="btn btn-dark mt-4" onClick={refresh}>
             Réessayer
@@ -137,50 +165,73 @@ export function DashboardView() {
   if (!data) return null;
 
   return (
-    <div className="flex min-h-screen gap-5 p-3 sm:p-5">
-      <Sidebar me={me} alerts={data.critical_actions.total} members={data.teams.members} subtitle={`${longDate(data.as_of).replace(/^./, (c) => c.toUpperCase())} · ${SCOPE_LABEL[data.scope]}`} />
-      <main className="min-w-0 flex-1">
-        <Topbar
+    // Cadre blanc unique (barre latérale + barre du haut) ; le contenu s'y encastre dans un panneau arrondi.
+    <div className="min-h-screen bg-[#e6e6e0] p-2 sm:p-4">
+      <div className="flex min-h-[calc(100vh-32px)] rounded-[30px] bg-surface p-2 sm:p-3">
+        <Sidebar
           me={me}
-          countries={countries}
-          country={country}
-          period={period}
           alerts={data.critical_actions.total}
-          onCountry={(c) => {
-            setCountry(c);
-            setTrendProject("");
-            setTasksProject("");
-          }}
-          onPeriod={setPeriod}
-          onLogout={logout}
+          members={data.teams.members}
+          subtitle={`${longDate(data.as_of).replace(/^./, (c) => c.toUpperCase())} · ${SCOPE_LABEL[data.scope]}`}
         />
+        <main className="flex min-w-0 flex-1 flex-col">
+          <Topbar
+            me={me}
+            countries={countries}
+            country={country}
+            period={period}
+            alerts={data.critical_actions.total}
+            onCountry={(c) => {
+              setCountry(c);
+              setTrendProject("");
+              setTasksProject("");
+            }}
+            onPeriod={setPeriod}
+            onLogout={logout}
+          />
 
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
-          <div className="flex min-w-0 flex-col gap-5">
-            <KpiRow kpis={data.kpis} />
-            <div className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-              <TrendCard trend={data.trend} projects={data.gantt} value={trendProject} onChange={setTrendProject} />
-              <WeekCard week={data.week} onOffset={setWeek} />
+          <div className="grid flex-1 gap-5 rounded-[24px] bg-bg p-3 sm:p-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+            <div className="flex min-w-0 flex-col gap-5">
+              <KpiRow kpis={data.kpis} />
+              <div className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+                <TrendCard
+                  trend={data.trend}
+                  projects={data.gantt}
+                  value={trendProject}
+                  onChange={setTrendProject}
+                />
+                <WeekCard week={data.week} onOffset={setWeek} />
+              </div>
+              <TaskProgressCard
+                progress={data.task_progress}
+                projects={data.gantt}
+                value={tasksProject}
+                onChange={setTasksProject}
+              />
+              <GanttCard projects={data.gantt} asOf={data.as_of} />
+              <ProjectsTable projects={data.projects} />
+              <TeamsTable teams={data.teams} />
             </div>
-            <TaskProgressCard progress={data.task_progress} projects={data.gantt} value={tasksProject} onChange={setTasksProject} />
-            <GanttCard projects={data.gantt} asOf={data.as_of} />
-            <ProjectsTable projects={data.projects} />
-            <TeamsTable teams={data.teams} />
-          </div>
 
-          <div className="flex min-w-0 flex-col gap-5">
-            <AssistantCard
-              summary={buildSummary(data)}
-              canRemind={remindable.length > 0}
-              reminders={remindable.length}
-              onRemind={() => setConfirmAll(true)}
-            />
-            <CalendarCard asOf={data.as_of} projects={data.gantt} />
-            <CriticalCard total={data.critical_actions.total} items={data.critical_actions.items} busy={busy} onAction={runAction} />
-            <ActivityCard entries={data.recent_activity} now={data.now} />
+            <div className="flex min-w-0 flex-col gap-5">
+              <AssistantCard
+                summary={buildSummary(data)}
+                canRemind={remindable.length > 0}
+                reminders={remindable.length}
+                onRemind={() => setConfirmAll(true)}
+              />
+              <CalendarCard asOf={data.as_of} projects={data.gantt} />
+              <CriticalCard
+                total={data.critical_actions.total}
+                items={data.critical_actions.items}
+                busy={busy}
+                onAction={runAction}
+              />
+              <ActivityCard entries={data.recent_activity} now={data.now} />
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
 
       <ConfirmDialog
         open={confirmAll}
@@ -192,8 +243,16 @@ export function DashboardView() {
         onCancel={() => setConfirmAll(false)}
       />
 
-      <div role="status" aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-5 flex justify-center">
-        {toast && <span className="rounded-full bg-side px-4 py-2.5 text-sm font-semibold text-white shadow-lg">{toast}</span>}
+      <div
+        role="status"
+        aria-live="polite"
+        className="pointer-events-none fixed inset-x-0 bottom-5 flex justify-center"
+      >
+        {toast && (
+          <span className="rounded-full bg-side px-4 py-2.5 text-sm font-semibold text-white shadow-lg">
+            {toast}
+          </span>
+        )}
       </div>
     </div>
   );

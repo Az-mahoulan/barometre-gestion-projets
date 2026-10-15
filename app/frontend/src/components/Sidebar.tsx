@@ -19,7 +19,7 @@ export function Sidebar({ me, alerts, members, subtitle }: { me: Me; alerts: num
   const first = me.name.split(" ")[0];
   const shown = members.slice(0, 4);
   return (
-    <aside className="sticky top-5 hidden h-[calc(100vh-40px)] w-[256px] shrink-0 flex-col overflow-y-auto rounded-[24px] bg-surface px-4 py-5 lg:flex">
+    <aside className="sticky top-6 hidden h-[calc(100vh-48px)] w-[248px] shrink-0 flex-col overflow-y-auto px-3 py-3 lg:flex">
       <div className="flex items-center gap-2.5 px-1 text-[19px] font-extrabold">
         <span className="grid h-[34px] w-[34px] place-items-center rounded-[10px] bg-side text-lime">
           <Icon name="logo" className="h-5 w-5" />
