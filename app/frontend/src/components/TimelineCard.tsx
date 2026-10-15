@@ -148,7 +148,7 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
                     left: cutL ? 0 : `calc(${left}% + 4px)`,
                     width: `calc(${right - left}% - ${(cutL ? 0 : 4) + (cutR ? 0 : 4)}px)`,
                     background: color.bar,
-                    borderRadius: `${cutL ? 0 : 5}px ${cutR ? 0 : 5}px ${cutR ? 0 : 5}px ${cutL ? 0 : 5}px`,
+                    borderRadius: `${cutL ? 0 : 2}px ${cutR ? 0 : 2}px ${cutR ? 0 : 2}px ${cutL ? 0 : 2}px`,
                   }}
                   title={`${p.name} · ${shortDate(p.start)} → ${shortDate(p.end)}`}
                 />
@@ -161,7 +161,7 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
                     <div key={k.label + k.date}>
                       {/* Date clé : une portion de la barre, dans la version franche de sa couleur. */}
                       <i
-                        className="absolute top-[13px] h-[14px] rounded-[4px]"
+                        className="absolute top-[13px] h-[14px] rounded-[2px]"
                         style={{ left: `calc(${(col(k.date) / n) * 100}% + 3px)`, width: `calc(${100 / n}% - 6px)`, background: color.solid }}
                         title={`${k.label} · ${shortDate(k.date)}`}
                       />
@@ -202,11 +202,11 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
 
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted">
         <span className="inline-flex items-center gap-1.5">
-          <i className="h-2 w-5 rounded-[3px] bg-[#b8acf6]" />
+          <i className="h-2 w-5 rounded-[1px] bg-[#b8acf6]" />
           Début → fin du projet
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <i className="h-2 w-2.5 rounded-[2px] bg-[#7c6cf0]" />
+          <i className="h-2 w-2.5 rounded-[1px] bg-[#7c6cf0]" />
           Date clé
         </span>
         {showToday && (
