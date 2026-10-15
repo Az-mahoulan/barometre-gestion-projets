@@ -150,11 +150,9 @@ export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[
           </div>
         </div>
         {scroll.ratio < 1 && (
-          <span className="pointer-events-none absolute inset-y-1 -right-2.5 w-[3px] rounded-full bg-[#efefea]" aria-hidden="true">
-            <span
-              className="absolute w-full rounded-full bg-[#c9cac3]"
-              style={{ height: `${scroll.ratio * 100}%`, top: `${scroll.top * (1 - scroll.ratio) * 100}%` }}
-            />
+          <span className="pointer-events-none absolute inset-y-1 -right-2.5 w-[3px]" aria-hidden="true">
+            {/* Seulement un petit curseur (la moitié d'une barre), sans piste */}
+            <span className="absolute w-full rounded-full bg-[#c9cac3]" style={{ height: ROW / 2, top: `calc(${scroll.top} * (100% - ${ROW / 2}px))` }} />
           </span>
         )}
         </div>
