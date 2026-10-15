@@ -5,16 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { parseDate, shortDate } from "@/lib/format";
 import type { GanttProject } from "@/lib/types";
 
-import { Icon } from "./ui";
-
-type Zoom = "month" | "quarter";
-const ZOOMS: { key: Zoom; label: string }[] = [
-  { key: "month", label: "Mois" },
-  { key: "quarter", label: "Trimestre" },
-];
 const MONTHS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
-const MONTHS_LONG = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
-const DAYS = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
 const NAME_W = 200;
 const COL_MIN = 40;
 
@@ -30,28 +21,14 @@ const PALETTE = [
   { solid: "#64748b", soft: "#d7dce4" },
 ];
 
-const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-
-function windowFor(zoom: Zoom, today: Date, offset: number) {
-  const size = zoom === "month" ? 1 : 3;
-  const index = Math.floor(today.getMonth() / size) + offset;
-  const from = new Date(today.getFullYear(), index * size, 1);
-  const to = new Date(from.getFullYear(), from.getMonth() + size, 1);
-  const title = size === 1 ? `${MONTHS_LONG[from.getMonth()]} ${from.getFullYear()}` : `T${Math.floor(from.getMonth() / 3) + 1} ${from.getFullYear()}`;
-  return { from: iso(from), to: iso(to), title };
-}
 
 /**
- * Chronologie des projets. L'en-tête ne suit pas une échelle régulière : chaque colonne est une date qui compte
- * (début, fin, jalon, revue ou rencontre d'un projet, et aujourd'hui). Les barres vont de la colonne du début à
- * celle de la fin ; les jalons prévus sont des points sur la barre, les moments hors programmation des losanges nommés.
+ * Chronologie des projets en cours : tableau récapitulatif dont l'en-tête est la suite, dans l'ordre, de toutes
+ * les dates clés (début, fin, jalon, revue ou rencontre d'un projet) ; pas d'échelle de temps régulière.
+ * Les barres vont de la colonne du début à celle de la fin ; jalons en points, revues et rencontres en losanges nommés.
  */
 export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asOf: string }) {
-  const today = parseDate(asOf);
-  const [zoom, setZoom] = useState<Zoom>("month");
-  const [offset, setOffset] = useState(0);
-  const { from, to, title } = windowFor(zoom, today, offset);
-  const within = (d: string) => d >= from && d < to;
+  const thisYear = parseDate(asOf).getFullYear();
 
   // Largeur réelle de la zone des dates, pour placer les noms sans chevauchement.
   const area = useRef<HTMLDivElement>(null);
@@ -72,75 +49,43 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
     if (el) setEdges({ left: el.scrollLeft > 2, right: el.scrollLeft + el.clientWidth < el.scrollWidth - 2 });
   };
 
-  const rows = projects
-    .map((p, i) => ({ p, color: PALETTE[i % PALETTE.length] }))
-    .filter(({ p }) => p.end >= from && p.start < to);
+  const rows = projects.filter((p) => p.status === "active").map((p, i) => ({ p, color: PALETTE[i % PALETTE.length] }));
 
-  // Colonnes : toutes les dates marquantes de la période, plus aujourd'hui.
+  // Colonnes : toutes les dates clés des projets, de la plus ancienne à la plus récente.
   const notes = new Map<string, string[]>();
-  const note = (d: string, text: string) => {
-    if (within(d)) notes.set(d, [...(notes.get(d) ?? []), text]);
-  };
+  const note = (d: string, text: string) => notes.set(d, [...(notes.get(d) ?? []), text]);
   for (const { p } of rows) {
     note(p.start, `Début · ${p.name}`);
     note(p.end, `Fin · ${p.name}`);
     for (const m of p.milestones) note(m.date, `Jalon « ${m.name} » · ${p.name}`);
     for (const e of p.events) note(e.date, `${e.title} · ${p.name}`);
   }
-  if (within(asOf) && !notes.has(asOf)) notes.set(asOf, []);
   const dates = [...notes.keys()].sort();
   const n = Math.max(dates.length, 1);
   const colW = width / n;
   const col = (d: string) => dates.indexOf(d);
   const labelW = (text: string) => text.length * 6.2 + 14;
 
-  // Ouvre la période sur aujourd'hui (ou au début) et met à jour les fondus.
+  // Aujourd'hui : un trait entre les dates déjà passées et celles à venir (au milieu de la colonne si c'est une date clé).
+  const past = dates.filter((d) => d < asOf).length;
+  const todayAt = dates.includes(asOf) ? past + 0.5 : past;
+
+  // Ouvre le tableau autour d'aujourd'hui et met à jour les fondus.
   useEffect(() => {
     const el = scroller.current;
     if (!el) return;
-    const i = dates.indexOf(asOf);
-    el.scrollLeft = i > 0 ? Math.max(0, NAME_W + (i / n) * (el.scrollWidth - NAME_W) - el.clientWidth / 2) : 0;
+    el.scrollLeft = Math.max(0, (todayAt / n) * (el.scrollWidth - NAME_W) - (el.clientWidth - NAME_W) / 2);
     measure();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [zoom, offset, n, width]);
-
-  const switchZoom = (z: Zoom) => {
-    setZoom(z);
-    setOffset(0);
-  };
+  }, [n, width]);
 
   return (
     <section className="card" aria-label="Chronologie des projets">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-[15px] font-bold">Chronologie des projets</h2>
-        <div className="flex items-center gap-2">
-          <span className="flex items-center rounded-full border border-line">
-            <button className="grid h-8 w-8 place-items-center rounded-full hover:bg-surface-2" onClick={() => setOffset(offset - 1)} aria-label="Période précédente">
-              <Icon name="left" className="h-4 w-4" />
-            </button>
-            <button className="min-w-[110px] px-1 text-center text-[12.5px] font-semibold" onClick={() => setOffset(0)} title="Revenir à la période actuelle">
-              {title}
-            </button>
-            <button className="grid h-8 w-8 place-items-center rounded-full hover:bg-surface-2" onClick={() => setOffset(offset + 1)} aria-label="Période suivante">
-              <Icon name="right" className="h-4 w-4" />
-            </button>
-          </span>
-          <span role="tablist" aria-label="Période" className="flex rounded-full bg-surface-2 p-1">
-            {ZOOMS.map((z) => (
-              <button
-                key={z.key}
-                role="tab"
-                aria-selected={zoom === z.key}
-                onClick={() => switchZoom(z.key)}
-                className={`rounded-full px-3 py-1 text-[11.5px] font-semibold transition-colors ${
-                  zoom === z.key ? "bg-surface text-ink shadow-[0_1px_3px_rgba(28,29,34,0.12)]" : "text-muted hover:text-ink"
-                }`}
-              >
-                {z.label}
-              </button>
-            ))}
-          </span>
-        </div>
+        <span className="text-[12px] text-muted">
+          {rows.length} projet{rows.length > 1 ? "s" : ""} en cours · {dates.length} dates clés
+        </span>
       </div>
 
       <div
@@ -152,18 +97,22 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
         }}
       >
         <div ref={area} className="relative overflow-clip rounded-[14px] border border-line" style={{ minWidth: NAME_W + n * COL_MIN }}>
-          <div className="grid border-b border-line bg-surface-2/60" style={{ gridTemplateColumns: `${NAME_W}px minmax(0,1fr)` }}>
+          <div className="relative z-20 grid border-b border-line bg-[#f8f8f5]" style={{ gridTemplateColumns: `${NAME_W}px minmax(0,1fr)` }}>
             <div className="sticky left-0 z-20 flex items-center border-r border-line bg-[#f8f8f5] px-3 text-[12px] font-bold">Projets</div>
             <div className="grid" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}>
               {dates.map((d) => {
                 const day = parseDate(d);
                 const isToday = d === asOf;
+                const year = day.getFullYear();
                 return (
-                  <div key={d} className="border-l border-line px-1 py-2 text-center" title={(notes.get(d) ?? []).join("\n") || "Aujourd’hui"}>
+                  <div key={d} className="border-l border-line px-1 py-2 text-center" title={(notes.get(d) ?? []).join("\n")}>
                     <div className="text-[13px] font-bold leading-tight">
                       <span className={isToday ? "inline-grid h-6 min-w-6 place-items-center rounded-full bg-lime px-1" : ""}>{day.getDate()}</span>
                     </div>
-                    <div className="text-[10.5px] text-muted">{zoom === "month" ? DAYS[day.getDay()] : MONTHS[day.getMonth()]}</div>
+                    <div className="text-[10.5px] text-muted">
+                      {MONTHS[day.getMonth()]}
+                      {year !== thisYear ? ` ${String(year).slice(2)}` : ""}
+                    </div>
                   </div>
                 );
               })}
@@ -173,14 +122,12 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
           {rows.length === 0 && <p className="px-3 py-6 text-center text-[12.5px] text-muted">Aucun projet sur cette période.</p>}
           {rows.map(({ p, color }) => {
             // Projet commencé avant la période (ou fini après) : la barre touche le bord, sans arrondi.
-            const cutL = p.start < from;
-            const cutR = p.end >= to;
-            const a = cutL ? 0 : col(p.start);
-            const b = cutR ? n - 1 : col(p.end);
+            const a = col(p.start);
+            const b = col(p.end);
             const left = (a / n) * 100;
             const right = ((b + 1) / n) * 100;
-            const milestones = p.milestones.filter((m) => within(m.date));
-            const events = p.events.filter((e) => within(e.date));
+            const milestones = p.milestones;
+            const events = p.events;
 
             // Noms des revues et rencontres sous la barre, sans chevauchement (sinon visibles au survol).
             const placed: [number, number][] = [];
@@ -211,17 +158,17 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
                 <div className="relative h-[52px]">
                   <div className="absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }} aria-hidden="true">
                     {dates.map((d) => (
-                      <div key={d} className={`border-l border-line ${d === asOf ? "bg-lime/15" : ""}`} />
+                      <div key={d} className="border-l border-line" />
                     ))}
                   </div>
 
                   <div
                     className="absolute top-[12px] h-[18px]"
                     style={{
-                      left: cutL ? 0 : `calc(${left}% + 4px)`,
-                      width: `calc(${right - left}% - ${(cutL ? 0 : 4) + (cutR ? 0 : 4)}px)`,
+                      left: `calc(${left}% + 4px)`,
+                      width: `calc(${right - left}% - 8px)`,
                       background: color.soft,
-                      borderRadius: `${cutL ? 0 : 9}px ${cutR ? 0 : 9}px ${cutR ? 0 : 9}px ${cutL ? 0 : 9}px`,
+                      borderRadius: 9,
                     }}
                     title={`${p.name} · ${shortDate(p.start)} → ${shortDate(p.end)}`}
                   />
@@ -264,6 +211,19 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
               </div>
             );
           })}
+
+          {rows.length > 0 && (
+            <div
+              className="pointer-events-none absolute inset-y-0 z-10"
+              style={{ left: `calc(${NAME_W}px + (100% - ${NAME_W}px) * ${todayAt / n})` }}
+              aria-hidden="true"
+            >
+              <span className="absolute inset-y-0 w-[2px] -translate-x-1/2 bg-lime" />
+              <span className="absolute bottom-1 -translate-x-1/2 whitespace-nowrap rounded-full bg-lime px-1.5 text-[9.5px] font-bold text-ink">
+                Aujourd’hui
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -285,7 +245,7 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
           Revue, rencontre
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <i className="h-3 w-3 rounded-full bg-lime" />
+          <i className="h-3 w-0.5 rounded-full bg-lime" />
           Aujourd’hui
         </span>
       </div>
