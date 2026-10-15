@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { parseDate, shortDate } from "@/lib/format";
+import { projectColor } from "@/lib/projectColors";
 import type { GanttProject } from "@/lib/types";
 
 import { Icon } from "./ui";
@@ -11,17 +12,6 @@ const MONTHS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "aoû
 const NAME_W = 200;
 const COL_MIN = 30; // en dessous, le tableau défile horizontalement
 
-// Une teinte par projet : couleur franche (pastille, losanges), teinte moyenne pour la barre, et une icône.
-const PALETTE = [
-  { solid: "#7c6cf0", bar: "#b8acf6", icon: "campaign" },
-  { solid: "#3b82f6", bar: "#9dbff3", icon: "chart" },
-  { solid: "#e0567f", bar: "#f2a9c0", icon: "factcheck" },
-  { solid: "#1fa37a", bar: "#8fd9b8", icon: "project" },
-  { solid: "#e5a216", bar: "#f3cd6b", icon: "rocket" },
-  { solid: "#e8743b", bar: "#f5b38f", icon: "training" },
-  { solid: "#0ea5b7", bar: "#8fd3dc", icon: "work" },
-  { solid: "#64748b", bar: "#b7c0cc", icon: "review" },
-];
 
 /**
  * Chronologie de l'année : tableau récapitulatif dont l'en-tête est la suite des dates qui comptent
@@ -36,7 +26,7 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
 
   // Année en cours : projets en cours ; autres années : tous les projets de l'année.
   const rows = projects
-    .map((p, i) => ({ p, color: PALETTE[i % PALETTE.length] }))
+    .map((p) => ({ p, color: projectColor(projects, p.id) }))
     .filter(({ p }) => p.start <= to && p.end >= from && (year !== currentYear || p.status === "active"));
 
   const notes = new Map<string, string[]>();
