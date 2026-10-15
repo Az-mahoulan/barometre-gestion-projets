@@ -4,17 +4,22 @@ import { useEffect, useRef, useState } from "react";
 
 import type { Dashboard, Member } from "@/lib/types";
 
-import { Avatar, Icon, TONES, type Tone } from "./ui";
+import { Icon } from "./ui";
 
-const STATUS: Record<Member["status"], { tone: Tone; icon: string; bg: string; label: string }> = {
-  available: { tone: "mint", icon: "taskalt", bg: "bg-ok-soft", label: "Disponibles" },
-  meeting: { tone: "lav", icon: "users", bg: "bg-lav-soft", label: "En réunion" },
-  mission: { tone: "sky", icon: "mission", bg: "bg-info-soft", label: "En mission" },
-  training: { tone: "sand", icon: "training", bg: "bg-risk-soft", label: "En formation" },
-  leave: { tone: "gray", icon: "leave", bg: "bg-surface-2", label: "En congé" },
+const STATUS: Record<Member["status"], { icon: string; label: string; dot: string }> = {
+  available: { icon: "taskalt", label: "Disponibles", dot: "var(--ok)" },
+  meeting: { icon: "users", label: "En réunion", dot: "var(--lav)" },
+  mission: { icon: "mission", label: "En mission", dot: "var(--info)" },
+  training: { icon: "training", label: "En formation", dot: "var(--risk)" },
+  leave: { icon: "leave", label: "En congé", dot: "#9aa0a8" },
 };
 
-/** Vue d'ensemble des équipes : liste des membres à gauche, fiche du membre choisi à droite (même teinte, d'un seul tenant). */
+// Teintes sobres, dans le ton du tableau de bord : cartes grises claires, carte choisie et fiche en vert-citron très léger.
+const CARD = "#f4f4ef";
+const PICKED = "#eef5d3";
+const R = 16; // rayon des courbures (cartes, onglet, fiche)
+
+/** Vue d'ensemble des équipes : cartes des membres à gauche ; la carte choisie se prolonge en onglet jusqu'à la fiche. */
 export function TeamsTable({ teams }: { teams: Dashboard["teams"] }) {
   const [filter, setFilter] = useState<Member["status"] | "">("");
   const [picked, setPicked] = useState<number | null>(null);
@@ -49,12 +54,10 @@ export function TeamsTable({ teams }: { teams: Dashboard["teams"] }) {
 
   return (
     <section className="card" aria-label="Vue d’ensemble des équipes">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-[15px] font-bold">Vue d’ensemble des équipes</h2>
-        <div className="flex items-center gap-3">
-          <span className="text-[12px] text-muted">
-            {teams.available} disponible{teams.available > 1 ? "s" : ""} sur {teams.total}
-          </span>
+      <div className="grid gap-y-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+        {/* Titres des deux colonnes, comme sur le modèle */}
+        <div className="flex items-center justify-between gap-2 md:pr-4">
+          <h2 className="text-[15px] font-bold">Membres</h2>
           <div ref={menuRef} className="relative">
             <button
               onClick={() => setMenu(!menu)}
@@ -86,63 +89,93 @@ export function TeamsTable({ teams }: { teams: Dashboard["teams"] }) {
             )}
           </div>
         </div>
-      </div>
-
-      {list.length === 0 ? (
-        <p className="py-6 text-center text-[12.5px] text-muted">Aucun membre pour ce filtre.</p>
-      ) : (
-        <div className="grid gap-y-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
-          {/* Liste des membres */}
-          <div className="relative">
-          <ul
-            ref={listRef}
-            onScroll={measure}
-            className="flex max-h-[372px] flex-col gap-1.5 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            style={{ maskImage: scroll.more ? "linear-gradient(to bottom, #000 calc(100% - 36px), transparent)" : undefined }}
-          >
-            {list.map((m) => {
-              const st = STATUS[m.status];
-              const active = current?.id === m.id;
-              return (
-                <li key={m.id}>
-                  <button
-                    onClick={() => setPicked(m.id)}
-                    aria-pressed={active}
-                    className={`flex w-full items-center gap-3 py-2.5 pl-2.5 text-left transition-colors ${
-                      active ? `${st.bg} rounded-l-[16px] pr-5 md:-mr-px` : "rounded-[16px] pr-2.5 hover:bg-surface-2"
-                    }`}
-                  >
-                    <Avatar initials={m.initials} size="h-9 w-9 text-[11px]" />
-                    <span className="min-w-0 flex-1">
-                      <b className="block truncate text-[13px] font-semibold">{m.name}</b>
-                      <small className="block truncate text-[11.5px] text-muted">
-                        {m.status_label} · {m.place_label}
-                      </small>
-                    </span>
-                    <span className={`chip shrink-0 ${active ? "bg-surface text-ink-2" : TONES[st.tone]}`}>
-                      {m.open_tasks} tâche{m.open_tasks > 1 ? "s" : ""}
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-          {scroll.show && (
-            <span className="pointer-events-none absolute inset-y-1 -left-2.5 w-[3px]" aria-hidden="true">
-              <span className="absolute h-4 w-full rounded-full bg-[#c9cac3]" style={{ top: `calc(${scroll.top} * (100% - 16px))` }} />
-            </span>
-          )}
-          </div>
-
-          {/* Fiche du membre choisi, dans la teinte de sa ligne */}
-          {current && <Detail m={current} first={list[0]?.id === current.id} />}
+        <div className="hidden items-center justify-between md:flex">
+          <h2 className="text-[15px] font-bold">Fiche du membre</h2>
+          <span className="text-[12px] text-muted">
+            {teams.available} disponible{teams.available > 1 ? "s" : ""} sur {teams.total}
+          </span>
         </div>
-      )}
+
+        {list.length === 0 ? (
+          <p className="py-6 text-center text-[12.5px] text-muted md:col-span-2">Aucun membre pour ce filtre.</p>
+        ) : (
+          <>
+            {/* Cartes des membres */}
+            <div className="relative">
+              <ul
+                ref={listRef}
+                onScroll={measure}
+                className="flex max-h-[392px] flex-col gap-2.5 overflow-y-auto overflow-x-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                style={{ maskImage: scroll.more ? "linear-gradient(to bottom, #000 calc(100% - 36px), transparent)" : undefined }}
+              >
+                {list.map((m, i) => {
+                  const active = current?.id === m.id;
+                  return (
+                    <li key={m.id} className={`relative ${active ? "" : "md:mr-4"}`}>
+                      <button
+                        onClick={() => setPicked(m.id)}
+                        aria-pressed={active}
+                        className="flex w-full items-center gap-3 py-2.5 pl-2.5 pr-3 text-left"
+                        style={{
+                          background: active ? PICKED : CARD,
+                          borderRadius: active ? `${R}px 0 0 ${R}px` : R,
+                          paddingRight: active ? 28 : undefined,
+                        }}
+                      >
+                        <span
+                          className={`grid h-10 w-10 shrink-0 place-items-center rounded-[12px] text-[11.5px] font-bold ${
+                            active ? "bg-side text-white" : "border border-line bg-surface text-ink-2"
+                          }`}
+                        >
+                          {m.initials}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <b className="block truncate text-[13px] font-semibold">{m.name}</b>
+                          <small className="flex items-center gap-1.5 truncate text-[11.5px] text-muted">
+                            <i className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: STATUS[m.status].dot }} />
+                            <span className="truncate">{m.status_label}</span>
+                          </small>
+                        </span>
+                        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${active ? "bg-surface text-ink" : "border border-line bg-surface text-ink-2"}`}>
+                          {m.open_tasks} tâche{m.open_tasks > 1 ? "s" : ""}
+                        </span>
+                      </button>
+                      {/* Courbures inversées de l'onglet, à la jonction avec la fiche (en haut sauf pour la 1re carte, et en bas) */}
+                      {active && (
+                        <>
+                          {i > 0 && (
+                            <i
+                              className="pointer-events-none absolute right-0 hidden md:block"
+                              style={{ top: -R, width: R, height: R, background: `radial-gradient(circle at 0 0, transparent ${R - 0.5}px, ${PICKED} ${R}px)` }}
+                            />
+                          )}
+                          <i
+                            className="pointer-events-none absolute right-0 hidden md:block"
+                            style={{ bottom: -R, width: R, height: R, background: `radial-gradient(circle at 0 100%, transparent ${R - 0.5}px, ${PICKED} ${R}px)` }}
+                          />
+                        </>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+              {scroll.show && (
+                <span className="pointer-events-none absolute inset-y-1 -left-2.5 w-[3px]" aria-hidden="true">
+                  <span className="absolute h-4 w-full rounded-full bg-[#c9cac3]" style={{ top: `calc(${scroll.top} * (100% - 16px))` }} />
+                </span>
+              )}
+            </div>
+
+            {/* Fiche du membre choisi */}
+            {current && <Detail m={current} squareTopLeft={list[0]?.id === current.id} />}
+          </>
+        )}
+      </div>
     </section>
   );
 }
 
-function Detail({ m, first }: { m: Member; first: boolean }) {
+function Detail({ m, squareTopLeft }: { m: Member; squareTopLeft: boolean }) {
   const st = STATUS[m.status];
   const rows: [string, React.ReactNode][] = [
     ["Statut", m.reason ? `${m.status_label} · ${m.reason.replace(/\.$/, "")}` : m.status_label],
@@ -157,7 +190,7 @@ function Detail({ m, first }: { m: Member; first: boolean }) {
     ["Pays", m.country || "—"],
   ];
   return (
-    <div className={`${st.bg} rounded-[18px] p-4 ${first ? "md:rounded-tl-none" : ""}`}>
+    <div className="p-4" style={{ background: PICKED, borderRadius: squareTopLeft ? `0 ${R}px ${R}px ${R}px` : R }}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <b className="block truncate text-[14px] font-bold underline decoration-1 underline-offset-4">{m.name}</b>
@@ -166,7 +199,7 @@ function Detail({ m, first }: { m: Member; first: boolean }) {
             {m.country ? ` · ${m.country}` : ""}
           </small>
         </div>
-        <Avatar initials={m.initials} size="h-11 w-11 text-[13px] ring-2 ring-surface" />
+        <span className="shrink-0 rounded-full border border-ink/25 px-2.5 py-1 text-[11px] font-semibold text-ink-2">{m.initials}</span>
       </div>
 
       <div className="mt-3 flex flex-wrap gap-1.5">
