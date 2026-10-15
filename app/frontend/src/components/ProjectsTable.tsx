@@ -67,7 +67,8 @@ function Glass({ done, total, id, color, still }: { done: number; total: number;
         d="M 5.5 3 L 26.5 3 L 24 35.5 Q 23.8 38 21.3 38 L 10.7 38 Q 8.2 38 8 35.5 Z"
         fill="none"
         stroke="#8a93a3"
-        strokeWidth="1.6"
+        strokeWidth="1.4"
+        strokeDasharray="2.2 2"
         strokeLinejoin="round"
       />
       <path d="M 9 7 L 10.6 31" stroke="#fff" strokeOpacity="0.8" strokeWidth="1.6" strokeLinecap="round" />

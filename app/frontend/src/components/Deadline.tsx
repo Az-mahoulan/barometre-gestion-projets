@@ -46,7 +46,7 @@ function Hourglass({ elapsed, running }: { elapsed: number; running: boolean }) 
   const top = 1 - elapsed; // part restante
   const bulb = "M 4 2.5 L 12 2.5 C 12 6.5 9 9 8.7 11 C 9 13 12 15.5 12 19.5 L 4 19.5 C 4 15.5 7 13 7.3 11 C 7 9 4 6.5 4 2.5 Z";
   return (
-    <svg viewBox="0 0 16 22" className="-my-1 h-5 w-[15px] shrink-0" aria-hidden="true">
+    <svg viewBox="0 0 16 22" className="h-[22px] w-4 shrink-0" aria-hidden="true">
       <defs>
         <clipPath id={clip}>
           <path d={bulb} />
@@ -66,18 +66,17 @@ function Hourglass({ elapsed, running }: { elapsed: number; running: boolean }) 
   );
 }
 
-/** Décompte semaines · jours · heures · minutes · secondes (les semaines et jours nuls sont omis). */
+/** Décompte semaines · jours · heures · minutes (les semaines et jours nuls sont omis). */
 function Countdown({ ms }: { ms: number }) {
   const w = Math.floor(ms / WEEK);
   const d = Math.floor((ms % WEEK) / DAY);
   const h = Math.floor((ms % DAY) / HOUR);
   const m = Math.floor((ms % HOUR) / MIN);
-  const s = Math.floor((ms % MIN) / SEC);
   const pad = (n: number) => String(n).padStart(2, "0");
   const parts: [string, string][] = [];
   if (w > 0) parts.push([String(w), "sem"]);
   if (w > 0 || d > 0) parts.push([String(d), "j"]);
-  parts.push([pad(h), "h"], [pad(m), "min"], [pad(s), "s"]);
+  parts.push([pad(h), "h"], [pad(m), "min"]);
   return (
     <span className="tabular-nums">
       {parts.map(([n, u]) => (
@@ -90,18 +89,25 @@ function Countdown({ ms }: { ms: number }) {
   );
 }
 
-/** Étiquette d'état du projet avec sablier et temps restant avant l'échéance, mis à jour chaque seconde. */
+const TEXT: Record<Health, string> = { ok: "text-ok", risk: "text-risk", late: "text-late", completed: "text-ink-2" };
+
+/** Étiquette d'état du projet avec sablier et temps restant avant l'échéance, mis à jour en continu. */
 export function Deadline({ health, start, end, now }: { health: Health; start: string; end: string; now: string }) {
   const t = useClock(now);
   if (health === "completed") return <HealthChip health={health} />;
-  if (t === null) return <HealthChip health={health} icon={<Hourglass elapsed={0} running={false} />} />;
+  if (t === null) return <HealthChip health={health} />;
   const s = startOfDay(start);
   const e = endOfDay(end);
   const left = e - t;
   const elapsed = Math.min(1, Math.max(0, (t - s) / Math.max(e - s, 1)));
   return (
     <div className="flex flex-col items-start gap-1">
-      <HealthChip health={health} icon={<Hourglass elapsed={elapsed} running={left > 0} />} />
+      <span className="flex items-center gap-1.5">
+        <HealthChip health={health} />
+        <span className={TEXT[health]}>
+          <Hourglass elapsed={elapsed} running={left > 0} />
+        </span>
+      </span>
       <span className="whitespace-nowrap text-[10.5px] text-muted" title={`Échéance du projet : ${new Date(e).toLocaleDateString("fr-FR")}`}>
         {left > 0 ? (
           <Countdown ms={left} />
