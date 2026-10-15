@@ -19,11 +19,11 @@ function expectedAt(m: Milestone, asOf: string) {
   return Math.min(1, Math.max(0, (now - start) / (end - start)));
 }
 
-// Couleurs selon l'écart au prévu, sur le principe de l'évolution mois par mois (rouge, vert moins franc, vert).
+// Couleurs selon l'écart au prévu, sur le principe de l'évolution mois par mois (rouge, jaune, vert).
 const TOLERANCE = 0.05; // ± 5 points : conforme au prévu
 const STATUS = {
   below: { color: "#c7321f", label: "Sous le prévu" },
-  on: { color: "#6fbf8f", label: "Conforme" },
+  on: { color: "#e5a50a", label: "Comme prévu" },
   above: { color: "#1f7a4d", label: "Au-dessus" },
 } as const;
 type Status = keyof typeof STATUS;
