@@ -79,8 +79,27 @@ export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProje
       {rows.length === 0 ? (
         <p className="text-[12.5px] text-muted">Aucun jalon en cours d’exécution.</p>
       ) : (
-        <div className="relative mt-2 flex min-h-0 flex-1 flex-col">
-        <ul ref={list} className="flex min-h-0 flex-1 flex-col gap-9 overflow-y-auto pb-6 pt-6 [scrollbar-width:none]">
+        <div className="relative mt-2 flex min-h-0 flex-1 flex-col rounded-[14px] bg-[#f8f8f4] px-3 pt-2">
+          {/* Axe des pourcentages, aligné sur les bandes */}
+          <div className="relative h-4 w-full shrink-0 text-[10px] font-semibold text-muted sm:w-[80%]" aria-hidden="true">
+            {[0, 25, 50, 75, 100].map((v) => (
+              <span
+                key={v}
+                className="absolute top-0 whitespace-nowrap"
+                style={{ left: `${v}%`, transform: v === 0 ? "none" : v === 100 ? "translateX(-100%)" : "translateX(-50%)" }}
+              >
+                {v} %
+              </span>
+            ))}
+          </div>
+          <div className="relative flex min-h-0 flex-1 flex-col">
+          {/* Repères verticaux discrets à 25, 50 et 75 % */}
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-full sm:w-[80%]" aria-hidden="true">
+            {[25, 50, 75].map((v) => (
+              <span key={v} className="absolute inset-y-0 border-l border-dashed border-line-strong/60" style={{ left: `${v}%` }} />
+            ))}
+          </div>
+        <ul ref={list} className="relative flex min-h-0 flex-1 flex-col gap-9 overflow-y-auto pb-6 pt-7 [scrollbar-width:none]">
           {rows.map(({ m, p }, i) => {
             const pct = Math.round(m.progress * 100);
             const expected = expectedAt(m, asOf);
@@ -137,8 +156,9 @@ export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProje
             );
           })}
         </ul>
+          </div>
           {/* Fondu du bas : d'autres jalons suivent en faisant défiler */}
-          <span className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-surface to-transparent" />
+          <span className="pointer-events-none absolute inset-x-0 bottom-0 h-8 rounded-b-[14px] bg-gradient-to-t from-[#f8f8f4] to-transparent" />
         </div>
       )}
 

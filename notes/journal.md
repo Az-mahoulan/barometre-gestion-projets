@@ -83,3 +83,4 @@
 - 15/10/2026 — Progression des jalons : photos des membres en fin de bande, juste avant l’échéance ; le nom du jalon ouvre la bande.
 - 15/10/2026 — Progression des jalons : photos retirées ; nom du jalon au-dessus de la bande, aligné avec les pourcentages ; échéance seule dans la bande ; couleurs uniformes selon l’écart au prévu (rouge sous le prévu, vert clair conforme à ± 5 points, vert au-dessus), trait du prévu noir.
 - 15/10/2026 — Progression des jalons : « comme prévu » en jaune (au lieu du vert clair), vert réservé au-dessus du prévu.
+- 15/10/2026 — Progression des jalons : fond léger sur la zone défilante, axe des pourcentages (0 à 100 %) en haut et repères verticaux discrets à 25, 50 et 75 %.
