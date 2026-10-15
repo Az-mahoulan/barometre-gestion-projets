@@ -281,12 +281,25 @@ function ColumnView({ progress, finishedPct }: { progress: Dashboard["task_progr
             const c = RING[s.key];
             const edge = l.side * BX; // bord du cadre côté anneau
             const bx = l.side === 1 ? BX : -BX - BW;
-            // Trait à 45° depuis la portion jusqu'à la hauteur de l'étiquette, puis horizontal : jamais de retour en arrière.
-            const kx = l.x0 + l.side * Math.min(Math.abs(l.ty - l.y0), Math.max(0, Math.abs(edge - l.x0) - 6));
+            // Trait en équerre qui ne traverse jamais l'anneau :
+            // - étiquette presque à la hauteur de la portion : trait droit ;
+            // - étiquette plus loin du centre (en haut ou en bas) : d'abord vertical, puis horizontal ;
+            // - sinon : horizontal jusqu'à dégager l'anneau, vertical, puis horizontal.
+            const crossesCenter = (l.y0 < 0) !== (l.ty < 0);
+            const yNear = crossesCenter ? 0 : Math.min(Math.abs(l.y0), Math.abs(l.ty));
+            const clear = Math.sqrt(Math.max(0, (R2 + 8) ** 2 - yNear ** 2));
+            const kx = l.side * Math.min(Math.max(Math.abs(l.x0) + 6, clear), Math.abs(edge) - 6);
+            const outward = !crossesCenter && Math.abs(l.ty) > Math.abs(l.y0);
+            const route =
+              Math.abs(l.ty - l.y0) < 4
+                ? `M ${l.x0} ${l.y0} L ${edge} ${l.y0}`
+                : outward
+                  ? `M ${l.x0} ${l.y0} L ${l.x0} ${l.ty} L ${edge} ${l.ty}`
+                  : `M ${l.x0} ${l.y0} L ${kx} ${l.y0} L ${kx} ${l.ty} L ${edge} ${l.ty}`;
             return (
               <g key={`l-${s.key}`}>
                 <path
-                  d={`M ${l.x0} ${l.y0} L ${kx} ${l.ty} L ${edge} ${l.ty}`}
+                  d={route}
                   fill="none"
                   stroke={c}
                   strokeWidth="2.5"

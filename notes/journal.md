@@ -87,3 +87,4 @@
 - 15/10/2026 — Palette des projets (activités de la semaine, chronologie) sans vert, orange ni rouge, réservés aux états : framboise, fuchsia, indigo et ardoise remplacent rose, vert, orange et rouge-orangé.
 - 15/10/2026 — Progression des jalons : repère vertical à 100 % ajouté.
 - 15/10/2026 — Cartes déplaçables (glisser-déposer, @dnd-kit) : poignée au survol en haut de chaque carte, souris, toucher ou clavier (espace, flèches, espace) ; réordonnancement dans chaque colonne ; disposition enregistrée sur le profil (`User.dashboard_layout`, POST /auth/me/layout/, migration accounts 0003) ; « Rétablir la disposition des cartes » dans le menu du profil. Test ajouté.
+- 15/10/2026 — Progression des tâches (anneau) : traits de liaison en équerre qui ne traversent jamais l’anneau (droit si même hauteur, vertical puis horizontal vers l’extérieur, sinon contournement).
