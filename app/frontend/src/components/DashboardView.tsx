@@ -13,6 +13,7 @@ import { AssistantCard, buildSummary } from "./AssistantCard";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { CriticalCard } from "./CriticalCard";
 import { GanttCard } from "./GanttCard";
+import { TimelineCard } from "./TimelineCard";
 import { KpiRow } from "./KpiRow";
 import { ProjectsTable } from "./ProjectsTable";
 import { Sidebar } from "./Sidebar";
@@ -203,6 +204,7 @@ export function DashboardView() {
                 value={tasksProject}
                 onChange={setTasksProject}
               />
+              <TimelineCard projects={data.gantt} asOf={data.as_of} />
               <GanttCard projects={data.gantt} asOf={data.as_of} />
               <ProjectsTable projects={data.projects} />
               <TeamsTable teams={data.teams} />

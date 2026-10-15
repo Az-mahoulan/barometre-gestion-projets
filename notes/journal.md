@@ -45,3 +45,4 @@
 - Filtre de projet sur mesure (`ProjectPicker`) pour l'évolution mensuelle et la progression des tâches : pilule claire (vert-citron si un projet est choisi), panneau clair et compact, onglets « En cours » / « Achevés », liste défilante sans barre visible, navigation au clavier.
 - Programmation déplacée sous la synthèse de l'assistant ; barres de l'évolution mensuelle élargies.
 - Évolution mois par mois : « Tous les projets » ne compte plus les projets achevés (un projet achevé reste consultable seul via le filtre).
+- Nouvelle carte « Chronologie des projets » (TimelineCard) : une ligne par projet (couleur propre, début → fin), jalons en losanges (prévu / atteint / dépassé), ligne d'aujourd'hui, échelles Mois / Trimestre / Semestre ; placée au-dessus du Gantt.
