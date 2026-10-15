@@ -116,9 +116,9 @@ export function WeekCard({
                         onClick={() => pick(d)}
                         aria-pressed={active}
                         aria-label={parseDate(key).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
-                        className={`relative mx-auto grid h-8 w-8 place-items-center overflow-hidden rounded-full ${
+                        className={`relative mx-auto grid h-8 w-8 place-items-center rounded-full ${
                           active
-                            ? "bg-side font-bold text-white"
+                            ? "overflow-hidden bg-side font-bold text-white"
                             : key === asOf
                               ? "bg-lime font-bold text-ink"
                               : out
@@ -130,7 +130,7 @@ export function WeekCard({
                         {active && tints.length > 0 && <span className="absolute inset-x-0 bottom-0 h-[10px] bg-white/90" />}
                         <span className={active && tints.length > 0 ? "relative -mt-2" : ""}>{d.getDate()}</span>
                         {tints.length > 0 && (
-                          <span className={`absolute left-1/2 flex -translate-x-1/2 gap-[2px] ${active ? "bottom-[3px]" : "bottom-0"}`}>
+                          <span className={`absolute left-1/2 flex -translate-x-1/2 gap-[2px] ${active ? "bottom-[3px]" : "bottom-[1px]"}`}>
                             {LEGEND.filter((l) => tints.includes(l.tint)).map((l) => (
                               <i key={l.tint} className="h-1 w-1 rounded-full" style={{ background: COLORS[l.tint] }} />
                             ))}
