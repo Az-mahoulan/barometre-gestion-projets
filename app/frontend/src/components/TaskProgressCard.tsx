@@ -193,14 +193,20 @@ const rad = (deg: number) => (deg * Math.PI) / 180;
 // Point à l'angle `a` (0 = en haut, sens horaire) sur le cercle de rayon r.
 const at = (cx: number, cy: number, r: number, a: number) => [cx + r * Math.sin(rad(a)), cy - r * Math.cos(rad(a))];
 
-/** Secteur d'anneau plein entre deux angles (rayons r1 < r2). */
-function sector(cx: number, cy: number, r1: number, r2: number, from: number, to: number) {
-  const large = to - from > 180 ? 1 : 0;
-  const [ax, ay] = at(cx, cy, r2, from);
-  const [bx, by] = at(cx, cy, r2, to);
-  const [c, d] = at(cx, cy, r1, to);
-  const [e, f] = at(cx, cy, r1, from);
-  return `M ${ax} ${ay} A ${r2} ${r2} 0 ${large} 1 ${bx} ${by} L ${c} ${d} A ${r1} ${r1} 0 ${large} 0 ${e} ${f} Z`;
+/**
+ * Secteur d'anneau entre deux angles (rayons r1 < r2), aux bords PARALLÈLES : chaque bord est décalé de `h` pixels
+ * de part et d'autre de la limite, d'où un espace de largeur constante entre deux portions (comme le modèle).
+ */
+function sector(cx: number, cy: number, r1: number, r2: number, from: number, to: number, h: number) {
+  const off = (r: number) => (Math.asin(Math.min(1, h / r)) * 180) / Math.PI;
+  const [o1, o2] = [from + off(r2), to - off(r2)];
+  const [i1, i2] = [from + off(r1), to - off(r1)];
+  const large = o2 - o1 > 180 ? 1 : 0;
+  const [ax, ay] = at(cx, cy, r2, o1);
+  const [bx, by] = at(cx, cy, r2, o2);
+  const [c, d] = at(cx, cy, r1, Math.max(i1, i2));
+  const [e, f] = at(cx, cy, r1, i1);
+  return `M ${ax} ${ay} A ${r2} ${r2} 0 ${large} 1 ${bx} ${by} L ${c} ${d} A ${r1} ${r1} 0 ${i2 - i1 > 180 ? 1 : 0} 0 ${e} ${f} Z`;
 }
 
 /** Disposition en colonne : statuts en liste à gauche, anneau segmenté à droite avec étiquettes reliées. */
@@ -214,7 +220,7 @@ function ColumnView({ progress, finishedPct }: { progress: Dashboard["task_progr
   const R2 = 92; // rayon extérieur
   const R1 = 58; // rayon intérieur
   const CORNER = 5; // arrondi des coins (petit, comme le modèle)
-  const GAP = 2.2; // espace entre segments, en degrés
+  const GAP = 5; // espace entre deux portions, en pixels (largeur constante)
   const MIN = 9; // part minimale à l'écran, pour qu'un petit statut reste visible (les % restent exacts)
 
   const raw = shown.map((s) => (s.count / total) * 360);
@@ -226,17 +232,18 @@ function ColumnView({ progress, finishedPct }: { progress: Dashboard["task_progr
     return { s, from, to: from + sweeps[i], mid: from + sweeps[i] / 2 };
   });
 
-  // Étiquettes : à droite pour la moitié droite de l'anneau, à gauche sinon ; écartées si elles se chevauchent.
-  type Label = { key: string; side: 1 | -1; ex: number; ey: number; y: number };
+  // Étiquettes (statut au-dessus, pourcentage en dessous) au bout d'un trait court et épais, de la couleur de la portion ;
+  // à droite pour la moitié droite de l'anneau, à gauche sinon, et écartées si elles se chevauchent.
+  type Label = { key: string; side: 1 | -1; x1: number; y1: number; x2: number; y2: number; ty: number };
   const labels: Label[] = segs.map(({ s, mid }) => {
     const side: 1 | -1 = Math.sin(rad(mid)) >= 0 ? 1 : -1;
-    const [ex, ey] = at(CX, CY, R2 + 6, mid);
-    const [, y] = at(CX, CY, R2 + 22, mid);
-    return { key: s.key, side, ex, ey, y };
+    const [x1, y1] = at(CX, CY, R2 + 4, mid);
+    const [x2, y2] = at(CX, CY, R2 + 16, mid);
+    return { key: s.key, side, x1, y1, x2, y2, ty: y2 };
   });
   for (const side of [1, -1] as const) {
-    const group = labels.filter((l) => l.side === side).sort((a, b) => a.y - b.y);
-    for (let i = 1; i < group.length; i++) group[i].y = Math.max(group[i].y, group[i - 1].y + 17);
+    const group = labels.filter((l) => l.side === side).sort((a, b) => a.ty - b.ty);
+    for (let i = 1; i < group.length; i++) group[i].ty = Math.max(group[i].ty, group[i - 1].ty + 32);
   }
   const labelOf = (key: string) => labels.find((l) => l.key === key)!;
 
@@ -273,13 +280,10 @@ function ColumnView({ progress, finishedPct }: { progress: Dashboard["task_progr
       >
         {segs.map(({ s, from, to }) => {
           // Coins arrondis : secteur réduit de CORNER sur chaque bord, puis contour arrondi de la même couleur.
-          const inset = (CORNER / R1) * (180 / Math.PI);
-          const a = from + GAP / 2 + inset;
-          const b = Math.max(a + 0.1, to - GAP / 2 - inset);
           return (
             <path
               key={s.key}
-              d={sector(CX, CY, R1 + CORNER, R2 - CORNER, a, b)}
+              d={sector(CX, CY, R1 + CORNER, R2 - CORNER, from, to, GAP / 2 + CORNER)}
               fill={RING[s.key]}
               stroke={RING[s.key]}
               strokeWidth={CORNER * 2}
@@ -290,20 +294,18 @@ function ColumnView({ progress, finishedPct }: { progress: Dashboard["task_progr
           );
         })}
 
-        {/* Liaisons et étiquettes « Statut  xx % » */}
+        {/* Traits courts et épais + étiquettes (statut, puis pourcentage), de la couleur de la portion */}
         {segs.map(({ s }) => {
           const l = labelOf(s.key);
-          const x2 = CX + l.side * (R2 + 20);
-          const x3 = x2 + l.side * 10;
+          const tx = l.x2 + l.side * 6;
           return (
             <g key={`l-${s.key}`}>
-              <polyline points={`${l.ex},${l.ey} ${x2},${l.y} ${x3},${l.y}`} fill="none" stroke="#b9bcc4" strokeWidth="1.2" />
-              <circle cx={l.ex} cy={l.ey} r="2.2" fill={RING[s.key]} />
-              <text x={x3 + l.side * 4} y={l.y} textAnchor={l.side === 1 ? "start" : "end"} dominantBaseline="central" className="text-[11.5px]">
-                <tspan className="fill-ink-2">{s.label}</tspan>
-                <tspan className="fill-ink font-bold" dx="5">
-                  {s.pct} %
-                </tspan>
+              <line x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} stroke={RING[s.key]} strokeWidth="4" strokeLinecap="round" />
+              <text x={tx} y={l.ty - 7} textAnchor={l.side === 1 ? "start" : "end"} dominantBaseline="central" className="text-[11px] font-medium" fill={RING[s.key]}>
+                {s.label}
+              </text>
+              <text x={tx} y={l.ty + 8} textAnchor={l.side === 1 ? "start" : "end"} dominantBaseline="central" className="text-[13px] font-bold" fill={RING[s.key]}>
+                {s.pct} %
               </text>
             </g>
           );
