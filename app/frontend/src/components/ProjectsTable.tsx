@@ -75,8 +75,8 @@ function Glass({ done, total, id, color, still }: { done: number; total: number;
   );
 }
 
-// Contour discret de chaque photo : un liseré blanc puis un fin trait gris, pour bien séparer les visages superposés.
-const EDGE = "shadow-[0_0_0_1.5px_var(--surface),0_0_0_2.5px_#d3d6dd]";
+// Contour discret de chaque photo : un fin liseré blanc puis un trait gris très fin, pour bien séparer les visages superposés.
+const EDGE = "shadow-[0_0_0_1px_var(--surface),0_0_0_1.75px_#dcdfe4]";
 
 /** Photos des personnes qui travaillent sur le projet (responsable en premier), superposées. */
 function Team({ team }: { team: ProjectRow["team"] }) {
@@ -86,7 +86,7 @@ function Team({ team }: { team: ProjectRow["team"] }) {
   return (
     <span className="mt-1 flex items-center" title={team.map((m) => m.name).join(", ")} aria-label={`Équipe : ${team.map((m) => m.name).join(", ")}`}>
       {shown.map((m, i) => (
-        <span key={m.name} className={`rounded-full ${EDGE} ${i > 0 ? "-ml-1.5" : ""}`}>
+        <span key={m.name} className={`grid h-[22px] w-[22px] shrink-0 rounded-full ${EDGE} ${i > 0 ? "-ml-1.5" : ""}`}>
           <Avatar initials={m.initials} seed={m.name} size="h-[22px] w-[22px] text-[9px]" />
         </span>
       ))}
