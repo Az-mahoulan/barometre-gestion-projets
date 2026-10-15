@@ -58,6 +58,8 @@ export interface GanttProject {
   next_milestone: NextMilestone | null;
   milestones: { name: string; date: string; achieved: boolean; overdue: boolean }[];
   activities: GanttActivity[];
+  /** Revues, rencontres : moments hors programmation rattachés au projet. */
+  events: { title: string; date: string; kind: string; kind_label: string }[];
 }
 
 export interface WeekItem {

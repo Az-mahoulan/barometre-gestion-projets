@@ -204,3 +204,18 @@ def test_trend_for_all_projects_ignores_completed_ones(admin, boss, make_project
     assert (sept(everything)["total"], sept(everything)["pct"]) == (1, 0)
     only_done = client_for(admin).get(f"/api/v1/dashboard/?trend_project={done.id}").json()
     assert (sept(only_done)["total"], sept(only_done)["pct"]) == (1, 100)
+
+
+def test_gantt_lists_project_events(admin, project, client_for):
+    from datetime import datetime, time
+
+    from django.utils import timezone
+
+    from apps.projects.models import CalendarEvent
+
+    at = timezone.make_aware(datetime.combine(date(2026, 10, 22), time(10, 0)))
+    CalendarEvent.objects.create(title="Revue avec le partenaire", starts_at=at, project=project)
+    CalendarEvent.objects.create(title="Point interne", starts_at=at)
+    rows = client_for(admin).get("/api/v1/dashboard/").json()["gantt"]
+    events = next(r for r in rows if r["id"] == project.id)["events"]
+    assert events == [{"title": "Revue avec le partenaire", "date": "2026-10-22", "kind": "meeting", "kind_label": "Réunion"}]
