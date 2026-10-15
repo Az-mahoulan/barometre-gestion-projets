@@ -44,3 +44,4 @@
 - Échéances affichées : fins de projets et d'activités, jalons, tâches, avec les personnes concernées (responsable du projet, assignés des tâches, participants des réunions). Nouveau champ `CalendarEvent.participants` (migration 0002, qui renseigne aussi les réunions de démonstration si elles existent).
 - Filtre de projet sur mesure (`ProjectPicker`) pour l'évolution mensuelle et la progression des tâches : pilule claire (vert-citron si un projet est choisi), panneau clair et compact, onglets « En cours » / « Achevés », liste défilante sans barre visible, navigation au clavier.
 - Programmation déplacée sous la synthèse de l'assistant ; barres de l'évolution mensuelle élargies.
+- Évolution mois par mois : « Tous les projets » ne compte plus les projets achevés (un projet achevé reste consultable seul via le filtre).

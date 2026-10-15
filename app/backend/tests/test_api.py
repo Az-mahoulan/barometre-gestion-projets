@@ -187,3 +187,20 @@ def test_week_lists_meetings_and_deadlines_with_people(admin, boss, worker, proj
     assert items["Jalon passé"]["late"] is True
     assert items["Jalon passé"]["people"][0]["name"] == "boss"
     assert items["Tâche à rendre"]["people"] == [{"initials": "W", "name": "worker"}]
+
+
+def test_trend_for_all_projects_ignores_completed_ones(admin, boss, make_project, client_for):
+    from apps.projects.models import Milestone, Project
+
+    done = make_project(boss, name="Projet achevé", status=Project.Status.COMPLETED)
+    Milestone.objects.create(project=done, name="Jalon achevé", due_date=date(2026, 9, 10), achieved_on=date(2026, 9, 10))
+    running = make_project(boss, name="Projet en cours")
+    Milestone.objects.create(project=running, name="Jalon manqué", due_date=date(2026, 9, 20))
+
+    def sept(data):
+        return next(m for m in data["trend"] if m["month"] == "2026-09")
+
+    everything = client_for(admin).get("/api/v1/dashboard/").json()
+    assert (sept(everything)["total"], sept(everything)["pct"]) == (1, 0)
+    only_done = client_for(admin).get(f"/api/v1/dashboard/?trend_project={done.id}").json()
+    assert (sept(only_done)["total"], sept(only_done)["pct"]) == (1, 100)

@@ -377,7 +377,11 @@ def build_dashboard(user, *, country: str | None = None, period: str = "year", w
     stats_all = {p.id: project_stats(p, today) for p in base}
     in_period = [p for p in base if p.end_date >= p_start and p.start_date < p_end]
 
-    trend_base = [p for p in base if trend_project is None or p.id == trend_project]
+    # « Tous les projets » : seuls les projets en cours comptent ; un projet achevé reste consultable seul.
+    if trend_project is None:
+        trend_base = [p for p in base if p.status == Project.Status.ACTIVE]
+    else:
+        trend_base = [p for p in base if p.id == trend_project]
     scope_tasks = _scope_tasks(user, in_period)
     # La progression des tâches peut être limitée à un projet ; les indicateurs restent globaux.
     progress_tasks = [t for t in scope_tasks if tasks_project is None or t.project_id == tasks_project]

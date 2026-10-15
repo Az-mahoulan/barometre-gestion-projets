@@ -49,7 +49,7 @@ export function TrendCard({
         <h2 className="whitespace-nowrap text-[15px] font-bold">Évolution mois par mois</h2>
         <ProjectPicker projects={projects} value={value} onChange={onChange} label="Évolution du projet" />
       </div>
-      <p className="mt-0.5 text-[12px] text-muted">Jalons atteints, en % des jalons prévus chaque mois</p>
+      <p className="mt-0.5 text-[12px] text-muted">Jalons atteints, en % des jalons prévus chaque mois{value === "" ? " · projets en cours" : ""}</p>
       {delta !== null && prev && (
             <p className="mt-2.5 flex items-center gap-2 whitespace-nowrap text-[12px] text-muted">
               <span
