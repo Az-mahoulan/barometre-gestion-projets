@@ -1,5 +1,6 @@
 import type { GanttProject, TrendMonth } from "@/lib/types";
 
+import { ProjectPicker } from "./ProjectPicker";
 import { Icon } from "./ui";
 
 const PLOT_H = 180;
@@ -46,17 +47,7 @@ export function TrendCard({
     <section className="card" aria-label="Évolution mois par mois">
       <div className="flex items-center justify-between gap-3">
         <h2 className="whitespace-nowrap text-[15px] font-bold">Évolution mois par mois</h2>
-        <label className="sr-only" htmlFor="trend-project">
-          Projet
-        </label>
-        <select id="trend-project" className="field min-w-0 max-w-[150px] !py-1.5" value={value} onChange={(e) => onChange(e.target.value)}>
-          <option value="">Tous les projets</option>
-          {projects.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </select>
+        <ProjectPicker projects={projects} value={value} onChange={onChange} label="Évolution du projet" />
       </div>
       <p className="mt-0.5 text-[12px] text-muted">Jalons atteints, en % des jalons prévus chaque mois</p>
       {delta !== null && prev && (

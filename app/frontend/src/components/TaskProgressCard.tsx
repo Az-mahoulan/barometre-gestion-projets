@@ -1,5 +1,6 @@
 import type { Dashboard, GanttProject } from "@/lib/types";
 
+import { ProjectPicker } from "./ProjectPicker";
 import { CardHeader, TileIcon } from "./ui";
 
 // Couleur de chaque statut : libellé, icône et part dans la barre de répartition.
@@ -42,19 +43,7 @@ export function TaskProgressCard({
       <CardHeader
         title="Progression des tâches"
         aside={
-          <>
-            <label className="sr-only" htmlFor="tasks-project">
-              Projet
-            </label>
-            <select id="tasks-project" className="field max-w-[210px] !py-1.5" value={value} onChange={(e) => onChange(e.target.value)}>
-              <option value="">Tous les projets</option>
-              {projects.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          </>
+          <ProjectPicker projects={projects} value={value} onChange={onChange} label="Tâches du projet" />
         }
       />
 

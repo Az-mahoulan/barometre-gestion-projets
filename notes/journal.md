@@ -42,3 +42,5 @@
 - Réveil du serveur Django depuis le navigateur (`/reveil`) : sur l'offre gratuite de Render, les appels relayés par Next ne réveillent pas le service.
 - Programmation : le calendrier du mois devient l'en-tête de la carte (semaine affichée surlignée, clic sur un jour pour voir ses éléments) ; trois couleurs seulement (réunion bleu, échéance orange, retard rouge) ; légende collée en bas.
 - Échéances affichées : fins de projets et d'activités, jalons, tâches, avec les personnes concernées (responsable du projet, assignés des tâches, participants des réunions). Nouveau champ `CalendarEvent.participants` (migration 0002, qui renseigne aussi les réunions de démonstration si elles existent).
+- Filtre de projet sur mesure (`ProjectPicker`) pour l'évolution mensuelle et la progression des tâches : bouton en pilule, panneau sombre, projets groupés « En cours » / « Achevés » avec santé et avancement, choix actif en vert-citron, navigation au clavier.
+- Programmation déplacée sous la synthèse de l'assistant ; barres de l'évolution mensuelle élargies.
