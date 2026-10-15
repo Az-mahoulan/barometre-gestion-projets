@@ -3,14 +3,14 @@ import type { GanttProject } from "./types";
 // Une teinte par projet, partagée par la chronologie et les activités de la semaine :
 // couleur franche (pastille, dates clés, partie réalisée), teinte moyenne (barre) et icône.
 export const PROJECT_PALETTE = [
-  { solid: "#7b61ff", bar: "#bdb0ff", icon: "campaign" },
-  { solid: "#2f7bff", bar: "#9fc0ff", icon: "chart" },
-  { solid: "#ff4d7e", bar: "#ffadc4", icon: "factcheck" },
-  { solid: "#10b981", bar: "#8ee0c2", icon: "project" },
-  { solid: "#ffad14", bar: "#ffd57a", icon: "rocket" },
-  { solid: "#ff6a2b", bar: "#ffb995", icon: "training" },
-  { solid: "#06b6d4", bar: "#8fe0ee", icon: "work" },
-  { solid: "#22242a", bar: "#b9bcc4", icon: "review" },
+  { solid: "#6a4cff", bar: "#b9a9ff", icon: "campaign" },
+  { solid: "#1e6bff", bar: "#9cc0ff", icon: "chart" },
+  { solid: "#ec2d6b", bar: "#f7a1bd", icon: "factcheck" },
+  { solid: "#1f8a4c", bar: "#8fcfa9", icon: "project" },
+  { solid: "#e8901c", bar: "#f4c27f", icon: "rocket" },
+  { solid: "#e2582c", bar: "#f2a988", icon: "training" },
+  { solid: "#0b93b5", bar: "#8fd0e0", icon: "work" },
+  { solid: "#1c1d22", bar: "#b9bcc4", icon: "review" },
 ];
 export type ProjectColor = (typeof PROJECT_PALETTE)[number];
 

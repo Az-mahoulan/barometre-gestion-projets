@@ -9,9 +9,9 @@ import type { GanttProject } from "@/lib/types";
 import { Icon } from "./ui";
 
 const DAY = 86_400_000;
-const ROW = 26; // épaisseur d'une barre
+const ROW = 32; // épaisseur d'une barre
 const GAP = 10;
-const VISIBLE = 6; // au-delà, la zone défile
+const VISIBLE = 5; // au-delà, la zone défile
 // Reste à courir après aujourd'hui : hachures grises, comme sur le modèle.
 const HATCH = "repeating-linear-gradient(135deg, #ececE7 0 5px, #f7f7f4 5px 10px)";
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -94,14 +94,14 @@ export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[
                   >
                     <div className="absolute inset-y-0 overflow-hidden rounded-full" style={{ left: `${left}%`, width: `${right - left}%`, background: HATCH }}>
                       {/* Nom en gris foncé sur la partie hachurée… */}
-                      <span className="relative flex h-full items-center gap-1.5 px-3 text-[11.5px] font-medium text-ink-2">
+                      <span className="relative flex h-full items-center gap-1.5 px-3 text-[12px] font-medium text-ink-2">
                         {done === 0 && <i className="h-2 w-2 shrink-0 rounded-full" style={{ background: color.solid }} />}
                         <span className="truncate">{a.name}</span>
                       </span>
                       {/* … et en blanc sur la partie pleine : même texte, découpé à la limite d'aujourd'hui. */}
                       {done > 0 && (
                         <div className="absolute inset-y-0 left-0 overflow-hidden" style={{ width: `${done}%`, background: color.solid }}>
-                          <span className="flex h-full items-center px-3 text-[11.5px] font-medium text-white" style={{ width: `${10000 / done}%` }}>
+                          <span className="flex h-full items-center px-3 text-[12px] font-semibold text-white" style={{ width: `${10000 / done}%` }}>
                             <span className="truncate">{a.name}</span>
                           </span>
                         </div>
