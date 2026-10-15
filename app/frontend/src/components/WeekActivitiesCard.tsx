@@ -16,6 +16,11 @@ const VISIBLE = 5; // au-delà, la zone défile
 const HATCH = "repeating-linear-gradient(135deg, #ececE7 0 5px, #f7f7f4 5px 10px)";
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+// « 12–18 oct. » (même mois) ou « 28 sept.–4 oct. » : court, pour tenir à côté du titre.
+const weekLabel = (a: string, b: string) => {
+  const [da, db] = [parseDate(a), parseDate(b)];
+  return da.getMonth() === db.getMonth() ? `${da.getDate()}–${shortDate(b)}` : `${shortDate(a)}–${shortDate(b)}`;
+};
 
 /**
  * Activités de la semaine : une pilule par activité, à la couleur de son projet, de la ligne de sa date de début
@@ -43,16 +48,16 @@ export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[
 
   return (
     <section className="card" aria-label="Activités de la semaine">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-[15px] font-bold">Activités de la semaine</h2>
-        <span className="flex items-center rounded-full border border-line">
-          <button className="grid h-7 w-7 place-items-center rounded-full hover:bg-surface-2" onClick={() => setOffset(offset - 1)} aria-label="Semaine précédente">
+      <div className="mb-3 flex items-center justify-between gap-1.5">
+        <h2 className="whitespace-nowrap text-[14.5px] font-bold">Activités de la semaine</h2>
+        <span className="flex shrink-0 items-center rounded-full border border-line">
+          <button className="grid h-7 w-6 place-items-center rounded-full hover:bg-surface-2" onClick={() => setOffset(offset - 1)} aria-label="Semaine précédente">
             <Icon name="left" className="h-4 w-4" />
           </button>
-          <button className="px-0.5 text-[11.5px] font-semibold" onClick={() => setOffset(0)} title="Revenir à cette semaine">
-            {shortDate(from)} – {shortDate(to)}
+          <button className="whitespace-nowrap text-[11.5px] font-semibold" onClick={() => setOffset(0)} title="Revenir à cette semaine">
+            {weekLabel(from, to)}
           </button>
-          <button className="grid h-7 w-7 place-items-center rounded-full hover:bg-surface-2" onClick={() => setOffset(offset + 1)} aria-label="Semaine suivante">
+          <button className="grid h-7 w-6 place-items-center rounded-full hover:bg-surface-2" onClick={() => setOffset(offset + 1)} aria-label="Semaine suivante">
             <Icon name="right" className="h-4 w-4" />
           </button>
         </span>
@@ -117,9 +122,13 @@ export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[
         </div>
 
         {/* Dates en bas, chacune sous sa ligne */}
-        <div className="relative mt-1.5 h-5 text-[12px]">
+        <div className="relative mt-1.5 h-6 text-[12px]">
           {days.map((d, i) => (
-            <span key={d.getTime()} className={`absolute -translate-x-1/2 ${iso(d) === asOf ? "font-bold text-ink" : "text-muted"}`} style={{ left: `${lineX(i)}%` }}>
+            <span
+              key={d.getTime()}
+              className={`absolute -translate-x-1/2 ${iso(d) === asOf ? "-top-0.5 grid h-6 min-w-6 place-items-center rounded-full bg-lime px-1 font-bold text-ink" : "text-muted"}`}
+              style={{ left: `${lineX(i)}%` }}
+            >
               {d.getDate()}
             </span>
           ))}
