@@ -33,8 +33,8 @@ function Ring({ value, color }: { value: number; color: string }) {
 // Vague répétée (période 16) : la translation d'une période donne un mouvement sans à-coup.
 const WAVE = `M -16 0 ${Array.from({ length: 6 }, () => "q 4 -1.6 8 0 t 8 0").join(" ")} L 80 44 L -16 44 Z`;
 
-/** Verre de livrables : le niveau du liquide suit la part des livrables remis ; le liquide tangue doucement. */
-function Glass({ done, total, id }: { done: number; total: number; id: number }) {
+/** Verre de livrables : le niveau du liquide suit la part des livrables remis ; le liquide, à la couleur de l'état du projet, tangue doucement. */
+function Glass({ done, total, id, color }: { done: number; total: number; id: number; color: string }) {
   const ratio = total > 0 ? done / total : 0;
   const y = 38 - ratio * 30; // fond du verre à 38, bord utile à 8
   const clip = `verre-${id}`;
@@ -45,16 +45,16 @@ function Glass({ done, total, id }: { done: number; total: number; id: number })
           <path d="M 5.5 3 L 26.5 3 L 24 35.5 Q 23.8 38 21.3 38 L 10.7 38 Q 8.2 38 8 35.5 Z" />
         </clipPath>
       </defs>
-      <path d="M 5.5 3 L 26.5 3 L 24 35.5 Q 23.8 38 21.3 38 L 10.7 38 Q 8.2 38 8 35.5 Z" fill="#eef5fd" />
+      <path d="M 5.5 3 L 26.5 3 L 24 35.5 Q 23.8 38 21.3 38 L 10.7 38 Q 8.2 38 8 35.5 Z" fill="var(--track)" />
       {ratio > 0 && (
         <g clipPath={`url(#${clip})`}>
           <g className="verre-niveau">
             <g className="verre-tangue">
               <g transform={`translate(0 ${y})`}>
                 <g transform="translate(-6 -1.2)">
-                  <path className="verre-vague-2" d={WAVE} fill="#9cc6f5" />
+                  <path className="verre-vague-2" d={WAVE} fill={color} fillOpacity="0.4" />
                 </g>
-                <path className="verre-vague" d={WAVE} fill="#2f8be0" />
+                <path className="verre-vague" d={WAVE} fill={color} />
               </g>
             </g>
           </g>
@@ -123,7 +123,7 @@ export function ProjectsTable({ projects }: { projects: ProjectRow[] }) {
               title={`${p.deliverables_done} livrable${p.deliverables_done > 1 ? "s" : ""} remis sur ${p.deliverables_total}`}
               aria-label={`Livrables : ${p.deliverables_done} sur ${p.deliverables_total}`}
             >
-              <Glass done={p.deliverables_done} total={p.deliverables_total} id={p.id} />
+              <Glass done={p.deliverables_done} total={p.deliverables_total} id={p.id} color={HEALTH_BAR[p.health]} />
               <span className="text-[11.5px] text-muted">
                 Livrables
                 <b className="block text-[13px] font-bold text-ink">
