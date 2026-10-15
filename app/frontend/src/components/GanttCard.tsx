@@ -126,11 +126,12 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
           const x2 = (pos(s.from) / 100) * box.w;
           const y1 = j * ROW_H + ROW_H / 2;
           const y2 = i * ROW_H + ROW_H / 2;
-          const elbow = x2 >= x1 + 14;
+          const elbow = x2 >= x1 + 4;
           const yTurn = i > j ? i * ROW_H : (i + 1) * ROW_H;
-          const d = elbow
-            ? `M${x1} ${y1} H${x1 + 7} V${y2} H${x2 - 1}`
-            : `M${x1} ${y1} H${x1 + 7} V${yTurn} H${x2 - 9} V${y2} H${x2 - 1}`;
+          // Départ sous l'échéance du jalon requis (le bout de la barre porte la date), arrivée au début de la barre.
+          const sx = x1 - 3;
+          const sy = y1 + 8;
+          const d = elbow ? `M${sx} ${sy} V${y2} H${x2 - 1}` : `M${sx} ${sy} V${yTurn} H${x2 - 9} V${y2} H${x2 - 1}`;
           const red = pre.overdue || threatened.has(pre.id);
           return [{ key: `${pre.id}-${s.m.id}`, d, red }];
         }),
@@ -181,7 +182,8 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
                 {r.label}
               </span>
               <span className="shrink-0 text-right text-[10.5px] leading-tight text-muted">
-                {project && threatened.has(r.segs[0]?.m.id) ? <b className="font-semibold text-late">menacé</b> : r.sub}
+                {r.sub}
+                {project && threatened.has(r.segs[0]?.m.id) && <b className="block font-semibold text-late">menacé</b>}
                 {r.alert && <b className="block font-semibold text-late">{r.alert}</b>}
               </span>
             </div>
@@ -236,6 +238,8 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
                         title={`${Math.round((parseDate(asOf).getTime() - parseDate(s.m.date).getTime()) / DAY)} j de retard`}
                       />
                     )}
+                    {/* Vue d'un projet : la date au bout de la barre (au bout du retard s'il y en a un). */}
+                    {project && <DateTag at={s.m.overdue ? Math.max(right, todayLeft) : right} date={s.m.date} late={s.m.overdue ? Math.round((parseDate(asOf).getTime() - parseDate(s.m.date).getTime()) / DAY) : 0} />}
                   </div>
                 );
               })}
@@ -312,5 +316,19 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
         )}
       </div>
     </section>
+  );
+}
+
+/** Date d'échéance écrite au bout de la barre ; à l'intérieur, juste avant l'échéance, si elle sortirait du tableau. */
+function DateTag({ at, date, late }: { at: number; date: string; late: number }) {
+  const text = late ? `${shortDate(date)} · ${late} j de retard` : shortDate(date);
+  const before = at > (late ? 70 : 86);
+  return (
+    <span
+      className={`absolute top-[13px] whitespace-nowrap text-[10.5px] font-medium leading-[14px] ${late ? "text-late" : before ? "text-ink-2" : "text-muted"}`}
+      style={before ? { right: `calc(${100 - at}% + 9px)` } : { left: `calc(${at}% + 6px)` }}
+    >
+      {text}
+    </span>
   );
 }
