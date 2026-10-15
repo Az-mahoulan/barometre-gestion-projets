@@ -50,9 +50,11 @@ export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[
   const from = iso(monday);
   const to = iso(addDays(monday, 6));
   // Chaque date est une ligne verticale : du lundi (0 %) au dimanche (100 %).
-  const at = (d: Date) => Math.min(100, Math.max(0, ((d.getTime() - monday.getTime()) / (6 * DAY)) * 100));
-  const lineX = (i: number) => (i / 6) * 100;
-  const nowPct = at(today);
+  // Samedi et dimanche, presque toujours vides, prennent moitié moins de place que les jours ouvrés.
+  const LINES = [0, 1, 2, 3, 4, 4.5, 5].map((v) => (v / 5) * 100);
+  const dayIndex = (d: Date) => Math.round((d.getTime() - monday.getTime()) / DAY);
+  const lineX = (i: number) => LINES[i];
+  const nowPct = LINES[Math.min(6, Math.max(0, dayIndex(today)))];
   const todayIn = asOf >= from && asOf <= to;
   const weekPast = today > addDays(monday, 6);
 
@@ -114,9 +116,15 @@ export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[
             <ul className="relative flex flex-col" style={{ gap: GAP, paddingBlock: GAP / 2 }}>
               {items.length === 0 && <li className="py-6 text-center text-[12.5px] text-muted">Aucune activité cette semaine.</li>}
               {items.map(({ a, p, color }) => {
-                const single = a.start === a.end;
-                const left = Math.max(0, at(parseDate(a.start)) - (single ? 4 : 0));
-                const right = Math.min(100, at(parseDate(a.end)) + (single ? 4 : 0));
+                // Une activité qui continue la semaine suivante s'arrête au vendredi (« › » au bout) ;
+                // elle ne va sur le week-end que si elle y commence ou s'y termine vraiment.
+                const s0 = Math.max(0, dayIndex(parseDate(a.start)));
+                const e0 = dayIndex(parseDate(a.end));
+                const continues = e0 > 6;
+                const e1 = continues ? (s0 >= 5 ? 6 : 4) : e0;
+                const single = s0 === e1;
+                const left = Math.max(0, LINES[s0] - (single ? 4 : 0));
+                const right = Math.min(100, LINES[e1] + (single ? 4 : 0));
                 // Part écoulée (jusqu'à aujourd'hui), en % de la barre.
                 const done = weekPast ? 100 : todayIn ? Math.min(100, Math.max(0, ((nowPct - left) / Math.max(0.01, right - left)) * 100)) : 0;
                 return (
@@ -139,6 +147,11 @@ export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[
                             <span className="truncate">{a.name}</span>
                           </span>
                         </div>
+                      )}
+                      {continues && (
+                        <span className={`absolute inset-y-0 right-1.5 flex items-center ${done >= 100 ? "text-white" : "text-ink-2"}`} aria-label="Se poursuit la semaine suivante">
+                          <Icon name="right" className="h-4 w-4" />
+                        </span>
                       )}
                     </div>
                   </li>
