@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import AlarmOutlined from "@mui/icons-material/AlarmOutlined";
+import DonutLargeOutlined from "@mui/icons-material/DonutLargeOutlined";
+import ViewStreamOutlined from "@mui/icons-material/ViewStreamOutlined";
 import ShuffleOutlined from "@mui/icons-material/ShuffleOutlined";
 import AdminPanelSettingsOutlined from "@mui/icons-material/AdminPanelSettingsOutlined";
 import AutoAwesomeOutlined from "@mui/icons-material/AutoAwesomeOutlined";
@@ -96,6 +98,8 @@ const ICONS: Record<string, typeof SvgIcon> = {
   caretup: KeyboardArrowUp,
   go: NorthEastRounded,
   alarm: AlarmOutlined,
+  donut: DonutLargeOutlined,
+  rowsview: ViewStreamOutlined,
   shuffle: ShuffleOutlined,
 };
 
