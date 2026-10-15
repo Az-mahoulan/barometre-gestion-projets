@@ -125,11 +125,11 @@ export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProje
                 {showMark && (
                   <span className="absolute inset-y-0 w-[5px] -translate-x-1/2" style={{ left: `${expected * 100}%`, background: `color-mix(in srgb, ${c.solid} 55%, black)` }} aria-hidden="true" />
                 )}
-                <div className="relative flex h-full items-center gap-2.5 pl-1">
+                <div className="relative flex h-full items-center gap-2.5 pl-3.5 pr-1">
+                  <span className="min-w-0 flex-1 truncate text-[12.5px] font-semibold text-white">{m.name}</span>
+                  {/* Membres du jalon en fin de bande, juste avant l'échéance */}
                   <Members members={m.members} />
-                  <span className="truncate text-[12.5px] font-semibold text-white">
-                    {m.name}
-                  </span>
+                  <span className="w-12 shrink-0 pr-2 text-right text-[11px] font-semibold text-white">{shortDate(m.date)}</span>
                 </div>
                 {/* % réalisé : au-dessus du bout de la partie remplie */}
                 <span
@@ -150,9 +150,6 @@ export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProje
                     {i === 0 ? `prévu · ${exp} %` : `${exp} %`}
                   </span>
                 )}
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-white">
-                  {shortDate(m.date)}
-                </span>
               </li>
             );
           })}

@@ -80,3 +80,4 @@
 - 15/10/2026 — Progression des jalons : textes des bandes en blanc (bandes plus soutenues pour la lisibilité) ; % réalisé au-dessus du bout de la partie remplie et % prévu au-dessus du trait (« réalisé · » / « prévu · » sur la première bande) ; ▼ rouge si en retard sur le prévu.
 - 15/10/2026 — Progression des jalons : ▲ vert quand le réalisé dépasse le prévu (symétrique du ▼ rouge).
 - 15/10/2026 — Progression des jalons : bandes moins arrondies (10 px au lieu de pilule).
+- 15/10/2026 — Progression des jalons : photos des membres en fin de bande, juste avant l’échéance ; le nom du jalon ouvre la bande.
