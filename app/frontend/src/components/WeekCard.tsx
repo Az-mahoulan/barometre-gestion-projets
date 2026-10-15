@@ -171,7 +171,7 @@ export function WeekCard({
                 <span className="flex shrink-0 items-center pl-1" title={people.map((p) => p.name).join(", ")}>
                   {people.slice(0, 3).map((p) => (
                     <span key={p.initials + p.name} className="-ml-1 rounded-full ring-2 ring-surface">
-                      <Avatar initials={p.initials} size="h-7 w-7 text-[9.5px]" />
+                      <Avatar initials={p.initials} seed={p.name} size="h-7 w-7 text-[9.5px]" />
                     </span>
                   ))}
                   {people.length > 3 && (

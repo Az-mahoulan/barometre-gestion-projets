@@ -21,7 +21,7 @@ export function TeamsTable({ teams }: { teams: Dashboard["teams"] }) {
           return (
             <li key={m.id} className="flex flex-col rounded-[18px] border border-line p-3.5">
               <div className="flex items-center gap-2.5">
-                <Avatar initials={m.initials} size="h-[38px] w-[38px] text-[12.5px]" />
+                <Avatar initials={m.initials} seed={m.name} size="h-[38px] w-[38px] text-[12.5px]" />
                 <div className="min-w-0">
                   <b className="block truncate text-[12.5px] font-bold">{m.name}</b>
                   <small className="block truncate text-[11px] text-muted">

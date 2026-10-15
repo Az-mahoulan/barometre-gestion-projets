@@ -63,7 +63,7 @@ export function Topbar({
       </button>
 
       <div className="flex items-center gap-2.5 rounded-full border border-line py-1 pl-1 pr-3">
-        <Avatar initials={me.initials} size="h-9 w-9 text-[11.5px]" />
+        <Avatar initials={me.initials} seed={me.name} size="h-9 w-9 text-[11.5px]" />
         <div className="leading-tight">
           <b className="block text-[12.5px] font-bold">{me.name}</b>
           <small className="text-[11px] text-muted">{me.role_label}</small>

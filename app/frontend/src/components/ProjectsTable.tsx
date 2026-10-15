@@ -50,7 +50,7 @@ export function ProjectsTable({ projects }: { projects: ProjectRow[] }) {
               <div className="min-w-0">
                 <b className="block truncate text-[13px] font-bold">{p.name}</b>
                 <span className="mt-0.5 flex items-center gap-1.5 text-[11.5px] text-muted">
-                  <Avatar initials={p.owner_initials} size="h-[18px] w-[18px] text-[8.5px]" />
+                  <Avatar initials={p.owner_initials} seed={p.owner} size="h-[18px] w-[18px] text-[8.5px]" />
                   <span className="truncate">
                     {p.owner} · {p.country}
                   </span>

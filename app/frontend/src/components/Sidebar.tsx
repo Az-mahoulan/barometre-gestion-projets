@@ -85,7 +85,7 @@ export function Sidebar({
             className="-mr-2 rounded-full ring-2 ring-surface"
             title={m.name}
           >
-            <Avatar initials={m.initials} size="h-9 w-9 text-[10.5px]" />
+            <Avatar initials={m.initials} seed={m.name} size="h-9 w-9 text-[10.5px]" />
           </span>
         ))}
         {members.length > shown.length && (

@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { createAvatar } from "@dicebear/core";
+import * as notionists from "@dicebear/notionists";
 import AlarmOutlined from "@mui/icons-material/AlarmOutlined";
 import AdminPanelSettingsOutlined from "@mui/icons-material/AdminPanelSettingsOutlined";
 import AutoAwesomeOutlined from "@mui/icons-material/AutoAwesomeOutlined";
@@ -171,10 +173,41 @@ export function Tile({ icon, tone, className = "h-10 w-10" }: { icon: string; to
   );
 }
 
-export function Avatar({ initials, size = "h-8 w-8 text-[10.5px]" }: { initials: string; size?: string }) {
+// Avatars illustrés (DiceBear « Notionists », licence CC0), générés localement en attendant une photo de profil.
+const AVATAR_CACHE = new Map<string, string>();
+function avatarUri(seed: string): string {
+  let uri = AVATAR_CACHE.get(seed);
+  if (!uri) {
+    uri = createAvatar(notionists, { seed, size: 64 }).toDataUri();
+    AVATAR_CACHE.set(seed, uri);
+  }
+  return uri;
+}
+
+/**
+ * Avatar d'une personne : sa photo si elle existe, sinon un avatar illustré sur la pastille pastel de ses initiales.
+ * `seed` (le nom de préférence) rend l'illustration propre à chacun ; à défaut, les initiales.
+ */
+export function Avatar({
+  initials,
+  seed,
+  photo,
+  size = "h-8 w-8 text-[10.5px]",
+}: {
+  initials: string;
+  seed?: string;
+  photo?: string | null;
+  size?: string;
+}) {
+  const key = seed || initials;
   return (
-    <span className={`inline-grid shrink-0 place-items-center rounded-full font-bold ${TONES[toneFor(initials)]} ${size}`}>
-      {initials}
+    <span className={`inline-grid shrink-0 place-items-center overflow-hidden rounded-full font-bold ${TONES[toneFor(initials)]} ${size}`} title={seed}>
+      {initials && initials !== "·" ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={photo || avatarUri(key)} alt="" className="h-full w-full object-cover" />
+      ) : (
+        initials
+      )}
     </span>
   );
 }
