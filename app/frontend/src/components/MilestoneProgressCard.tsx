@@ -20,6 +20,8 @@ function expectedAt(m: Milestone, asOf: string) {
   return Math.min(1, Math.max(0, (now - start) / (end - start)));
 }
 
+const showMarkAt = (e: number) => e > 0 && e < 1;
+
 /** Membres du jalon : deux photos, puis le nombre de personnes restantes. */
 function Members({ members }: { members: Milestone["members"] }) {
   const shown = members.slice(0, 2);
@@ -108,14 +110,19 @@ export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProje
             const PCT_W = 40;
             // % atteint : dans la partie réalisée (à son extrémité) s'il y a la place, sinon juste après le nom.
             const pctInside = fillPx >= leftEnd + PCT_W;
-            const pctLeft = fillPx - PCT_W - 4;
-            const pctBox: [number, number] = pctInside ? [pctLeft, pctLeft + PCT_W] : [leftEnd, leftEnd + PCT_W + 8];
+            let pctLeft = fillPx - PCT_W - 4;
+            // Jamais sur le trait du prévu : le pourcentage se décale juste avant le trait.
+            if (pctInside && markPx > pctLeft - 6 && markPx < pctLeft + PCT_W + 6) pctLeft = markPx - PCT_W - 8;
+            // Après le nom : si le trait du prévu tombe dessus, le pourcentage passe juste après le trait.
+            const inlineShift = !pctInside && showMarkAt(expected) && markPx > leftEnd - 14 && markPx < leftEnd + PCT_W + 6 ? markPx + 10 - (leftEnd - 4) : 0;
+            const inlineAt = leftEnd + inlineShift;
+            const pctBox: [number, number] = pctInside ? [pctLeft, pctLeft + PCT_W] : [inlineAt, inlineAt + PCT_W + 8];
             // % prévu : juste après le trait, sinon juste avant, sinon à droite avant l'échéance.
             const EXP_W = 72;
             const free = (x: number) => x >= pctBox[1] + 6 || (x >= leftEnd && x + EXP_W <= pctBox[0] - 6);
             const fits = (x: number) => x + EXP_W <= rightStart && free(x);
             const expLeft = fits(markPx + 8) ? markPx + 8 : fits(markPx - 8 - EXP_W) ? markPx - 8 - EXP_W : null;
-            const showMark = expected > 0 && expected < 1;
+            const showMark = showMarkAt(expected);
             const pctLabel = (
               <b className={`shrink-0 text-[12.5px] font-bold ${m.overdue || behind ? "text-late" : "text-ink"}`}>{pct} %</b>
             );
@@ -137,7 +144,7 @@ export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProje
                   <span className="truncate text-[12.5px] font-semibold text-ink">
                     {m.name}
                   </span>
-                  {!pctInside && pctLabel}
+                  {!pctInside && <span style={{ marginLeft: inlineShift }}>{pctLabel}</span>}
                 </div>
                 {pctInside && (
                   <span className="absolute top-1/2 w-10 -translate-y-1/2 text-right" style={{ left: pctLeft }}>

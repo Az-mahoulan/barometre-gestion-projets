@@ -217,7 +217,11 @@ export function DashboardView() {
               />
               <TimelineCard projects={data.gantt} asOf={data.as_of} />
               <GanttCard projects={data.gantt} asOf={data.as_of} />
-              <MilestoneProgressCard projects={data.gantt} asOf={data.as_of} />
+              {/* Progression des jalons et activités de la semaine côte à côte (même hauteur : celle des activités). */}
+              <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_316px]">
+                <MilestoneProgressCard projects={data.gantt} asOf={data.as_of} />
+                <WeekActivitiesCard projects={data.gantt} asOf={data.as_of} />
+              </div>
               <ProjectsTable projects={data.projects} now={data.now} />
               <TeamsTable teams={data.teams} />
             </div>
@@ -230,7 +234,6 @@ export function DashboardView() {
                 onRemind={() => setConfirmAll(true)}
               />
               <WeekCard week={data.week} asOf={data.as_of} projects={data.gantt} onOffset={setWeek} />
-              <WeekActivitiesCard projects={data.gantt} asOf={data.as_of} />
               <CriticalCard
                 total={data.critical_actions.total}
                 items={data.critical_actions.items}
