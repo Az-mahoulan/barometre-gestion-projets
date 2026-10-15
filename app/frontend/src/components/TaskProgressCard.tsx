@@ -205,7 +205,7 @@ const ringArc = arc<{ startAngle: number; endAngle: number }>()
 function ColumnView({ progress, finishedPct }: { progress: Dashboard["task_progress"]; finishedPct: number }) {
   const shown = progress.statuses.filter((s) => s.count > 0);
   const total = Math.max(progress.total, 1);
-  const VW = 440;
+  const VW = 460;
   const VH = 300;
   const CX = VW / 2;
   const CY = VH / 2;
@@ -222,24 +222,27 @@ function ColumnView({ progress, finishedPct }: { progress: Dashboard["task_progr
     return { s, startAngle, endAngle, mid: (startAngle + endAngle) / 2 };
   });
 
-  // Étiquettes dans l'axe de chaque portion, juste au-delà d'un petit trait épais de sa couleur (pas de coude).
-  type Label = { key: string; x0: number; y0: number; x1: number; y1: number; tx: number; ty: number; anchor: "start" | "middle" | "end" };
+  // Étiquettes encadrées (statut au-dessus, pourcentage centré dessous), à droite ou à gauche de l'anneau,
+  // reliées à leur portion par un trait coudé de sa couleur ; écartées si elles se chevauchent.
+  const BW = 74; // largeur d'un cadre
+  const BH = 40; // hauteur d'un cadre
+  const BX = R2 + 36; // distance du centre au bord intérieur des cadres
+  type Label = { key: string; side: 1 | -1; x0: number; y0: number; x1: number; y1: number; ty: number };
   const labels: Label[] = segs.map(({ s, mid }) => {
     const [sx, sy] = [Math.sin(mid), -Math.cos(mid)];
-    const anchor = Math.abs(sx) < 0.35 ? "middle" : sx > 0 ? "start" : "end";
-    // En haut ou en bas, l'étiquette se place au-dessus / au-dessous du trait ; sur les côtés, à côté.
-    const lift = anchor === "middle" ? (sy > 0 ? 16 : -16) : 0;
-    return {
-      key: s.key,
-      x0: sx * (R2 + 5),
-      y0: sy * (R2 + 5),
-      x1: sx * (R2 + 15),
-      y1: sy * (R2 + 15),
-      tx: sx * (R2 + 21),
-      ty: sy * (R2 + 21) + lift,
-      anchor,
-    };
+    const side: 1 | -1 = sx >= 0 ? 1 : -1;
+    return { key: s.key, side, x0: sx * (R2 + 5), y0: sy * (R2 + 5), x1: sx * (R2 + 16), y1: sy * (R2 + 16), ty: sy * (R2 + 16) };
   });
+  const LIM = CY - BH / 2 - 2;
+  for (const side of [1, -1] as const) {
+    const group = labels.filter((l) => l.side === side).sort((a, b) => a.ty - b.ty);
+    for (let i = 1; i < group.length; i++) group[i].ty = Math.max(group[i].ty, group[i - 1].ty + BH + 8);
+    // Si le dernier cadre déborde en bas, on remonte le groupe.
+    for (let i = group.length - 1; i >= 0; i--) {
+      const max = i === group.length - 1 ? LIM : group[i + 1].ty - BH - 8;
+      group[i].ty = Math.min(group[i].ty, max);
+    }
+  }
   const labelOf = (key: string) => labels.find((l) => l.key === key)!;
 
   return (
@@ -267,7 +270,7 @@ function ColumnView({ progress, finishedPct }: { progress: Dashboard["task_progr
 
       <svg
         viewBox={`0 0 ${VW} ${VH}`}
-        className="mx-auto h-auto w-full max-w-[440px]"
+        className="mx-auto h-auto w-full max-w-[460px]"
         role="img"
         aria-label={`Répartition des ${progress.total} tâches : ${shown.map((s) => `${s.label} ${s.pct} %`).join(", ")}`}
       >
@@ -280,13 +283,25 @@ function ColumnView({ progress, finishedPct }: { progress: Dashboard["task_progr
 
           {segs.map(({ s }) => {
             const l = labelOf(s.key);
+            const c = RING[s.key];
+            const edge = l.side * BX; // bord du cadre côté anneau
+            const bx = l.side === 1 ? BX : -BX - BW;
+            const kx = l.x1 + l.side * Math.min(8, Math.abs(edge - l.x1) / 2); // coude
             return (
               <g key={`l-${s.key}`}>
-                <line x1={l.x0} y1={l.y0} x2={l.x1} y2={l.y1} stroke={RING[s.key]} strokeWidth="3.5" strokeLinecap="round" />
-                <text x={l.tx} y={l.ty - 8} textAnchor={l.anchor} dominantBaseline="central" fill={RING[s.key]} className="text-[11.5px] font-semibold">
+                <path
+                  d={`M ${l.x0} ${l.y0} L ${l.x1} ${l.y1} L ${kx} ${l.ty} L ${edge} ${l.ty}`}
+                  fill="none"
+                  stroke={c}
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <rect x={bx} y={l.ty - BH / 2} width={BW} height={BH} rx="10" fill="#fff" stroke={c} strokeWidth="1.5" strokeDasharray="3 3" />
+                <text x={bx + BW / 2} y={l.ty - 8} textAnchor="middle" dominantBaseline="central" fill={c} className="text-[11px] font-semibold">
                   {s.label}
                 </text>
-                <text x={l.tx} y={l.ty + 9} textAnchor={l.anchor} dominantBaseline="central" fill={RING[s.key]} className="text-[14px] font-bold">
+                <text x={bx + BW / 2} y={l.ty + 9} textAnchor="middle" dominantBaseline="central" fill={c} className="text-[14px] font-bold">
                   {s.pct} %
                 </text>
               </g>
