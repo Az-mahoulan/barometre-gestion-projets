@@ -111,12 +111,12 @@ export function WeekCard({
                   const active = shown && key === selected.date;
                   const tints = [...(marks.get(key) ?? [])];
                   return (
-                    <td key={key} className={`py-1 ${shown ? "bg-lime/35 first:rounded-l-full last:rounded-r-full" : ""}`}>
+                    <td key={key} className={`py-[3px] ${shown ? "bg-lime/35 first:rounded-l-full last:rounded-r-full" : ""}`}>
                       <button
                         onClick={() => pick(d)}
                         aria-pressed={active}
                         aria-label={parseDate(key).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
-                        className={`relative mx-auto grid h-7 w-7 place-items-center rounded-full ${
+                        className={`relative mx-auto grid h-8 w-8 place-items-center overflow-hidden rounded-full ${
                           active
                             ? "bg-side font-bold text-white"
                             : key === asOf
@@ -126,9 +126,11 @@ export function WeekCard({
                                 : `hover:bg-surface-2 ${shown ? "font-semibold text-ink" : "text-ink-2"}`
                         }`}
                       >
-                        {d.getDate()}
+                        {/* Jour choisi : les points passent dans le cercle, sur une bande claire en bas pour rester visibles. */}
+                        {active && tints.length > 0 && <span className="absolute inset-x-0 bottom-0 h-[10px] bg-white/90" />}
+                        <span className={active && tints.length > 0 ? "relative -mt-2" : ""}>{d.getDate()}</span>
                         {tints.length > 0 && (
-                          <span className="absolute -bottom-[1px] left-1/2 flex -translate-x-1/2 gap-[2px]">
+                          <span className={`absolute left-1/2 flex -translate-x-1/2 gap-[2px] ${active ? "bottom-[3px]" : "bottom-0"}`}>
                             {LEGEND.filter((l) => tints.includes(l.tint)).map((l) => (
                               <i key={l.tint} className="h-1 w-1 rounded-full" style={{ background: COLORS[l.tint] }} />
                             ))}
