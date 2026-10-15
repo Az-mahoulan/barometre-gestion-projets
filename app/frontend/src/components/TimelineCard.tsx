@@ -117,8 +117,9 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
           for (const k of keys) {
             const x = (col(k.date) + 0.5) * colW;
             const w = labelW(k.label);
-            const side = k.date > p.end && x + 10 + w <= width;
-            const box: [number, number] = side ? [x + 6, x + 10 + w] : x + w > width ? [x - w, x + 6] : [x - 6, x + w];
+            const end = (col(k.date) + 1) * colW;
+            const side = k.date > p.end && end + 4 + w <= width;
+            const box: [number, number] = side ? [end, end + 4 + w] : x + w > width ? [x - w, x + 6] : [x - 6, x + w];
             if (!side && placed.some(([s, t]) => box[0] < t && s < box[1])) continue;
             if (!side) placed.push(box);
             named.set(k.label + k.date, side ? "side" : "below");
@@ -158,13 +159,14 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
                   const flip = (col(k.date) + 0.5) * colW + labelW(k.label) > width;
                   return (
                     <div key={k.label + k.date}>
+                      {/* Date clé : une portion de la barre, dans la version franche de sa couleur. */}
                       <i
-                        className="absolute top-[15px] h-2.5 w-2.5 -translate-x-1/2 rotate-45 rounded-[2px] ring-2 ring-surface"
-                        style={{ left: `${xPct}%`, background: color.solid }}
+                        className="absolute top-[13px] h-[14px] rounded-[4px]"
+                        style={{ left: `calc(${(col(k.date) / n) * 100}% + 3px)`, width: `calc(${100 / n}% - 6px)`, background: color.solid }}
                         title={`${k.label} · ${shortDate(k.date)}`}
                       />
                       {where === "side" && (
-                        <span className="absolute top-[12px] whitespace-nowrap text-[11px] font-medium text-ink-2" style={{ left: `calc(${xPct}% + 12px)` }}>
+                        <span className="absolute top-[12px] whitespace-nowrap text-[11px] font-medium text-ink-2" style={{ left: `calc(${((col(k.date) + 1) / n) * 100}% + 2px)` }}>
                           {k.label}
                         </span>
                       )}
@@ -191,6 +193,9 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
             aria-hidden="true"
           >
             <span className="absolute inset-y-0 w-[2px] -translate-x-1/2 bg-lime" />
+            <span className="absolute bottom-1 -translate-x-1/2 whitespace-nowrap rounded-full bg-lime px-1.5 text-[9.5px] font-bold text-ink">
+              Aujourd’hui
+            </span>
           </div>
         )}
       </div>
@@ -201,7 +206,7 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
           Début → fin du projet
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <i className="h-2 w-2 rotate-45 rounded-[1px] bg-[#7c6cf0]" />
+          <i className="h-2 w-2.5 rounded-[2px] bg-[#7c6cf0]" />
           Date clé
         </span>
         {showToday && (
