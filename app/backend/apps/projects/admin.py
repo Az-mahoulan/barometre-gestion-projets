@@ -33,5 +33,10 @@ class TaskAdmin(admin.ModelAdmin):
     list_filter = ("status", "project")
 
 
-admin.site.register(CalendarEvent)
+@admin.register(CalendarEvent)
+class CalendarEventAdmin(admin.ModelAdmin):
+    list_display = ("title", "kind", "starts_at", "project")
+    filter_horizontal = ("participants",)
+
+
 admin.site.register(ActivityLog)

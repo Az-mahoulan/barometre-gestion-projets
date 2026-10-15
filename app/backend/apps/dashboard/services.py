@@ -106,7 +106,7 @@ def _visible_projects(user, country: str | None):
     qs = (
         visible_projects(user)
         .select_related("country", "owner")
-        .prefetch_related("tasks", "milestones", "activities")
+        .prefetch_related("tasks__assignee", "milestones", "activities")
     )
     if country:
         qs = qs.filter(country__code=country)
@@ -168,34 +168,63 @@ def build_gantt(projects, stats, today: date) -> list[dict]:
     return rows
 
 
+def _people(users) -> list[dict]:
+    """Personnes à afficher sur un élément de l'agenda (sans doublon, utilisateurs supprimés ignorés)."""
+    seen, out = set(), []
+    for u in users:
+        if u is not None and u.id not in seen:
+            seen.add(u.id)
+            out.append({"initials": u.initials, "name": u.display_name})
+    return out
+
+
 def build_week(user, projects, today: date, offset: int) -> dict:
+    """Agenda de la semaine : réunions (bleu) et échéances (orange, rouge si dépassées) avec les personnes concernées."""
     monday = today - timedelta(days=today.weekday()) + timedelta(weeks=offset)
     sunday = monday + timedelta(days=6)
     visible_ids = {p.id for p in projects}
     tz = timezone.get_current_timezone()
     start_dt = timezone.make_aware(datetime.combine(monday, time.min), tz)
     end_dt = timezone.make_aware(datetime.combine(sunday + timedelta(days=1), time.min), tz)
-    events = CalendarEvent.objects.filter(starts_at__gte=start_dt, starts_at__lt=end_dt)
+    events = CalendarEvent.objects.filter(starts_at__gte=start_dt, starts_at__lt=end_dt).prefetch_related("participants")
     days = {monday + timedelta(days=i): [] for i in range(7)}
+    in_week = lambda d: monday <= d <= sunday
 
     for e in events:
         if e.project_id and e.project_id not in visible_ids:
             continue
         local = timezone.localtime(e.starts_at, tz)
         days[local.date()].append(
-            {"kind": "event", "title": e.title, "subtitle": e.get_kind_display(), "time": local.strftime("%H:%M")}
+            {"kind": "event", "title": e.title, "subtitle": e.get_kind_display(), "time": local.strftime("%H:%M"),
+             "people": _people(e.participants.all())}
         )
+    scope_tasks = _scope_tasks(user, projects)
     for p in projects:
-        for m in p.milestones.all():
-            if monday <= m.due_date <= sunday:
-                days[m.due_date].append(
-                    {"kind": "milestone", "title": m.name, "subtitle": f"Jalon · {p.name}", "done": m.is_achieved}
+        if in_week(p.end_date):
+            done = p.status != Project.Status.ACTIVE
+            days[p.end_date].append(
+                {"kind": "project", "title": p.name, "subtitle": "Fin prévue", "done": done,
+                 "late": not done and p.end_date < today, "people": _people([p.owner])}
+            )
+        for a in p.activities.all():
+            if in_week(a.end_date):
+                ts = [t for t in p.tasks.all() if t.activity_id == a.id]
+                done = bool(ts) and all(t.is_complete for t in ts)
+                days[a.end_date].append(
+                    {"kind": "activity", "title": a.name, "subtitle": p.name, "done": done,
+                     "late": not done and a.end_date < today, "people": _people(t.assignee for t in ts)}
                 )
-    for t in _scope_tasks(user, projects):
-        if monday <= t.due_date <= sunday:
+        for m in p.milestones.all():
+            if in_week(m.due_date):
+                days[m.due_date].append(
+                    {"kind": "milestone", "title": m.name, "subtitle": p.name, "done": m.is_achieved,
+                     "late": not m.is_achieved and m.due_date < today, "people": _people([p.owner])}
+                )
+    for t in scope_tasks:
+        if in_week(t.due_date):
             days[t.due_date].append(
                 {"kind": "task", "title": t.title, "subtitle": f"{p_name(projects, t.project_id)}",
-                 "done": t.is_complete, "late": is_overdue(t, today), "task_id": t.id}
+                 "done": t.is_complete, "late": is_overdue(t, today), "task_id": t.id, "people": _people([t.assignee])}
             )
     return {
         "start": monday, "end": sunday, "offset": offset,

@@ -90,8 +90,11 @@ PROJECTS = [
      [("Collecte des données", "sena", "approved", "06-30", "n", 0), ("Analyse", "ibrahim", "approved", "07-31", "n", 1), ("Rapport final", "aicha", "approved", "08-28", "n", 1)]),
 ]
 
-EVENTS = [("10-12", "10:00", "Point hebdomadaire", "meeting"), ("10-14", "15:00", "Comité de pilotage", "meeting"),
-          ("10-15", "09:00", "Atelier partenaires (Dakar)", "mission"), ("10-16", "14:00", "Revue des jalons", "meeting")]
+# date, heure, intitulé, type, participants
+EVENTS = [("10-12", "10:00", "Point hebdomadaire", "meeting", ["mireille", "koffi", "aicha", "fatou"]),
+          ("10-14", "15:00", "Comité de pilotage", "meeting", ["mireille", "aicha", "romuald"]),
+          ("10-15", "09:00", "Atelier partenaires (Dakar)", "mission", ["sena", "ibrahim"]),
+          ("10-16", "14:00", "Revue des jalons", "meeting", ["mireille", "sena", "adjoa", "koffi", "fatou"])]
 
 LOGS = [(2, "mireille", "a approuvé « Lancer la collecte »", "Enquête nationale T4"), (3, "sena", "a passé « Atelier de cadrage » en cours", "Tableau de bord partenaires"),
         (26, "koffi", "a terminé « Arborescence du site »", "Refonte du site web"), (27, "romuald", "a commenté « Rapport d’audit »", "Audit qualité des données"),
@@ -143,9 +146,10 @@ class Command(BaseCommand):
                 Task.objects.create(project=p, activity=acts[act], title=title, assignee=users[who], status=st, due_date=d(due), priority=prio)
 
         tz = timezone.get_current_timezone()
-        for day, hour, title, kind in EVENTS:
+        for day, hour, title, kind, who in EVENTS:
             at = timezone.make_aware(datetime.combine(d(day), time.fromisoformat(hour)), tz)
-            CalendarEvent.objects.create(title=title, kind=kind, starts_at=at)
+            event = CalendarEvent.objects.create(title=title, kind=kind, starts_at=at)
+            event.participants.set([users[u] for u in who])
 
         noon = timezone.make_aware(datetime.combine(DEMO_TODAY, time(14, 0)), tz)
         for hours_ago, who, message, project in LOGS:

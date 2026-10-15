@@ -61,13 +61,15 @@ export interface GanttProject {
 }
 
 export interface WeekItem {
-  kind: "event" | "milestone" | "task";
+  kind: "event" | "project" | "activity" | "milestone" | "task";
   title: string;
   subtitle: string;
   time?: string;
   done?: boolean;
   late?: boolean;
   task_id?: number;
+  /** Participants d'une réunion ou personnes chargées de l'échéance (peut être vide). */
+  people?: { initials: string; name: string }[];
 }
 
 export interface Week {

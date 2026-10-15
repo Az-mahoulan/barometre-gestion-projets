@@ -166,3 +166,24 @@ def test_task_progress_can_be_limited_to_one_project(admin, boss, project, make_
     assert full["task_progress"]["total"] > 1
     # Les indicateurs du haut de page ne dépendent pas de ce filtre.
     assert only["kpis"] == full["kpis"]
+
+
+def test_week_lists_meetings_and_deadlines_with_people(admin, boss, worker, project, make_task, client_for):
+    from datetime import datetime, time
+
+    from django.utils import timezone
+
+    from apps.projects.models import CalendarEvent, Milestone
+
+    at = timezone.make_aware(datetime.combine(date(2026, 10, 15), time(10, 0)))
+    meeting = CalendarEvent.objects.create(title="Réunion", starts_at=at)
+    meeting.participants.set([boss, worker])
+    Milestone.objects.create(project=project, name="Jalon passé", due_date=date(2026, 10, 13))
+    make_task(project, date(2026, 10, 16), assignee=worker, title="Tâche à rendre")
+
+    days = client_for(admin).get("/api/v1/dashboard/").json()["week"]["days"]
+    items = {i["title"]: i for d in days for i in d["items"]}
+    assert [p["name"] for p in items["Réunion"]["people"]] == ["boss", "worker"]
+    assert items["Jalon passé"]["late"] is True
+    assert items["Jalon passé"]["people"][0]["name"] == "boss"
+    assert items["Tâche à rendre"]["people"] == [{"initials": "W", "name": "worker"}]

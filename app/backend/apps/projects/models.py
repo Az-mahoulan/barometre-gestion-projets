@@ -121,6 +121,7 @@ class CalendarEvent(models.Model):
     starts_at = models.DateTimeField()
     ends_at = models.DateTimeField(null=True, blank=True)
     project = models.ForeignKey(Project, null=True, blank=True, on_delete=models.CASCADE, related_name="events")
+    participants = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="events", verbose_name="Participants")
 
     class Meta:
         verbose_name = "événement"

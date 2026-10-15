@@ -40,3 +40,5 @@
 - Mise en page en deux colonnes : à gauche indicateurs, évolution mensuelle, programmation, progression des tâches, Gantt, projets, équipes ; à droite synthèse de l'assistant (carte sombre), calendrier des jalons, actions critiques, activités récentes.
 - Nouveau : calendrier du mois (jalons prévus / dépassés), écart de l'évolution par rapport au mois précédent.
 - Réveil du serveur Django depuis le navigateur (`/reveil`) : sur l'offre gratuite de Render, les appels relayés par Next ne réveillent pas le service.
+- Programmation : le calendrier du mois devient l'en-tête de la carte (semaine affichée surlignée, clic sur un jour pour voir ses éléments) ; trois couleurs seulement (réunion bleu, échéance orange, retard rouge) ; légende collée en bas.
+- Échéances affichées : fins de projets et d'activités, jalons, tâches, avec les personnes concernées (responsable du projet, assignés des tâches, participants des réunions). Nouveau champ `CalendarEvent.participants` (migration 0002, qui renseigne aussi les réunions de démonstration si elles existent).

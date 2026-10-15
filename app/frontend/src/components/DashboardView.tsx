@@ -9,7 +9,6 @@ import { useCountries, useDashboard, useMe } from "@/lib/hooks";
 import type { CriticalItem, Period } from "@/lib/types";
 
 import { ActivityCard } from "./ActivityCard";
-import { CalendarCard } from "./CalendarCard";
 import { AssistantCard, buildSummary } from "./AssistantCard";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { CriticalCard } from "./CriticalCard";
@@ -199,7 +198,7 @@ export function DashboardView() {
                   value={trendProject}
                   onChange={setTrendProject}
                 />
-                <WeekCard week={data.week} onOffset={setWeek} />
+                <WeekCard week={data.week} asOf={data.as_of} projects={data.gantt} onOffset={setWeek} />
               </div>
               <TaskProgressCard
                 progress={data.task_progress}
@@ -219,7 +218,6 @@ export function DashboardView() {
                 reminders={remindable.length}
                 onRemind={() => setConfirmAll(true)}
               />
-              <CalendarCard asOf={data.as_of} projects={data.gantt} />
               <CriticalCard
                 total={data.critical_actions.total}
                 items={data.critical_actions.items}
