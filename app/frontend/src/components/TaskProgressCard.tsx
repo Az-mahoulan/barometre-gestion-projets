@@ -193,7 +193,7 @@ const RING: Record<string, string> = {
 // Portions géométriquement exactes (d3-shape) : coins arrondis réguliers, espaces de largeur constante (bords parallèles).
 const R1 = 60; // rayon intérieur
 const R2 = 96; // rayon extérieur
-const PAD = 6; // largeur de l'espace entre deux portions, en pixels
+const PAD = 4; // largeur de l'espace entre deux portions, en pixels
 const ringArc = arc<{ startAngle: number; endAngle: number }>()
   .innerRadius(R1)
   .outerRadius(R2)
@@ -209,13 +209,8 @@ function ColumnView({ progress, finishedPct }: { progress: Dashboard["task_progr
   const VH = 300;
   const CX = VW / 2;
   const CY = VH / 2;
-  const MIN = (24 * Math.PI) / 180; // part minimale à l'écran (24°) pour qu'un petit statut garde une vraie forme
-
-  // Angles à l'écran (radians, 0 = en haut, sens horaire) : chaque portion a au moins MIN, les % affichés restent exacts.
-  const raw = shown.map((s) => (s.count / total) * 2 * Math.PI);
-  const small = raw.filter((d) => d < MIN).length;
-  const bigSum = raw.filter((d) => d >= MIN).reduce((a, d) => a + d, 0);
-  const sweeps = raw.map((d) => (d < MIN ? MIN : (d / Math.max(bigSum, 1e-6)) * (2 * Math.PI - small * MIN)));
+  // Angles strictement proportionnels aux nombres de tâches (0 = en haut, sens horaire).
+  const sweeps = shown.map((s) => (s.count / total) * 2 * Math.PI);
   const segs = shown.map((s, i) => {
     const startAngle = sweeps.slice(0, i).reduce((a, d) => a + d, 0);
     const endAngle = startAngle + sweeps[i];
@@ -227,11 +222,11 @@ function ColumnView({ progress, finishedPct }: { progress: Dashboard["task_progr
   const BW = 74; // largeur d'un cadre
   const BH = 40; // hauteur d'un cadre
   const BX = R2 + 36; // distance du centre au bord intérieur des cadres
-  type Label = { key: string; side: 1 | -1; x0: number; y0: number; x1: number; y1: number; ty: number };
+  type Label = { key: string; side: 1 | -1; x0: number; y0: number; ty: number };
   const labels: Label[] = segs.map(({ s, mid }) => {
     const [sx, sy] = [Math.sin(mid), -Math.cos(mid)];
     const side: 1 | -1 = sx >= 0 ? 1 : -1;
-    return { key: s.key, side, x0: sx * (R2 + 5), y0: sy * (R2 + 5), x1: sx * (R2 + 16), y1: sy * (R2 + 16), ty: sy * (R2 + 16) };
+    return { key: s.key, side, x0: sx * (R2 + 5), y0: sy * (R2 + 5), ty: sy * (R2 + 16) };
   });
   const LIM = CY - BH / 2 - 2;
   for (const side of [1, -1] as const) {
@@ -286,11 +281,12 @@ function ColumnView({ progress, finishedPct }: { progress: Dashboard["task_progr
             const c = RING[s.key];
             const edge = l.side * BX; // bord du cadre côté anneau
             const bx = l.side === 1 ? BX : -BX - BW;
-            const kx = l.x1 + l.side * Math.min(8, Math.abs(edge - l.x1) / 2); // coude
+            // Trait à 45° depuis la portion jusqu'à la hauteur de l'étiquette, puis horizontal : jamais de retour en arrière.
+            const kx = l.x0 + l.side * Math.min(Math.abs(l.ty - l.y0), Math.max(0, Math.abs(edge - l.x0) - 6));
             return (
               <g key={`l-${s.key}`}>
                 <path
-                  d={`M ${l.x0} ${l.y0} L ${l.x1} ${l.y1} L ${kx} ${l.ty} L ${edge} ${l.ty}`}
+                  d={`M ${l.x0} ${l.y0} L ${kx} ${l.ty} L ${edge} ${l.ty}`}
                   fill="none"
                   stroke={c}
                   strokeWidth="2.5"
