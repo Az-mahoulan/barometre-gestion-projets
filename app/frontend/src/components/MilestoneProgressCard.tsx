@@ -115,12 +115,12 @@ export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProje
             return (
               <li
                 key={m.id}
-                className="relative h-9 w-full shrink-0 rounded-full [text-shadow:0_1px_1px_rgba(0,0,0,0.18)] sm:w-[80%]"
+                className="relative h-9 w-full shrink-0 rounded-[10px] [text-shadow:0_1px_1px_rgba(0,0,0,0.18)] sm:w-[80%]"
                 style={{ background: `color-mix(in srgb, ${c.solid} 55%, white)` }}
                 title={`${p.name} · ${m.name} : ${pct} % réalisé, ${exp} % prévu à date (${m.tasks_complete}/${m.tasks_total} tâches) · échéance ${shortDate(m.date)}`}
               >
                 {/* Avancement réel : même teinte, plus pure */}
-                {pct > 0 && <span className={`absolute inset-y-0 left-0 ${pct >= 97 ? "rounded-full" : "rounded-l-full"}`} style={{ width: `${pct}%`, background: c.solid }} />}
+                {pct > 0 && <span className={`absolute inset-y-0 left-0 ${pct >= 97 ? "rounded-[10px]" : "rounded-l-[10px]"}`} style={{ width: `${pct}%`, background: c.solid }} />}
                 {/* Avancement prévu à date : trait épais sur toute la hauteur, couleur foncée du projet */}
                 {showMark && (
                   <span className="absolute inset-y-0 w-[5px] -translate-x-1/2" style={{ left: `${expected * 100}%`, background: `color-mix(in srgb, ${c.solid} 55%, black)` }} aria-hidden="true" />
@@ -164,7 +164,7 @@ export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProje
 
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted">
         <span className="inline-flex items-center gap-1.5">
-          <i className="h-2.5 w-6 rounded-full bg-[#1e6bff]" />
+          <i className="h-2.5 w-6 rounded-[3px] bg-[#1e6bff]" />
           Avancement réel
         </span>
         <span className="inline-flex items-center gap-1.5">
