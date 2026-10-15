@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { parseDate, shortDate } from "@/lib/format";
 import { projectColor } from "@/lib/projectColors";
@@ -29,6 +29,22 @@ const weekLabel = (a: string, b: string) => {
 export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[]; asOf: string }) {
   const today = parseDate(asOf);
   const [offset, setOffset] = useState(0);
+
+  // Défilement : fine barre discrète à droite + fondu en bas tant qu'il reste des activités à voir.
+  const scroller = useRef<HTMLDivElement>(null);
+  const [scroll, setScroll] = useState({ ratio: 1, top: 0, more: false });
+  const measure = () => {
+    const el = scroller.current;
+    if (!el) return;
+    const ratio = el.clientHeight / Math.max(el.scrollHeight, 1);
+    const next = {
+      ratio,
+      top: el.scrollHeight > el.clientHeight ? el.scrollTop / (el.scrollHeight - el.clientHeight) : 0,
+      more: el.scrollTop + el.clientHeight < el.scrollHeight - 2,
+    };
+    // Mise à jour seulement si quelque chose a changé (évite une boucle de rendus).
+    setScroll((cur) => (cur.ratio === next.ratio && cur.top === next.top && cur.more === next.more ? cur : next));
+  };
   const monday = addDays(today, -((today.getDay() + 6) % 7) + offset * 7);
   const days = Array.from({ length: 7 }, (_, i) => addDays(monday, i));
   const from = iso(monday);
@@ -39,6 +55,10 @@ export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[
   const nowPct = at(today);
   const todayIn = asOf >= from && asOf <= to;
   const weekPast = today > addDays(monday, 6);
+
+  useEffect(() => {
+    measure();
+  });
 
   const items = projects
     .filter((p) => p.status === "active")
@@ -73,8 +93,17 @@ export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[
           )}
         </div>
 
-        {/* Zone des barres : défile (sans barre visible) au-delà de quelques activités */}
-        <div className="overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" style={{ maxHeight: VISIBLE * (ROW + GAP) + GAP }}>
+        {/* Zone des barres : défile au-delà de quelques activités */}
+        <div className="relative">
+        <div
+          ref={scroller}
+          onScroll={measure}
+          className="overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          style={{
+            maxHeight: VISIBLE * (ROW + GAP) + GAP,
+            maskImage: scroll.more ? "linear-gradient(to bottom, #000 calc(100% - 28px), transparent)" : undefined,
+          }}
+        >
           <div className="relative">
             <div className="pointer-events-none absolute inset-0" aria-hidden="true">
               {days.map((d, i) => (
@@ -119,6 +148,15 @@ export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[
 
             {todayIn && <span className="pointer-events-none absolute inset-y-0 z-10 w-[2px] -translate-x-1/2 bg-lime" style={{ left: `${nowPct}%` }} aria-hidden="true" />}
           </div>
+        </div>
+        {scroll.ratio < 1 && (
+          <span className="pointer-events-none absolute inset-y-1 -right-2.5 w-[3px] rounded-full bg-[#efefea]" aria-hidden="true">
+            <span
+              className="absolute w-full rounded-full bg-[#c9cac3]"
+              style={{ height: `${scroll.ratio * 100}%`, top: `${scroll.top * (1 - scroll.ratio) * 100}%` }}
+            />
+          </span>
+        )}
         </div>
 
         {/* Dates en bas, chacune sous sa ligne */}

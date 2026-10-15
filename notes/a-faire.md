@@ -11,3 +11,7 @@ Liste des évolutions demandées, à reprendre quand le tableau de bord sera sta
 
 - [ ] Rattacher les activités à un jalon (projet > jalons > activités > tâches), lien facultatif.
 - [ ] Écrans de saisie dans l'application (aujourd'hui dans l'admin Django) : dates clés des projets, dépendances entre jalons, participants des réunions, photo de profil.
+
+## Démo en ligne (Render)
+
+- [ ] **Date figée** : le serveur Django de démonstration a `APP_DEMO_TODAY=2026-10-14` (variable d'environnement sur Render et dans `render.yaml`). Le tableau de bord affiche donc toujours le 14 octobre comme « aujourd'hui ». Pour suivre la vraie date du Bénin (fuseau `Africa/Porto-Novo`, déjà réglé), vider ou retirer cette variable sur le service Django ; les données de démo vieilliront alors avec le temps. Gardé figé pour l'instant (décision du 15/10/2026).
