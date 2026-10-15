@@ -111,6 +111,13 @@ DEPENDENCIES = {
     "Enquête nationale T4": [("Collecte terminée", "Collecte lancée"), ("Rapport préliminaire", "Collecte terminée")],
 }
 
+# Activités courtes de la semaine de démonstration : projet, intitulé, début, fin
+SHORT_ACTIVITIES = [("Rapport annuel 2026", "Relecture du chapitre 1", "10-12", "10-14"),
+                    ("Enquête nationale T4", "Formation des superviseurs", "10-13", "10-15"),
+                    ("Refonte du site web", "Tests utilisateurs", "10-15", "10-20"),
+                    ("Tableau de bord partenaires", "Maquette des indicateurs", "10-16", "10-21"),
+                    ("Formation des enquêteurs", "Répétition générale", "10-19", "10-22")]
+
 LOGS = [(2, "mireille", "a approuvé « Lancer la collecte »", "Enquête nationale T4"), (3, "sena", "a passé « Atelier de cadrage » en cours", "Tableau de bord partenaires"),
         (26, "koffi", "a terminé « Arborescence du site »", "Refonte du site web"), (27, "romuald", "a commenté « Rapport d’audit »", "Audit qualité des données"),
         (50, "adjoa", "a ajouté 3 tâches à « Enquête nationale T4 »", "Enquête nationale T4"), (72, "aicha", "a importé un Gantt dans « Rapport annuel 2026 »", "Rapport annuel 2026")]
@@ -162,6 +169,9 @@ class Command(BaseCommand):
                 made[after].depends_on.add(made[before])
             for title, who, st, due, prio, act in tasks:
                 Task.objects.create(project=p, activity=acts[act], title=title, assignee=users[who], status=st, due_date=d(due), priority=prio)
+
+        for name, title, start, end in SHORT_ACTIVITIES:
+            ProjectActivity.objects.create(project=projects[name], name=title, start_date=d(start), end_date=d(end))
 
         for name, day, label in KEY_DATES:
             ProjectKeyDate.objects.create(project=projects[name], date=d(day), label=label)

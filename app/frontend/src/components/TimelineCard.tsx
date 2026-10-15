@@ -230,11 +230,11 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
 
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted">
         <span className="inline-flex items-center gap-1.5">
-          <i className="h-2 w-5 rounded-[1px] bg-[#b8acf6]" />
+          <i className="h-2 w-5 rounded-[1px] bg-[#bdb0ff]" />
           Début → fin du projet
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <i className="h-2 w-2.5 rounded-[1px] bg-[#7c6cf0]" />
+          <i className="h-2 w-2.5 rounded-[1px] bg-[#7b61ff]" />
           Date clé
         </span>
         {showToday && (
