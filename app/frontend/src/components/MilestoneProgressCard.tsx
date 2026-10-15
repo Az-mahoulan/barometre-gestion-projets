@@ -69,8 +69,18 @@ export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProje
     return () => ro.disconnect();
   }, [rows.length]);
 
+  // Même hauteur que la carte « Activités de la semaine » (colonne de droite) ; la liste défile à l'intérieur.
+  const [height, setHeight] = useState<number | null>(null);
+  useEffect(() => {
+    const twin = document.querySelector('[aria-label="Activités de la semaine"]');
+    if (!twin) return;
+    const ro = new ResizeObserver(() => setHeight(twin.getBoundingClientRect().height));
+    ro.observe(twin);
+    return () => ro.disconnect();
+  }, []);
+
   return (
-    <section className="card" aria-label="Progression des jalons">
+    <section className="card flex flex-col" aria-label="Progression des jalons" style={height ? { height } : undefined}>
       <CardHeader
         title="Progression des jalons"
         aside={<ProjectPicker projects={projects} value={value} onChange={setValue} label="Jalons du projet" />}
@@ -79,7 +89,8 @@ export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProje
       {rows.length === 0 ? (
         <p className="text-[12.5px] text-muted">Aucun jalon en cours d’exécution.</p>
       ) : (
-        <ul ref={list} className="mt-2 flex max-h-[560px] flex-col gap-7 overflow-y-auto py-1 [scrollbar-width:none]">
+        <div className="relative mt-2 flex min-h-0 flex-1 flex-col">
+        <ul ref={list} className="flex min-h-0 flex-1 flex-col gap-7 overflow-y-auto py-1 pb-6 [scrollbar-width:none]">
           {rows.map(({ m, p }) => {
             const c = projectColor(projects, p.id);
             const pct = Math.round(m.progress * 100);
@@ -89,7 +100,7 @@ export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProje
 
             // Placement (px, estimé) : membres + nom à gauche, échéance à droite.
             const membersW = 28 + Math.min(m.members.length - 1, 2) * 20;
-            const nameW = m.name.length * 6.6 + (project ? 0 : (p.name.length + 3) * 6);
+            const nameW = m.name.length * 6.6;
             const leftEnd = 6 + membersW + 10 + nameW + 10;
             const rightStart = bandW - 62; // zone de l'échéance
             const fillPx = (pct / 100) * bandW;
@@ -125,7 +136,6 @@ export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProje
                   <Members members={m.members} />
                   <span className="truncate text-[12.5px] font-semibold text-ink">
                     {m.name}
-                    {!project && <span className="font-normal text-ink-2"> · {p.name}</span>}
                   </span>
                   {!pctInside && pctLabel}
                 </div>
@@ -150,6 +160,9 @@ export function MilestoneProgressCard({ projects, asOf }: { projects: GanttProje
             );
           })}
         </ul>
+          {/* Fondu du bas : d'autres jalons suivent en faisant défiler */}
+          <span className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-surface to-transparent" />
+        </div>
       )}
 
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted">
