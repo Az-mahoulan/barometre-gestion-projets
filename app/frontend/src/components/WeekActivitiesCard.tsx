@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { parseDate, shortDate } from "@/lib/format";
 import { projectColor } from "@/lib/projectColors";
@@ -8,59 +8,103 @@ import type { GanttProject } from "@/lib/types";
 
 import { Icon } from "./ui";
 
-const DAYS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 const DAY = 86_400_000;
+const TODAY_COLOR = "#f26b3a";
+// Reste à courir après aujourd'hui : hachures grises, comme sur le modèle.
+const HATCH = "repeating-linear-gradient(135deg, #ededE8 0 5px, #f7f7f3 5px 10px)";
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
 
 /**
- * Activités de la semaine : une barre par activité en cours cette semaine, à la couleur de son projet.
- * Partie déjà écoulée en couleur pleine, reste de l'activité hachuré ; trait d'aujourd'hui.
+ * Activités de la semaine : une pilule par activité, à la couleur de son projet.
+ * Partie écoulée en couleur pleine, reste hachuré en gris ; trait d'aujourd'hui ; jours en bas.
  */
 export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[]; asOf: string }) {
   const today = parseDate(asOf);
   const [offset, setOffset] = useState(0);
+  const [menu, setMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!menu) return;
+    const close = (e: MouseEvent) => {
+      if (!menuRef.current?.contains(e.target as Node)) setMenu(false);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [menu]);
+
   const monday = addDays(today, -((today.getDay() + 6) % 7) + offset * 7);
   const days = Array.from({ length: 7 }, (_, i) => addDays(monday, i));
   const from = iso(monday);
   const to = iso(addDays(monday, 6));
-  const span = 7 * DAY;
-  // Position d'un instant dans la semaine (en %), bornée à la semaine.
-  const at = (d: Date) => Math.min(100, Math.max(0, ((d.getTime() - monday.getTime()) / span) * 100));
+  // Chaque jour est une colonne ; un instant est placé en % de la semaine.
+  const at = (d: Date) => Math.min(100, Math.max(0, ((d.getTime() - monday.getTime()) / (7 * DAY)) * 100));
   const nowPct = at(new Date(today.getTime() + DAY / 2));
   const todayIn = asOf >= from && asOf <= to;
+  const weekPast = today > addDays(monday, 6);
 
   const items = projects
     .filter((p) => p.status === "active")
     .flatMap((p) => p.activities.filter((a) => a.start <= to && a.end >= from).map((a) => ({ a, p, color: projectColor(projects, p.id) })))
     .sort((x, y) => x.a.start.localeCompare(y.a.start) || x.a.end.localeCompare(y.a.end));
 
+  const go = (o: number) => {
+    setOffset(o);
+    setMenu(false);
+  };
+
   return (
     <section className="card" aria-label="Activités de la semaine">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-[15px] font-bold">Activités de la semaine</h2>
-        <span className="flex items-center rounded-full border border-line">
-          <button className="grid h-8 w-8 place-items-center rounded-full hover:bg-surface-2" onClick={() => setOffset(offset - 1)} aria-label="Semaine précédente">
-            <Icon name="left" className="h-4 w-4" />
-          </button>
-          <button className="min-w-[118px] px-1 text-center text-[12.5px] font-semibold" onClick={() => setOffset(0)} title="Revenir à cette semaine">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="flex items-center gap-2.5 text-[15px] font-bold">
+          <span className="grid h-7 w-7 place-items-center rounded-full border border-line text-ink-2">
+            <Icon name="timeline" className="h-4 w-4" />
+          </span>
+          Activités de la semaine
+          <span className="text-[12px] font-medium text-muted">
             {shortDate(from)} – {shortDate(to)}
+          </span>
+        </h2>
+        <div ref={menuRef} className="relative">
+          <button
+            className="grid h-8 w-8 place-items-center rounded-full bg-surface-2 text-ink-2 hover:bg-[#e9e9e2]"
+            onClick={() => setMenu(!menu)}
+            aria-haspopup="menu"
+            aria-expanded={menu}
+            aria-label="Changer de semaine"
+          >
+            <Icon name="more" className="h-4 w-4" />
           </button>
-          <button className="grid h-8 w-8 place-items-center rounded-full hover:bg-surface-2" onClick={() => setOffset(offset + 1)} aria-label="Semaine suivante">
-            <Icon name="right" className="h-4 w-4" />
-          </button>
-        </span>
+          {menu && (
+            <div role="menu" className="absolute right-0 top-[calc(100%+6px)] z-30 w-[190px] rounded-[14px] border border-line bg-surface p-1 shadow-[0_12px_28px_-14px_rgba(28,29,34,0.3)]">
+              {[
+                [offset - 1, "Semaine précédente"],
+                [0, "Cette semaine"],
+                [offset + 1, "Semaine suivante"],
+              ].map(([o, label]) => (
+                <button
+                  key={label}
+                  role="menuitem"
+                  onClick={() => go(o as number)}
+                  className={`block w-full rounded-[10px] px-3 py-1.5 text-left text-[12.5px] hover:bg-surface-2 ${label === "Cette semaine" && offset === 0 ? "font-semibold" : ""}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="relative">
-        {/* Colonnes des jours (week-end grisé) */}
+        {/* Repères des jours : traits verticaux très légers */}
         <div className="pointer-events-none absolute inset-0 grid grid-cols-7" aria-hidden="true">
-          {days.map((d, i) => (
-            <div key={i} className={`border-l border-dashed border-line first:border-l-0 ${i >= 5 ? "bg-surface-2/60" : ""}`} />
+          {days.map((d) => (
+            <div key={d.getTime()} className="border-r border-[#efefea] last:border-r-0" />
           ))}
         </div>
 
-        <ul className="relative flex flex-col gap-2.5 py-2">
+        <ul className="relative flex flex-col gap-2.5 py-3">
           {items.length === 0 && <li className="py-6 text-center text-[12.5px] text-muted">Aucune activité cette semaine.</li>}
           {items.map(({ a, p, color }) => {
             const start = parseDate(a.start);
@@ -70,23 +114,26 @@ export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[
             const cutL = start < monday;
             const cutR = end > addDays(monday, 7);
             // Part écoulée de la barre (jusqu'à aujourd'hui), en % de la barre.
-            const done = todayIn || today >= addDays(monday, 7) ? Math.min(100, Math.max(0, ((nowPct - left) / Math.max(0.01, right - left)) * 100)) : 0;
-            const future = done < 30;
+            const done = weekPast ? 100 : todayIn ? Math.min(100, Math.max(0, ((nowPct - left) / Math.max(0.01, right - left)) * 100)) : 0;
             return (
-              <li key={a.id} className="relative h-[30px]" title={`${a.name} · ${p.name} · ${shortDate(a.start)} → ${shortDate(a.end)} · ${a.tasks_complete}/${a.tasks_total} tâches`}>
+              <li key={a.id} className="relative h-[26px]" title={`${a.name} · ${p.name} · ${shortDate(a.start)} → ${shortDate(a.end)} · ${a.tasks_complete}/${a.tasks_total} tâches`}>
                 <div
                   className="absolute inset-y-0 overflow-hidden"
                   style={{
-                    left: `calc(${left}% + ${cutL ? 0 : 3}px)`,
-                    width: `calc(${right - left}% - ${(cutL ? 0 : 3) + (cutR ? 0 : 3)}px)`,
+                    left: `${left}%`,
+                    width: `${right - left}%`,
                     borderRadius: `${cutL ? 0 : 999}px ${cutR ? 0 : 999}px ${cutR ? 0 : 999}px ${cutL ? 0 : 999}px`,
-                    background: `repeating-linear-gradient(135deg, ${color.bar}66 0 6px, ${color.bar}cc 6px 12px)`,
+                    background: HATCH,
                   }}
                 >
-                  <div className="absolute inset-y-0 left-0" style={{ width: `${done}%`, background: color.solid }} />
-                  <span className={`relative flex h-full items-center gap-1.5 truncate px-3 text-[11.5px] font-semibold ${future ? "text-ink" : "text-white [text-shadow:0_1px_2px_rgba(28,29,34,0.35)]"}`}>
+                  <div
+                    className="absolute inset-y-0 left-0"
+                    style={{ width: `${done}%`, background: color.solid }}
+                  />
+                  <span className={`relative flex h-full items-center gap-1.5 truncate px-3 text-[11.5px] font-medium ${done > 0 ? "text-white" : "text-ink-2"}`}>
+                    {/* Activité pas encore commencée : la couleur du projet reste visible par une pastille. */}
+                    {done === 0 && <i className="h-2 w-2 shrink-0 rounded-full" style={{ background: color.solid }} />}
                     <span className="truncate">{a.name}</span>
-                    <span className={`shrink-0 font-medium ${future ? "text-ink-2" : "text-white/75"}`}>· {p.name}</span>
                   </span>
                 </div>
               </li>
@@ -95,24 +142,22 @@ export function WeekActivitiesCard({ projects, asOf }: { projects: GanttProject[
         </ul>
 
         {todayIn && (
-          <div className="pointer-events-none absolute -top-1 bottom-0 z-10" style={{ left: `${nowPct}%` }} aria-hidden="true">
-            <span className="absolute inset-y-0 w-[2px] -translate-x-1/2 bg-lime" />
-            <span className="absolute -top-1 h-2.5 w-2.5 -translate-x-1/2 rounded-full border-2 border-surface bg-lime" />
+          <div className="pointer-events-none absolute -top-2 bottom-0 z-10" style={{ left: `${nowPct}%` }} aria-hidden="true">
+            <span className="absolute inset-y-0 w-px -translate-x-1/2" style={{ background: TODAY_COLOR }} />
+            <span className="absolute -top-1 h-3 w-3 -translate-x-1/2 rounded-full border-2 bg-surface" style={{ borderColor: TODAY_COLOR }}>
+              <span className="absolute inset-[2px] rounded-full" style={{ background: TODAY_COLOR }} />
+            </span>
           </div>
         )}
       </div>
 
-      {/* Jours en bas, comme sur le modèle */}
-      <div className="mt-1 grid grid-cols-7 border-t border-line pt-2 text-center">
-        {days.map((d, i) => {
-          const isToday = iso(d) === asOf;
-          return (
-            <div key={i} className="flex flex-col items-center">
-              <span className={`text-[12.5px] font-semibold ${isToday ? "grid h-6 min-w-6 place-items-center rounded-full bg-lime px-1 text-ink" : "text-ink-2"}`}>{d.getDate()}</span>
-              <span className="text-[10.5px] text-muted">{DAYS[i]}</span>
-            </div>
-          );
-        })}
+      {/* Jours en bas, comme sur le modèle : de simples numéros */}
+      <div className="mt-1 grid grid-cols-7 text-center text-[12px]">
+        {days.map((d) => (
+          <span key={d.getTime()} className={iso(d) === asOf ? "font-bold text-ink" : "text-muted"}>
+            {d.getDate()}
+          </span>
+        ))}
       </div>
     </section>
   );
