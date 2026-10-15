@@ -216,7 +216,7 @@ export function DashboardView() {
               />
               <TimelineCard projects={data.gantt} asOf={data.as_of} />
               <GanttCard projects={data.gantt} asOf={data.as_of} />
-              <ProjectsTable projects={data.projects} />
+              <ProjectsTable projects={data.projects} now={data.now} />
               <TeamsTable teams={data.teams} />
             </div>
 

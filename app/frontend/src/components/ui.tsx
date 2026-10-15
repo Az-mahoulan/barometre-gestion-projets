@@ -136,9 +136,14 @@ const HEALTH: Record<Health, { label: string; className: string }> = {
   completed: { label: "Achevé", className: "bg-surface-2 text-ink-2" },
 };
 
-export function HealthChip({ health }: { health: Health }) {
+export function HealthChip({ health, icon }: { health: Health; icon?: ReactNode }) {
   const h = HEALTH[health];
-  return <span className={`chip ${h.className}`}>{h.label}</span>;
+  return (
+    <span className={`chip ${h.className}`}>
+      {icon}
+      {h.label}
+    </span>
+  );
 }
 
 export const HEALTH_BAR: Record<Health, string> = {

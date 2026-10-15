@@ -180,3 +180,18 @@ body {
     animation: none;
   }
 }
+
+/* Sablier des échéances : le filet de sable s'écoule. */
+@keyframes sablier-filet {
+  to {
+    stroke-dashoffset: -4.8;
+  }
+}
+.sablier-filet {
+  animation: sablier-filet 0.8s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sablier-filet {
+    animation: none;
+  }
+}

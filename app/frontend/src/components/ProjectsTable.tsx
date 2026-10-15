@@ -1,7 +1,8 @@
 import { shortDate } from "@/lib/format";
 import type { ProjectRow } from "@/lib/types";
 
-import { Avatar, HealthChip, HEALTH_BAR, Tile, type Tone } from "./ui";
+import { Deadline } from "./Deadline";
+import { Avatar, HEALTH_BAR, Tile, type Tone } from "./ui";
 
 const TILE_TONES: Tone[] = ["lav", "rose", "sky", "sand", "mint", "peach"];
 
@@ -34,8 +35,9 @@ function Ring({ value, color }: { value: number; color: string }) {
 const WAVE = `M -16 0 ${Array.from({ length: 6 }, () => "q 4 -1.6 8 0 t 8 0").join(" ")} L 80 44 L -16 44 Z`;
 
 /** Verre de livrables : le niveau du liquide suit la part des livrables remis ; le liquide, à la couleur de l'état du projet, tangue doucement. */
-function Glass({ done, total, id, color }: { done: number; total: number; id: number; color: string }) {
-  const ratio = total > 0 ? done / total : 0;
+function Glass({ done, total, id, color, still }: { done: number; total: number; id: number; color: string; still: boolean }) {
+  // Projet achevé : verre plein jusqu'au bord, liquide immobile.
+  const ratio = still ? 1 : total > 0 ? done / total : 0;
   const y = 38 - ratio * 30; // fond du verre à 38, bord utile à 8
   const clip = `verre-${id}`;
   return (
@@ -46,7 +48,8 @@ function Glass({ done, total, id, color }: { done: number; total: number; id: nu
         </clipPath>
       </defs>
       <path d="M 5.5 3 L 26.5 3 L 24 35.5 Q 23.8 38 21.3 38 L 10.7 38 Q 8.2 38 8 35.5 Z" fill="var(--track)" />
-      {ratio > 0 && (
+      {still && <rect x="0" y="5" width="32" height="40" fill={color} clipPath={`url(#${clip})`} />}
+      {!still && ratio > 0 && (
         <g clipPath={`url(#${clip})`}>
           <g className="verre-niveau">
             <g className="verre-tangue">
@@ -72,7 +75,7 @@ function Glass({ done, total, id, color }: { done: number; total: number; id: nu
   );
 }
 
-export function ProjectsTable({ projects }: { projects: ProjectRow[] }) {
+export function ProjectsTable({ projects, now }: { projects: ProjectRow[]; now: string }) {
   return (
     <section aria-label="Vue d’ensemble des projets">
       <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2">
@@ -87,7 +90,7 @@ export function ProjectsTable({ projects }: { projects: ProjectRow[] }) {
       <ul className="flex flex-col gap-3">
         {projects.map((p, i) => (
           <li key={p.id} className="flex flex-wrap items-center gap-x-3 gap-y-3 rounded-[18px] bg-surface px-[18px] py-3.5">
-            <div className="flex min-w-[200px] flex-1 items-center gap-3">
+            <div className="flex min-w-[190px] flex-1 items-center gap-3">
               <Tile icon="project" tone={TILE_TONES[i % TILE_TONES.length]} />
               <div className="min-w-0">
                 <b className="block truncate text-[13px] font-bold">{p.name}</b>
@@ -100,7 +103,7 @@ export function ProjectsTable({ projects }: { projects: ProjectRow[] }) {
               </div>
             </div>
 
-            <div className="w-[150px] text-[11.5px] text-muted" title={`${shortDate(p.start)} → ${shortDate(p.end)}`}>
+            <div className="w-[136px] text-[11.5px] text-muted" title={`${shortDate(p.start)} → ${shortDate(p.end)}`}>
               Prochain jalon
               {p.next_milestone ? (
                 <b className={`block truncate text-[12.5px] ${p.next_milestone.overdue ? "text-late" : "text-ink"}`}>
@@ -123,7 +126,7 @@ export function ProjectsTable({ projects }: { projects: ProjectRow[] }) {
               title={`${p.deliverables_done} livrable${p.deliverables_done > 1 ? "s" : ""} remis sur ${p.deliverables_total}`}
               aria-label={`Livrables : ${p.deliverables_done} sur ${p.deliverables_total}`}
             >
-              <Glass done={p.deliverables_done} total={p.deliverables_total} id={p.id} color={HEALTH_BAR[p.health]} />
+              <Glass done={p.deliverables_done} total={p.deliverables_total} id={p.id} color={HEALTH_BAR[p.health]} still={p.health === "completed"} />
               <span className="text-[11.5px] text-muted">
                 Livrables
                 <b className="block text-[13px] font-bold text-ink">
@@ -132,8 +135,8 @@ export function ProjectsTable({ projects }: { projects: ProjectRow[] }) {
               </span>
             </div>
 
-            <div className="w-[108px]">
-              <HealthChip health={p.health} />
+            <div className="w-[150px]">
+              <Deadline health={p.health} start={p.start} end={p.end} now={now} />
             </div>
 
             <div className="flex w-[104px] items-center gap-2" title={`${p.tasks_complete} tâches avancées sur ${p.tasks_total} · jalons ${p.milestones_achieved}/${p.milestones_total}`}>
