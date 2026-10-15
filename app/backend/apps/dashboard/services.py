@@ -317,6 +317,7 @@ def build_activity(projects) -> list[dict]:
     logs = ActivityLog.objects.filter(project__in=[p.id for p in projects]).select_related("actor", "project")[:6]
     return [
         {"id": entry.id, "message": entry.message, "actor_initials": entry.actor.initials if entry.actor else "",
+         "actor_name": entry.actor.display_name if entry.actor else "",
          "project": entry.project.name, "created_at": entry.created_at}
         for entry in logs
     ]
@@ -409,4 +410,6 @@ def build_dashboard(user, *, country: str | None = None, period: str = "year", w
         "recent_activity": build_activity(in_period),
         "projects": build_projects_overview(in_period, stats_all),
         "teams": build_teams(country, today),
+        # Avatars illustrés de chacun (nom affiché -> combinaison de traits), pour toutes les vignettes de l'interface.
+        "avatars": {u.display_name: u.avatar for u in User.objects.filter(is_active=True).exclude(avatar__isnull=True)},
     }

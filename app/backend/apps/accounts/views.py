@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
+from .avatars import assign_avatar
+
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
@@ -22,6 +24,8 @@ def user_payload(user) -> dict:
         "role": user.role,
         "role_label": user.get_role_display(),
         "job_title": user.job_title,
+        "avatar": user.avatar,
+        "avatar_style": user.avatar_style,
     }
 
 
@@ -61,6 +65,23 @@ class LogoutView(APIView):
     def post(self, request):
         logout(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class AvatarSerializer(serializers.Serializer):
+    style = serializers.ChoiceField(choices=["neutral", "masculine", "feminine"], required=False)
+
+
+class MeAvatarView(APIView):
+    """Tire un nouvel avatar unique pour soi (et change éventuellement son style)."""
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(request=AvatarSerializer, responses={200: serializers.DictField()})
+    def post(self, request):
+        serializer = AvatarSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        assign_avatar(request.user, serializer.validated_data.get("style"))
+        return Response(user_payload(request.user))
 
 
 class MeView(APIView):

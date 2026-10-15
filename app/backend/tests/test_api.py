@@ -224,3 +224,16 @@ def test_gantt_lists_milestone_dependencies(admin, project, client_for):
     ms = {m["name"]: m for m in next(r for r in rows if r["id"] == project.id)["milestones"]}
     assert ms["Version bêta"]["depends_on"] == [a.id]
     assert ms["Maquettes"]["depends_on"] == []
+
+
+def test_each_profile_gets_a_unique_avatar_and_can_change_it(admin, boss, worker, client_for):
+    from apps.accounts.models import User
+
+    avatars = list(User.objects.values_list("avatar", flat=True))
+    assert all(avatars) and len(set(avatars)) == len(avatars)
+    before = client_for(worker).get("/api/v1/auth/me/").json()["avatar"]
+    after = client_for(worker).post("/api/v1/auth/me/avatar/", {"style": "feminine"}, format="json").json()
+    assert after["avatar_style"] == "feminine" and after["avatar"] != before
+    assert "beard=none" in after["avatar"]
+    data = client_for(admin).get("/api/v1/dashboard/").json()
+    assert data["avatars"]["worker"] == after["avatar"]

@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
-import { createAvatar } from "@dicebear/core";
-import * as notionists from "@dicebear/notionists";
 import AlarmOutlined from "@mui/icons-material/AlarmOutlined";
+import ShuffleOutlined from "@mui/icons-material/ShuffleOutlined";
 import AdminPanelSettingsOutlined from "@mui/icons-material/AdminPanelSettingsOutlined";
 import AutoAwesomeOutlined from "@mui/icons-material/AutoAwesomeOutlined";
 import BarChartOutlined from "@mui/icons-material/BarChartOutlined";
@@ -97,6 +96,7 @@ const ICONS: Record<string, typeof SvgIcon> = {
   caretup: KeyboardArrowUp,
   go: NorthEastRounded,
   alarm: AlarmOutlined,
+  shuffle: ShuffleOutlined,
 };
 
 const TILE_ICONS: Record<string, typeof SvgIcon> = {
@@ -144,70 +144,14 @@ export const HEALTH_BAR: Record<Health, string> = {
   completed: "var(--bar-ok)",
 };
 
-// Pastilles pastel : fond clair et icône/texte de la même teinte.
-export const TONES = {
-  lav: "bg-lav-soft text-lav",
-  peach: "bg-peach-soft text-peach",
-  mint: "bg-ok-soft text-ok",
-  sky: "bg-info-soft text-info",
-  rose: "bg-late-soft text-late",
-  sand: "bg-risk-soft text-risk",
-  gray: "bg-surface-2 text-ink-2",
-} as const;
-export type Tone = keyof typeof TONES;
-
-const AVATAR_TONES: Tone[] = ["lav", "sky", "mint", "peach", "sand", "rose"];
-
-/** Couleur stable par personne, calculée à partir des initiales. */
-export function toneFor(key: string): Tone {
-  let h = 0;
-  for (const c of key) h = (h * 31 + c.charCodeAt(0)) % 997;
-  return AVATAR_TONES[h % AVATAR_TONES.length];
-}
+export { TONES, toneFor, type Tone } from "./tones";
+import { TONES, type Tone } from "./tones";
+export { Avatar, AvatarsProvider } from "./Avatar";
 
 export function Tile({ icon, tone, className = "h-10 w-10" }: { icon: string; tone: Tone; className?: string }) {
   return (
     <span className={`grid shrink-0 place-items-center rounded-[12px] ${TONES[tone]} ${className}`}>
       <Icon name={icon} className="h-[18px] w-[18px]" />
-    </span>
-  );
-}
-
-// Avatars illustrés (DiceBear « Notionists », licence CC0), générés localement en attendant une photo de profil.
-const AVATAR_CACHE = new Map<string, string>();
-function avatarUri(seed: string): string {
-  let uri = AVATAR_CACHE.get(seed);
-  if (!uri) {
-    uri = createAvatar(notionists, { seed, size: 64 }).toDataUri();
-    AVATAR_CACHE.set(seed, uri);
-  }
-  return uri;
-}
-
-/**
- * Avatar d'une personne : sa photo si elle existe, sinon un avatar illustré sur la pastille pastel de ses initiales.
- * `seed` (le nom de préférence) rend l'illustration propre à chacun ; à défaut, les initiales.
- */
-export function Avatar({
-  initials,
-  seed,
-  photo,
-  size = "h-8 w-8 text-[10.5px]",
-}: {
-  initials: string;
-  seed?: string;
-  photo?: string | null;
-  size?: string;
-}) {
-  const key = seed || initials;
-  return (
-    <span className={`inline-grid shrink-0 place-items-center overflow-hidden rounded-full font-bold ${TONES[toneFor(initials)]} ${size}`} title={seed}>
-      {initials && initials !== "·" ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={photo || avatarUri(key)} alt="" className="h-full w-full object-cover" />
-      ) : (
-        initials
-      )}
     </span>
   );
 }

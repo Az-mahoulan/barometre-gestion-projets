@@ -20,7 +20,7 @@ export function ActivityCard({ entries, now }: { entries: ActivityEntry[]; now: 
       <ul className="flex flex-col gap-1">
         {entries.map((e) => (
           <li key={e.id} className="flex items-start gap-2.5 py-2">
-            <Avatar initials={e.actor_initials || "·"} size="h-[30px] w-[30px] text-[10.5px]" />
+            <Avatar initials={e.actor_initials || "·"} seed={e.actor_name || undefined} size="h-[30px] w-[30px] text-[10.5px]" />
             <div className="min-w-0">
               <p className="text-[12px] leading-snug">{e.message}</p>
               <small className="text-[11px] text-muted">

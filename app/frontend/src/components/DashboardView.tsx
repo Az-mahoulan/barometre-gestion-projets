@@ -6,9 +6,10 @@ import { useEffect, useState } from "react";
 import { apiPost } from "@/lib/api";
 import { longDate } from "@/lib/format";
 import { useCountries, useDashboard, useMe } from "@/lib/hooks";
-import type { CriticalItem, Period } from "@/lib/types";
+import type { CriticalItem, Me, Period } from "@/lib/types";
 
 import { ActivityCard } from "./ActivityCard";
+import { AvatarsProvider } from "./Avatar";
 import { AssistantCard, buildSummary } from "./AssistantCard";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { CriticalCard } from "./CriticalCard";
@@ -28,7 +29,10 @@ const SCOPE_LABEL = { all: "Tous les projets", owned: "Vos projets", assigned: "
 
 export function DashboardView() {
   const router = useRouter();
-  const { me, error: meError, waking } = useMe();
+  const { me: loadedMe, error: meError, waking } = useMe();
+  // Profil mis à jour localement (changement d'avatar) sans recharger la page.
+  const [meUpdate, setMeUpdate] = useState<Me | null>(null);
+  const me = meUpdate ?? loadedMe;
   const countries = useCountries(!!me);
 
   const [country, setCountry] = useState("");
@@ -163,6 +167,7 @@ export function DashboardView() {
 
   return (
     // Cadre blanc unique (barre latérale + barre du haut) ; le contenu s'y encastre dans un panneau arrondi.
+    <AvatarsProvider value={{ ...data.avatars, [me.name]: me.avatar }}>
     <div className="min-h-screen bg-surface">
       <div className="flex min-h-screen bg-surface p-2">
         <Sidebar
@@ -185,6 +190,10 @@ export function DashboardView() {
             }}
             onPeriod={setPeriod}
             onLogout={logout}
+            onMeChange={(updated) => {
+              setMeUpdate(updated);
+              refresh();
+            }}
           />
 
           {/* Indicateurs sur toute la largeur, puis deux colonnes : la colonne de droite commence sous eux (forme en L). */}
@@ -254,5 +263,6 @@ export function DashboardView() {
         )}
       </div>
     </div>
+    </AvatarsProvider>
   );
 }

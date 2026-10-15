@@ -12,6 +12,9 @@ export interface Me {
   role: Role;
   role_label: string;
   job_title: string;
+  /** Avatar illustré unique (combinaison de traits) et son style. */
+  avatar: string | null;
+  avatar_style: "neutral" | "masculine" | "feminine";
 }
 
 export interface Country {
@@ -111,6 +114,7 @@ export interface ActivityEntry {
   id: number;
   message: string;
   actor_initials: string;
+  actor_name: string;
   project: string;
   created_at: string;
 }
@@ -165,4 +169,6 @@ export interface Dashboard {
   recent_activity: ActivityEntry[];
   projects: ProjectRow[];
   teams: { available: number; total: number; members: Member[] };
+  /** Avatars illustrés : nom affiché -> combinaison de traits. */
+  avatars: Record<string, string>;
 }

@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+
+import { apiPost } from "@/lib/api";
 import type { Country, Me, Period } from "@/lib/types";
 
 import { Avatar, Icon } from "./ui";
@@ -13,6 +16,7 @@ export function Topbar({
   onCountry,
   onPeriod,
   onLogout,
+  onMeChange,
 }: {
   me: Me;
   countries: Country[];
@@ -22,6 +26,7 @@ export function Topbar({
   onCountry: (code: string) => void;
   onPeriod: (p: Period) => void;
   onLogout: () => void;
+  onMeChange: (me: Me) => void;
 }) {
   return (
     <header className="flex flex-wrap items-center gap-2.5 px-2 pb-3 pt-1.5">
@@ -62,14 +67,99 @@ export function Topbar({
         <Icon name="logout" className="h-5 w-5" />
       </button>
 
-      <div className="flex items-center gap-2.5 rounded-full border border-line py-1 pl-1 pr-3">
+      <ProfileMenu me={me} onMeChange={onMeChange} />
+    </header>
+  );
+}
+
+const STYLES: { key: Me["avatar_style"]; label: string }[] = [
+  { key: "neutral", label: "Neutre" },
+  { key: "masculine", label: "Masculin" },
+  { key: "feminine", label: "Féminin" },
+];
+
+/** Puce du profil : ouvre « Mon avatar » (style d'avatar et tirage d'un nouvel avatar unique). */
+function ProfileMenu({ me, onMeChange }: { me: Me; onMeChange: (me: Me) => void }) {
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent) => {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [open]);
+
+  const change = async (style: Me["avatar_style"]) => {
+    setBusy(true);
+    setError("");
+    try {
+      onMeChange(await apiPost<Me>("/auth/me/avatar/", { style }));
+    } catch {
+      setError("Le changement n’a pas abouti. Réessayez.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        className="flex items-center gap-2.5 rounded-full border border-line py-1 pl-1 pr-3 hover:bg-surface-2"
+      >
         <Avatar initials={me.initials} seed={me.name} size="h-9 w-9 text-[11.5px]" />
-        <div className="leading-tight">
+        <span className="text-left leading-tight">
           <b className="block text-[12.5px] font-bold">{me.name}</b>
           <small className="text-[11px] text-muted">{me.role_label}</small>
+        </span>
+        <Icon name={open ? "caretup" : "caretdown"} className="h-4 w-4 text-muted" />
+      </button>
+
+      {open && (
+        <div role="dialog" aria-label="Mon avatar" className="absolute right-0 top-[calc(100%+8px)] z-40 w-[260px] rounded-[18px] border border-line bg-surface p-4 shadow-[0_16px_36px_-14px_rgba(28,29,34,0.28)]">
+          <div className="flex items-center gap-3">
+            <Avatar initials={me.initials} seed={me.name} size="h-14 w-14 text-[14px]" />
+            <div className="min-w-0">
+              <b className="block truncate text-[13px] font-bold">Mon avatar</b>
+              <small className="text-[11px] leading-snug text-muted">Unique à votre profil, en attendant votre photo.</small>
+            </div>
+          </div>
+
+          <p className="mb-1.5 mt-4 text-[11px] font-semibold text-muted">Style</p>
+          <div role="radiogroup" aria-label="Style d’avatar" className="grid grid-cols-3 gap-1 rounded-full bg-surface-2 p-1">
+            {STYLES.map((st) => (
+              <button
+                key={st.key}
+                role="radio"
+                aria-checked={me.avatar_style === st.key}
+                disabled={busy}
+                onClick={() => me.avatar_style !== st.key && change(st.key)}
+                className={`rounded-full py-1 text-[11.5px] font-semibold ${
+                  me.avatar_style === st.key ? "bg-surface text-ink shadow-[0_1px_3px_rgba(28,29,34,0.12)]" : "text-muted hover:text-ink"
+                }`}
+              >
+                {st.label}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => change(me.avatar_style)}
+            disabled={busy}
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-lime py-2 text-[12.5px] font-semibold text-ink disabled:opacity-60"
+          >
+            <Icon name="shuffle" className="h-4 w-4" />
+            {busy ? "Un instant…" : "Nouvel avatar"}
+          </button>
+          {error && <p className="mt-2 text-[11.5px] text-late">{error}</p>}
         </div>
-        <Icon name="caretdown" className="h-4 w-4 text-muted" />
-      </div>
-    </header>
+      )}
+    </div>
   );
 }

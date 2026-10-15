@@ -25,6 +25,15 @@ class User(AbstractUser):
     job_title = models.CharField("Fonction", max_length=120, blank=True)
     country = models.ForeignKey(Country, verbose_name="Pays", null=True, blank=True, on_delete=models.SET_NULL)
 
+    class AvatarStyle(models.TextChoices):
+        NEUTRAL = "neutral", "Neutre"
+        MASCULINE = "masculine", "Masculin"
+        FEMININE = "feminine", "Féminin"
+
+    # Avatar illustré par défaut (en attendant une photo) : combinaison de traits unique par profil (voir avatars.py).
+    avatar_style = models.CharField("Style d'avatar", max_length=10, choices=AvatarStyle.choices, default=AvatarStyle.NEUTRAL)
+    avatar = models.CharField("Avatar", max_length=200, null=True, blank=True, unique=True, editable=False)
+
     class Meta:
         verbose_name = "utilisateur"
         verbose_name_plural = "utilisateurs"
@@ -33,6 +42,10 @@ class User(AbstractUser):
         # Un super-utilisateur (créé par createsuperuser) est toujours administrateur de l'application.
         if self.is_superuser:
             self.role = self.Role.ADMIN
+        if not self.avatar:
+            from .avatars import assign_avatar
+
+            assign_avatar(self, save=False)
         super().save(*args, **kwargs)
 
     @property

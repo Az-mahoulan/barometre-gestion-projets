@@ -8,6 +8,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 
+from apps.accounts.avatars import assign_avatar
 from apps.accounts.models import Country, Presence, User
 from apps.projects.models import (
     ActivityLog,
@@ -42,6 +43,9 @@ PEOPLE = [
     ("adjoa", "Adjoa", "Mensah", "membre", "Coordinatrice terrain", "TG", "mission", "Collecte terrain à Lomé, jusqu’au 20 oct.", "field", "Togo", d("10-20")),
 ]
 ORDER = [p[0] for p in PEOPLE]
+# Style d'avatar illustré (masculin / féminin) des comptes de démonstration
+AVATAR_STYLES = {"koffi": "masculine", "ibrahim": "masculine", "romuald": "masculine", "aicha": "feminine",
+                 "mireille": "feminine", "sena": "feminine", "fatou": "feminine", "adjoa": "feminine"}
 
 # nom, pays, responsable, début, fin, statut, activités[(nom, début, fin)], jalons[(nom, échéance, atteint)],
 # tâches[(intitulé, assigné, statut, échéance, priorité, index d'activité)]
@@ -151,6 +155,8 @@ class Command(BaseCommand):
             u = User.objects.create_user(username=username, first_name=first, last_name=last, role=role, job_title=title,
                                          country=countries[cc], password=password)
             Presence.objects.create(user=u, status=status, reason=reason, place=place, place_detail=detail, until=until)
+            if username in AVATAR_STYLES:
+                assign_avatar(u, AVATAR_STYLES[username])
             users[username] = u
         admin = User.objects.filter(username="admin").first() or User.objects.create_user(
             username="admin", first_name="Administration", role="admin", is_staff=True, password=password)
