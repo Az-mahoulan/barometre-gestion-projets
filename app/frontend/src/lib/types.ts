@@ -59,7 +59,23 @@ export interface GanttProject {
   end: string;
   progress: number;
   next_milestone: NextMilestone | null;
-  milestones: { id: number; name: string; date: string; achieved: boolean; overdue: boolean; depends_on: number[] }[];
+  milestones: {
+    id: number;
+    name: string;
+    date: string;
+    /** Début de la période du jalon : échéance du jalon précédent, ou début du projet. */
+    start: string;
+    achieved: boolean;
+    overdue: boolean;
+    depends_on: number[];
+    /** Activités rattachées au jalon et avancement de leurs tâches. */
+    activities: number;
+    tasks_total: number;
+    tasks_complete: number;
+    progress: number;
+    /** Personne la plus impliquée (le plus de tâches), sinon le responsable du projet. */
+    lead: { name: string; initials: string };
+  }[];
   activities: GanttActivity[];
   /** Dates clés renseignées par le gestionnaire (revue, rencontre, lancement…), distinctes des jalons. */
   key_dates: { label: string; date: string }[];

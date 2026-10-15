@@ -37,6 +37,10 @@ class ProjectActivity(models.Model):
     """Une activité regroupe des tâches au sein d'un projet (projet → activités → tâches)."""
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="activities")
+    # Jalon auquel l'activité contribue (même projet) : l'avancement du jalon est celui de ses activités.
+    milestone = models.ForeignKey(
+        "Milestone", null=True, blank=True, on_delete=models.SET_NULL, related_name="activities", verbose_name="Jalon"
+    )
     name = models.CharField("Nom", max_length=160)
     start_date = models.DateField("Début")
     end_date = models.DateField("Fin prévue")

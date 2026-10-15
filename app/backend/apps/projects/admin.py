@@ -39,6 +39,14 @@ class KeyDateInline(admin.TabularInline):
 class ActivityInline(admin.TabularInline):
     model = ProjectActivity
     extra = 0
+    fields = ("name", "start_date", "end_date", "milestone")
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        # « Jalon » : seulement les jalons du même projet.
+        if db_field.name == "milestone":
+            project_id = request.resolver_match.kwargs.get("object_id") if request.resolver_match else None
+            kwargs["queryset"] = Milestone.objects.filter(project_id=project_id) if project_id else Milestone.objects.none()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 @admin.register(Project)

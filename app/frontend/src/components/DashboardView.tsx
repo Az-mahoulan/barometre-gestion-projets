@@ -14,6 +14,7 @@ import { AssistantCard, buildSummary } from "./AssistantCard";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { CriticalCard } from "./CriticalCard";
 import { GanttCard } from "./GanttCard";
+import { MilestoneProgressCard } from "./MilestoneProgressCard";
 import { TimelineCard } from "./TimelineCard";
 import { WeekActivitiesCard } from "./WeekActivitiesCard";
 import { KpiRow } from "./KpiRow";
@@ -216,6 +217,7 @@ export function DashboardView() {
               />
               <TimelineCard projects={data.gantt} asOf={data.as_of} />
               <GanttCard projects={data.gantt} asOf={data.as_of} />
+              <MilestoneProgressCard projects={data.gantt} asOf={data.as_of} />
               <ProjectsTable projects={data.projects} now={data.now} />
               <TeamsTable teams={data.teams} />
             </div>

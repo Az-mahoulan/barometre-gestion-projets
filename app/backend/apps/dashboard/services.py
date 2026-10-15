@@ -137,6 +137,29 @@ def build_kpis(projects, stats, period_start: date, period_end: date) -> dict:
     }
 
 
+def _milestones_payload(p, today: date) -> list[dict]:
+    """Jalons d'un projet, avec l'avancement des activités qui y contribuent et la personne la plus impliquée."""
+    tasks = list(p.tasks.all())
+    rows, previous = [], p.start_date
+    for m in p.milestones.all():
+        act_ids = {a.id for a in p.activities.all() if a.milestone_id == m.id}
+        ts = [t for t in tasks if t.activity_id in act_ids]
+        done = sum(1 for t in ts if t.is_complete)
+        progress = done / len(ts) if ts else (1.0 if m.is_achieved else 0.0)
+        counts = Counter(t.assignee for t in ts if t.assignee is not None)
+        lead = counts.most_common(1)[0][0] if counts else p.owner
+        rows.append(
+            {"id": m.id, "name": m.name, "date": m.due_date, "start": min(previous, m.due_date),
+             "achieved": m.is_achieved, "overdue": not m.is_achieved and m.due_date < today,
+             "depends_on": [d.id for d in m.depends_on.all() if d.project_id == p.id],
+             "activities": len(act_ids), "tasks_total": len(ts), "tasks_complete": done,
+             "progress": 1.0 if m.is_achieved else progress,
+             "lead": {"name": lead.display_name, "initials": lead.initials}}
+        )
+        previous = m.due_date
+    return rows
+
+
 def build_gantt(projects, stats, today: date) -> list[dict]:
     rows = []
     for p in sorted(projects, key=lambda p: (p.status != Project.Status.ACTIVE, p.start_date, p.name)):
@@ -157,12 +180,7 @@ def build_gantt(projects, stats, today: date) -> list[dict]:
                 "id": p.id, "name": p.name, "status": p.status, "health": s["health"],
                 "start": p.start_date, "end": p.end_date, "progress": s["progress"],
                 "next_milestone": _next_milestone_payload(s["next_milestone"], today),
-                "milestones": [
-                    {"id": m.id, "name": m.name, "date": m.due_date, "achieved": m.is_achieved,
-                     "overdue": not m.is_achieved and m.due_date < today,
-                     "depends_on": [d.id for d in m.depends_on.all() if d.project_id == p.id]}
-                    for m in p.milestones.all()
-                ],
+                "milestones": _milestones_payload(p, today),
                 "activities": activities,
                 # Dates clés renseignées par le gestionnaire (revue, rencontre, lancement…).
                 "key_dates": [{"label": k.label, "date": k.date} for k in p.key_dates.all()],

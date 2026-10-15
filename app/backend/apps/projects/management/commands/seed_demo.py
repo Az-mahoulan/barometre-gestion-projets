@@ -208,6 +208,13 @@ class Command(BaseCommand):
         for name, title, start, end in SHORT_ACTIVITIES:
             ProjectActivity.objects.create(project=projects[name], name=title, start_date=d(start), end_date=d(end))
 
+        # Chaque activité contribue au premier jalon de son projet qui suit sa fin (sinon au dernier).
+        for a in ProjectActivity.objects.all():
+            ms = list(Milestone.objects.filter(project_id=a.project_id).order_by("due_date", "id"))
+            if ms:
+                a.milestone = next((m for m in ms if m.due_date >= a.end_date), ms[-1])
+                a.save(update_fields=["milestone"])
+
         for name, title, due, delivered in DELIVERABLES:
             Deliverable.objects.create(project=projects[name], name=title, due_date=d(due), delivered_on=d(due) if delivered else None)
 
