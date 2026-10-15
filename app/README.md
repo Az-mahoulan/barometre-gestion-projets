@@ -75,4 +75,5 @@ Ne jamais lancer `seed_demo` en production.
 ## Crédits
 
 - Icônes : [Material UI Icons](https://mui.com/material-ui/material-icons/) (`@mui/icons-material`, licence MIT).
+- Graphiques en anneau : [d3-shape](https://github.com/d3/d3-shape) (licence ISC).
 - Avatars par défaut : [DiceBear](https://www.dicebear.com) (`@dicebear/core`, MIT), style « Notionists » de Zoish (licence CC0 1.0). Remplacés par la photo de profil dès qu'elle existe.
