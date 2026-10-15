@@ -180,45 +180,68 @@ export function TaskProgressCard({
   );
 }
 
-// Anneau : teintes moyennes (comme le modèle), un segment arrondi par statut, séparés par un petit espace.
+// Anneau : couleurs pures (mêmes tons que l'évolution mois par mois), un segment par statut aux coins à peine arrondis.
 const RING: Record<string, string> = {
-  todo: "#c9ccd2",
-  doing: "#8fb2f4",
-  done: "#7dd3c0",
-  review: "#f6c85f",
-  approved: "#a9dc8b",
+  todo: "#9aa0a8",
+  doing: "#2f6fe0",
+  done: "#0f9b8e",
+  review: "#e8901c",
+  approved: "#1f7a4d",
 };
 
-/** Arc d'anneau (angles en degrés, 0 = en haut, sens horaire). */
-function arc(cx: number, cy: number, r: number, from: number, to: number) {
-  const pt = (a: number) => [cx + r * Math.sin((a * Math.PI) / 180), cy - r * Math.cos((a * Math.PI) / 180)];
-  const [x1, y1] = pt(from);
-  const [x2, y2] = pt(to);
-  return `M ${x1} ${y1} A ${r} ${r} 0 ${to - from > 180 ? 1 : 0} 1 ${x2} ${y2}`;
+const rad = (deg: number) => (deg * Math.PI) / 180;
+// Point à l'angle `a` (0 = en haut, sens horaire) sur le cercle de rayon r.
+const at = (cx: number, cy: number, r: number, a: number) => [cx + r * Math.sin(rad(a)), cy - r * Math.cos(rad(a))];
+
+/** Secteur d'anneau plein entre deux angles (rayons r1 < r2). */
+function sector(cx: number, cy: number, r1: number, r2: number, from: number, to: number) {
+  const large = to - from > 180 ? 1 : 0;
+  const [ax, ay] = at(cx, cy, r2, from);
+  const [bx, by] = at(cx, cy, r2, to);
+  const [c, d] = at(cx, cy, r1, to);
+  const [e, f] = at(cx, cy, r1, from);
+  return `M ${ax} ${ay} A ${r2} ${r2} 0 ${large} 1 ${bx} ${by} L ${c} ${d} A ${r1} ${r1} 0 ${large} 0 ${e} ${f} Z`;
 }
 
-/** Disposition en colonne : statuts en liste à gauche, anneau segmenté à droite (total au centre). */
+/** Disposition en colonne : statuts en liste à gauche, anneau segmenté à droite avec étiquettes reliées. */
 function ColumnView({ progress, finishedPct }: { progress: Dashboard["task_progress"]; finishedPct: number }) {
   const shown = progress.statuses.filter((s) => s.count > 0);
   const total = Math.max(progress.total, 1);
-  const SIZE = 230;
-  const R = 88;
-  const W = 28; // épaisseur
-  const CAP = ((W / 2) / R) * (180 / Math.PI); // ce que mange un bout arrondi, en degrés
-  const GAP = 3; // espace visible entre deux segments, en degrés
-  const MIN = 2 * CAP + GAP + 6; // part minimale à l'écran pour qu'un petit statut reste lisible
-  // Parts à l'écran : chaque segment a au moins MIN degrés, les autres se partagent le reste (les % affichés restent exacts).
+  const VW = 420; // largeur (place pour les étiquettes de part et d'autre)
+  const VH = 250;
+  const CX = VW / 2;
+  const CY = VH / 2;
+  const R2 = 92; // rayon extérieur
+  const R1 = 58; // rayon intérieur
+  const CORNER = 5; // arrondi des coins (petit, comme le modèle)
+  const GAP = 2.2; // espace entre segments, en degrés
+  const MIN = 9; // part minimale à l'écran, pour qu'un petit statut reste visible (les % restent exacts)
+
   const raw = shown.map((s) => (s.count / total) * 360);
   const small = raw.filter((d) => d < MIN).length;
   const bigSum = raw.filter((d) => d >= MIN).reduce((a, d) => a + d, 0);
   const sweeps = raw.map((d) => (d < MIN ? MIN : (d / Math.max(bigSum, 1)) * (360 - small * MIN)));
   const segs = shown.map((s, i) => {
     const from = sweeps.slice(0, i).reduce((a, d) => a + d, 0);
-    return { s, from, to: from + sweeps[i] };
+    return { s, from, to: from + sweeps[i], mid: from + sweeps[i] / 2 };
   });
 
+  // Étiquettes : à droite pour la moitié droite de l'anneau, à gauche sinon ; écartées si elles se chevauchent.
+  type Label = { key: string; side: 1 | -1; ex: number; ey: number; y: number };
+  const labels: Label[] = segs.map(({ s, mid }) => {
+    const side: 1 | -1 = Math.sin(rad(mid)) >= 0 ? 1 : -1;
+    const [ex, ey] = at(CX, CY, R2 + 6, mid);
+    const [, y] = at(CX, CY, R2 + 22, mid);
+    return { key: s.key, side, ex, ey, y };
+  });
+  for (const side of [1, -1] as const) {
+    const group = labels.filter((l) => l.side === side).sort((a, b) => a.y - b.y);
+    for (let i = 1; i < group.length; i++) group[i].y = Math.max(group[i].y, group[i - 1].y + 17);
+  }
+  const labelOf = (key: string) => labels.find((l) => l.key === key)!;
+
   return (
-    <div className="mt-2 grid items-center gap-5 sm:grid-cols-[minmax(0,1fr)_auto]">
+    <div className="mt-2 grid items-center gap-2 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)]">
       <ul className="flex flex-col gap-2">
         {progress.statuses.map((s) => (
           <li key={s.key} className="flex items-center gap-3 rounded-[14px] px-3 py-2" style={{ background: STATUS_BG[s.key] }}>
@@ -241,39 +264,55 @@ function ColumnView({ progress, finishedPct }: { progress: Dashboard["task_progr
       </ul>
 
       <svg
-        width={SIZE}
-        height={SIZE}
-        viewBox={`0 0 ${SIZE} ${SIZE}`}
-        className="mx-auto"
+        width={VW}
+        height={VH}
+        viewBox={`0 0 ${VW} ${VH}`}
+        className="mx-auto h-auto w-full max-w-[420px] overflow-visible"
         role="img"
         aria-label={`Répartition des ${progress.total} tâches : ${shown.map((s) => `${s.label} ${s.pct} %`).join(", ")}`}
       >
         {segs.map(({ s, from, to }) => {
-          const a = from + GAP / 2 + CAP;
-          const b = to - GAP / 2 - CAP;
-          const mid = (from + to) / 2;
-          const lx = SIZE / 2 + R * Math.sin((mid * Math.PI) / 180);
-          const ly = SIZE / 2 - R * Math.cos((mid * Math.PI) / 180);
+          // Coins arrondis : secteur réduit de CORNER sur chaque bord, puis contour arrondi de la même couleur.
+          const inset = (CORNER / R1) * (180 / Math.PI);
+          const a = from + GAP / 2 + inset;
+          const b = Math.max(a + 0.1, to - GAP / 2 - inset);
           return (
-            <g key={s.key}>
+            <path
+              key={s.key}
+              d={sector(CX, CY, R1 + CORNER, R2 - CORNER, a, b)}
+              fill={RING[s.key]}
+              stroke={RING[s.key]}
+              strokeWidth={CORNER * 2}
+              strokeLinejoin="round"
+            >
               <title>{`${s.label} : ${s.count} (${s.pct} %)`}</title>
-              {b > a ? (
-                <path d={arc(SIZE / 2, SIZE / 2, R, a, b)} fill="none" stroke={RING[s.key]} strokeWidth={W} strokeLinecap="round" />
-              ) : (
-                <circle cx={lx} cy={ly} r={W / 2} fill={RING[s.key]} />
-              )}
-              {to - from >= MIN + 4 && (
-                <text x={lx} y={ly} textAnchor="middle" dominantBaseline="central" className="fill-ink text-[11px] font-semibold">
-                  {s.pct}%
-                </text>
-              )}
+            </path>
+          );
+        })}
+
+        {/* Liaisons et étiquettes « Statut  xx % » */}
+        {segs.map(({ s }) => {
+          const l = labelOf(s.key);
+          const x2 = CX + l.side * (R2 + 20);
+          const x3 = x2 + l.side * 10;
+          return (
+            <g key={`l-${s.key}`}>
+              <polyline points={`${l.ex},${l.ey} ${x2},${l.y} ${x3},${l.y}`} fill="none" stroke="#b9bcc4" strokeWidth="1.2" />
+              <circle cx={l.ex} cy={l.ey} r="2.2" fill={RING[s.key]} />
+              <text x={x3 + l.side * 4} y={l.y} textAnchor={l.side === 1 ? "start" : "end"} dominantBaseline="central" className="text-[11.5px]">
+                <tspan className="fill-ink-2">{s.label}</tspan>
+                <tspan className="fill-ink font-bold" dx="5">
+                  {s.pct} %
+                </tspan>
+              </text>
             </g>
           );
         })}
-        <text x={SIZE / 2} y={SIZE / 2 - 14} textAnchor="middle" className="fill-muted text-[12px]">
+
+        <text x={CX} y={CY - 12} textAnchor="middle" className="fill-muted text-[12px]">
           Tâches
         </text>
-        <text x={SIZE / 2} y={SIZE / 2 + 18} textAnchor="middle" className="fill-ink text-[34px] font-bold" style={{ letterSpacing: "-1px" }}>
+        <text x={CX} y={CY + 17} textAnchor="middle" className="fill-ink text-[30px] font-bold" style={{ letterSpacing: "-1px" }}>
           {progress.total}
         </text>
       </svg>
