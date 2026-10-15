@@ -3,6 +3,15 @@ import type { Dashboard, GanttProject } from "@/lib/types";
 import { CardHeader, TileIcon } from "./ui";
 
 // Couleur de chaque statut : libellé, icône et part dans la barre de répartition.
+// Fond pastel de chaque tuile.
+const STATUS_BG: Record<string, string> = {
+  todo: "#f3f3ee",
+  doing: "#dcecfd",
+  done: "#d9f1ec",
+  review: "#fdf0cf",
+  approved: "#e3f6cf",
+};
+
 const STATUS_COLOR: Record<string, string> = {
   todo: "#6b7280",
   doing: "#2a56c6",
@@ -53,7 +62,8 @@ export function TaskProgressCard({
         {progress.statuses.map((s) => (
           <li
             key={s.key}
-            className="flex flex-col items-center gap-2.5 rounded-xl border border-line px-2 py-3 text-center"
+            className="flex flex-col items-center gap-2.5 rounded-[18px] px-2 py-3.5 text-center"
+            style={{ background: STATUS_BG[s.key] }}
             aria-label={`${s.label} : ${s.count} tâche${s.count > 1 ? "s" : ""}`}
           >
             <span className="text-[12.5px] font-semibold leading-tight" style={{ color: STATUS_COLOR[s.key] }}>
@@ -62,7 +72,7 @@ export function TaskProgressCard({
             <span style={{ color: STATUS_COLOR[s.key] }}>
               <TileIcon name={s.key} className="h-9 w-9" />
             </span>
-            <b className="text-[24px] font-semibold leading-none tracking-[-0.5px]">{s.count}</b>
+            <b className="text-[24px] font-extrabold leading-none tracking-[-0.5px]">{s.count}</b>
           </li>
         ))}
       </ul>
@@ -103,7 +113,7 @@ export function TaskProgressCard({
           ))}
         </ul>
         {progress.overdue > 0 && (
-          <p className="mt-4 rounded-lg bg-late-soft px-3 py-2 text-[12.5px] text-late">
+          <p className="mt-4 rounded-full bg-late-soft px-4 py-2 text-[12.5px] font-semibold text-late">
             {progress.overdue} tâche{progress.overdue > 1 ? "s" : ""} en retard sur leur échéance
           </p>
         )}

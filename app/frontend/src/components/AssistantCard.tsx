@@ -25,6 +25,19 @@ export function buildSummary(d: Dashboard): string {
   return text;
 }
 
+// Met en valeur les quantités (« 2 projets », « 4 tâches ») de la synthèse.
+function highlight(text: string) {
+  return text.split(/(\d+ (?:projets?|tâches?))/).map((part, i) =>
+    i % 2 ? (
+      <em key={i} className="not-italic text-lime">
+        {part}
+      </em>
+    ) : (
+      part
+    ),
+  );
+}
+
 export function AssistantCard({
   summary,
   canRemind,
@@ -37,31 +50,30 @@ export function AssistantCard({
   onRemind: () => void;
 }) {
   return (
-    <section className="flex flex-col gap-3.5 rounded-2xl border border-[#dfe9e2] bg-surface px-[22px] py-[18px]" aria-label="Assistant IA">
-      <div className="flex flex-wrap items-start gap-4">
-        <span className="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-[11px] bg-ink text-white">
-          <Icon name="sparkle" />
+    <section className="relative overflow-hidden rounded-[22px] bg-side p-[22px] text-white" aria-label="Synthèse de l’assistant">
+      <i className="pointer-events-none absolute -right-10 -top-10 h-[150px] w-[150px] rounded-full border-[22px] border-lime/10" />
+      <div className="flex items-center gap-2 text-[12.5px] font-semibold text-[#c9cad0]">
+        <span className="text-lime">
+          <Icon name="sparkle" className="h-[18px] w-[18px]" />
         </span>
-        <div className="min-w-[260px] flex-1">
-          <div className="text-[12.5px] font-medium text-muted">Assistant IA · Synthèse du jour</div>
-          <p className="mt-1 max-w-[760px] text-[14.5px] leading-normal">{summary}</p>
-        </div>
-        {canRemind && reminders > 0 && (
-          <button className="btn btn-dark" onClick={onRemind}>
-            Relancer les responsables ({reminders})
-          </button>
-        )}
+        Synthèse de l’assistant
       </div>
-      <div className="flex items-center gap-3 rounded-xl border border-line bg-surface-2 py-1.5 pl-4 pr-1.5 text-[13.5px] text-muted">
+      <p className="relative my-3.5 text-[17px] font-bold leading-[1.4]">{highlight(summary)}</p>
+      {canRemind && reminders > 0 && (
+        <button className="btn btn-lime" onClick={onRemind}>
+          <Icon name="campaign" className="h-[18px] w-[18px]" />
+          Relancer les responsables ({reminders})
+        </button>
+      )}
+      <div className="mt-4 flex items-center gap-2 rounded-full bg-side-2 py-[7px] pl-4 pr-[7px] text-[12.5px] text-[#9b9da5]">
         <input
           disabled
-          aria-label="Question ou instruction pour l’assistant"
-          className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted"
-          placeholder="Assistant conversationnel (« Crée une tâche pour Koffi », « Qui est disponible demain ? ») : prochaine étape"
+          aria-label="Question pour l’assistant"
+          placeholder="Posez une question à l’assistant (bientôt)"
+          className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-[#9b9da5]"
         />
-        <span className="hidden text-xs sm:inline">Rien n’est modifié sans votre confirmation</span>
-        <span className="grid h-[34px] w-[34px] place-items-center rounded-[9px] bg-ink text-white opacity-40">
-          <Icon name="send" />
+        <span className="grid h-8 w-8 place-items-center rounded-full bg-lime text-ink opacity-60">
+          <Icon name="up" className="h-[18px] w-[18px]" />
         </span>
       </div>
     </section>

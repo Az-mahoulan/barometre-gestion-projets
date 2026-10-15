@@ -23,6 +23,24 @@ import SearchOutlined from "@mui/icons-material/SearchOutlined";
 import SendOutlined from "@mui/icons-material/SendOutlined";
 import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
 import YoutubeSearchedFor from "@mui/icons-material/YoutubeSearchedFor";
+import ArrowUpward from "@mui/icons-material/ArrowUpward";
+import BeachAccessOutlined from "@mui/icons-material/BeachAccessOutlined";
+import CampaignOutlined from "@mui/icons-material/CampaignOutlined";
+import ChevronLeft from "@mui/icons-material/ChevronLeft";
+import ChevronRight from "@mui/icons-material/ChevronRight";
+import EventOutlined from "@mui/icons-material/EventOutlined";
+import FactCheckOutlined from "@mui/icons-material/FactCheckOutlined";
+import FlightOutlined from "@mui/icons-material/FlightOutlined";
+import FolderOpenOutlined from "@mui/icons-material/FolderOpenOutlined";
+import InsightsOutlined from "@mui/icons-material/InsightsOutlined";
+import NorthEast from "@mui/icons-material/NorthEast";
+import RateReviewOutlined from "@mui/icons-material/RateReviewOutlined";
+import RocketLaunchOutlined from "@mui/icons-material/RocketLaunchOutlined";
+import SchoolOutlined from "@mui/icons-material/SchoolOutlined";
+import SouthEast from "@mui/icons-material/SouthEast";
+import TaskAltOutlined from "@mui/icons-material/TaskAltOutlined";
+import TrendingFlat from "@mui/icons-material/TrendingFlat";
+import WorkOutlineOutlined from "@mui/icons-material/WorkOutlineOutlined";
 import type SvgIcon from "@mui/material/SvgIcon";
 
 import type { Health } from "@/lib/types";
@@ -49,6 +67,24 @@ const ICONS: Record<string, typeof SvgIcon> = {
   chevron: ExpandMoreOutlined,
   pin: PlaceOutlined,
   logout: LogoutOutlined,
+  rocket: RocketLaunchOutlined,
+  taskalt: TaskAltOutlined,
+  event: EventOutlined,
+  left: ChevronLeft,
+  right: ChevronRight,
+  campaign: CampaignOutlined,
+  up: ArrowUpward,
+  logo: InsightsOutlined,
+  review: RateReviewOutlined,
+  factcheck: FactCheckOutlined,
+  down: SouthEast,
+  rise: NorthEast,
+  flat: TrendingFlat,
+  mission: FlightOutlined,
+  leave: BeachAccessOutlined,
+  training: SchoolOutlined,
+  project: FolderOpenOutlined,
+  work: WorkOutlineOutlined,
 };
 
 const TILE_ICONS: Record<string, typeof SvgIcon> = {
@@ -81,7 +117,7 @@ const HEALTH: Record<Health, { label: string; className: string }> = {
   ok: { label: "Dans les temps", className: "bg-ok-soft text-ok" },
   risk: { label: "À surveiller", className: "bg-risk-soft text-risk" },
   late: { label: "En retard", className: "bg-late-soft text-late" },
-  completed: { label: "Achevé", className: "bg-ok-soft text-ok" },
+  completed: { label: "Achevé", className: "bg-surface-2 text-ink-2" },
 };
 
 export function HealthChip({ health }: { health: Health }) {
@@ -96,10 +132,38 @@ export const HEALTH_BAR: Record<Health, string> = {
   completed: "var(--bar-ok)",
 };
 
-export function Avatar({ initials, tone = "green" }: { initials: string; tone?: "green" | "gray" }) {
-  const cls = tone === "green" ? "bg-ok-soft text-ok" : "bg-surface-2 text-ink-2 border border-line";
+// Pastilles pastel : fond clair et icône/texte de la même teinte.
+export const TONES = {
+  lav: "bg-lav-soft text-lav",
+  peach: "bg-peach-soft text-peach",
+  mint: "bg-ok-soft text-ok",
+  sky: "bg-info-soft text-info",
+  rose: "bg-late-soft text-late",
+  sand: "bg-risk-soft text-risk",
+  gray: "bg-surface-2 text-ink-2",
+} as const;
+export type Tone = keyof typeof TONES;
+
+const AVATAR_TONES: Tone[] = ["lav", "sky", "mint", "peach", "sand", "rose"];
+
+/** Couleur stable par personne, calculée à partir des initiales. */
+export function toneFor(key: string): Tone {
+  let h = 0;
+  for (const c of key) h = (h * 31 + c.charCodeAt(0)) % 997;
+  return AVATAR_TONES[h % AVATAR_TONES.length];
+}
+
+export function Tile({ icon, tone, className = "h-11 w-11" }: { icon: string; tone: Tone; className?: string }) {
   return (
-    <span className={`inline-grid h-8 w-8 shrink-0 place-items-center rounded-full text-[11.5px] font-semibold ${cls}`}>
+    <span className={`grid shrink-0 place-items-center rounded-[14px] ${TONES[tone]} ${className}`}>
+      <Icon name={icon} className="h-5 w-5" />
+    </span>
+  );
+}
+
+export function Avatar({ initials, size = "h-8 w-8 text-[11px]" }: { initials: string; size?: string }) {
+  return (
+    <span className={`inline-grid shrink-0 place-items-center rounded-full font-extrabold ${TONES[toneFor(initials)]} ${size}`}>
       {initials}
     </span>
   );
@@ -107,8 +171,8 @@ export function Avatar({ initials, tone = "green" }: { initials: string; tone?: 
 
 export function CardHeader({ title, aside }: { title: string; aside?: ReactNode }) {
   return (
-    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-      <h2 className="text-base font-semibold">{title}</h2>
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+      <h2 className="text-[17px] font-bold">{title}</h2>
       {aside ? <div className="text-[12.5px] text-muted">{aside}</div> : null}
     </div>
   );

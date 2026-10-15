@@ -9,6 +9,7 @@ import { useCountries, useDashboard, useMe } from "@/lib/hooks";
 import type { CriticalItem, Period } from "@/lib/types";
 
 import { ActivityCard } from "./ActivityCard";
+import { CalendarCard } from "./CalendarCard";
 import { AssistantCard, buildSummary } from "./AssistantCard";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { CriticalCard } from "./CriticalCard";
@@ -136,10 +137,12 @@ export function DashboardView() {
   if (!data) return null;
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar me={me} projects={data.gantt} onLogout={logout} />
-      <div className="flex min-w-0 flex-1 flex-col">
+    <div className="flex min-h-screen gap-5 p-3 sm:p-5">
+      <Sidebar me={me} alerts={data.critical_actions.total} />
+      <main className="min-w-0 flex-1">
         <Topbar
+          me={me}
+          subtitle={`${longDate(data.as_of).replace(/^./, (c) => c.toUpperCase())} · ${SCOPE_LABEL[data.scope]}`}
           countries={countries}
           country={country}
           period={period}
@@ -150,55 +153,35 @@ export function DashboardView() {
             setTasksProject("");
           }}
           onPeriod={setPeriod}
+          onLogout={logout}
         />
 
-        <main className="flex flex-1 flex-col gap-4 bg-bg px-6 py-[22px]">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <h1 className="text-[28px] font-semibold tracking-[-0.8px]">Tableau de bord</h1>
-              <p className="mt-1 text-sm text-muted">
-                {SCOPE_LABEL[data.scope]} · {longDate(data.as_of)}
-              </p>
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+          <div className="flex min-w-0 flex-col gap-5">
+            <KpiRow kpis={data.kpis} />
+            <div className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+              <TrendCard trend={data.trend} projects={data.gantt} value={trendProject} onChange={setTrendProject} />
+              <WeekCard week={data.week} onOffset={setWeek} />
             </div>
-            <div className="flex gap-2.5">
-              <button className="btn btn-green" disabled title="La création de projet arrive à l’étape suivante">
-                + Ajouter un projet
-              </button>
-              <button className="btn" disabled title="L’import de Gantt arrive à l’étape suivante">
-                Importer un Gantt
-              </button>
-            </div>
-          </div>
-
-          <KpiRow kpis={data.kpis} />
-
-          <AssistantCard
-            summary={buildSummary(data)}
-            canRemind={remindable.length > 0}
-            reminders={remindable.length}
-            onRemind={() => setConfirmAll(true)}
-          />
-
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-            <GanttCard projects={data.gantt} asOf={data.as_of} />
-            <WeekCard week={data.week} onOffset={setWeek} />
-          </div>
-
-          <div className="grid gap-4 xl:grid-cols-2">
-            <TrendCard trend={data.trend} projects={data.gantt} value={trendProject} onChange={setTrendProject} />
             <TaskProgressCard progress={data.task_progress} projects={data.gantt} value={tasksProject} onChange={setTasksProject} />
+            <GanttCard projects={data.gantt} asOf={data.as_of} />
+            <ProjectsTable projects={data.projects} />
+            <TeamsTable teams={data.teams} />
           </div>
 
-          <ProjectsTable projects={data.projects} />
-
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="flex min-w-0 flex-col gap-5">
+            <AssistantCard
+              summary={buildSummary(data)}
+              canRemind={remindable.length > 0}
+              reminders={remindable.length}
+              onRemind={() => setConfirmAll(true)}
+            />
+            <CalendarCard asOf={data.as_of} projects={data.gantt} />
             <CriticalCard total={data.critical_actions.total} items={data.critical_actions.items} busy={busy} onAction={runAction} />
             <ActivityCard entries={data.recent_activity} now={data.now} />
           </div>
-
-          <TeamsTable teams={data.teams} />
-        </main>
-      </div>
+        </div>
+      </main>
 
       <ConfirmDialog
         open={confirmAll}
@@ -211,7 +194,7 @@ export function DashboardView() {
       />
 
       <div role="status" aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-5 flex justify-center">
-        {toast && <span className="rounded-full bg-ink px-4 py-2 text-sm text-white shadow-lg">{toast}</span>}
+        {toast && <span className="rounded-full bg-side px-4 py-2.5 text-sm font-semibold text-white shadow-lg">{toast}</span>}
       </div>
     </div>
   );

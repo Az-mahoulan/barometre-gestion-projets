@@ -83,7 +83,7 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
       <CardHeader
         title="Gantt des projets"
         aside={
-          <div className="flex overflow-hidden rounded-[9px] border border-line-strong text-[12.5px] text-ink-2" role="group" aria-label="Vue">
+          <div className="flex gap-1 rounded-full bg-surface-2 p-1 text-[12.5px] font-semibold text-ink-2" role="group" aria-label="Vue">
             {(
               [
                 ["projects", "Projets"],
@@ -94,7 +94,7 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
                 key={key}
                 aria-pressed={tab === key}
                 onClick={() => setTab(key)}
-                className={`px-3 py-1.5 ${tab === key ? "bg-ink text-white" : "bg-surface"}`}
+                className={`rounded-full px-3.5 py-1 ${tab === key ? "bg-side text-white" : ""}`}
               >
                 {label}
               </button>
@@ -135,7 +135,7 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
             </div>
 
             {rows.map((r) => (
-              <div key={r.key} className="flex h-[46px] items-center border-t border-[#f1f3f5]">
+              <div key={r.key} className="flex h-[46px] items-center border-t border-line">
                 <div className="w-[200px] shrink-0 overflow-hidden whitespace-nowrap pr-2">
                   <span className="block truncate text-[13px]">{r.label}</span>
                   {r.sub && <span className={`block text-[11.5px] ${r.subLate ? "text-late" : "text-muted"}`}>{r.sub}</span>}
@@ -143,7 +143,7 @@ export function GanttCard({ projects, asOf }: { projects: GanttProject[]; asOf: 
                 <div className="relative h-[46px] flex-1">
                   <div
                     title={r.tip}
-                    className="absolute top-[19px] h-2 overflow-hidden rounded-full"
+                    className="absolute top-[18px] h-2.5 overflow-hidden rounded-full"
                     style={{
                       left: `${pos(r.start)}%`,
                       width: `${Math.max(1, pos(r.end) - pos(r.start))}%`,

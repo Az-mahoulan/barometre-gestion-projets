@@ -34,3 +34,9 @@
 ## 2026-10-14 (refonte visuelle annulée)
 - Une refonte (police IBM Plex Sans, synthèse en tête, moins de cartes) a été publiée puis annulée à la demande : le rendu a été jugé moins bon que la version précédente.
 - Retour à la version d'origine du tableau de bord (commit d'annulation de bf2146a).
+
+## 2026-10-15 (style v2 inspiré d'Eduplex)
+- Maquette `maquette/tableau-de-bord-v2.html` validée, puis appliquée au site : menu latéral sombre avec accent vert-citron, fond clair, cartes blanches très arrondies, pastilles pastel, police Plus Jakarta Sans, icônes Material UI.
+- Mise en page en deux colonnes : à gauche indicateurs, évolution mensuelle, programmation, progression des tâches, Gantt, projets, équipes ; à droite synthèse de l'assistant (carte sombre), calendrier des jalons, actions critiques, activités récentes.
+- Nouveau : calendrier du mois (jalons prévus / dépassés), écart de l'évolution par rapport au mois précédent.
+- Réveil du serveur Django depuis le navigateur (`/reveil`) : sur l'offre gratuite de Render, les appels relayés par Next ne réveillent pas le service.

@@ -5,12 +5,12 @@ import { useState } from "react";
 import { dayLabel, parseDate, shortDate } from "@/lib/format";
 import type { Week, WeekItem } from "@/lib/types";
 
-import { CardHeader } from "./ui";
+import { CardHeader, Icon, Tile, type Tone } from "./ui";
 
-const BAR: Record<WeekItem["kind"], string> = {
-  event: "var(--accent-2)",
-  milestone: "var(--bar-risk)",
-  task: "var(--ink)",
+const KIND: Record<WeekItem["kind"], { icon: string; tone: Tone; label: string }> = {
+  event: { icon: "users", tone: "peach", label: "Réunion" },
+  milestone: { icon: "flag", tone: "lav", label: "Jalon" },
+  task: { icon: "factcheck", tone: "mint", label: "Tâche" },
 };
 
 export function WeekCard({ week, onOffset }: { week: Week; onOffset: (offset: number) => void }) {
@@ -24,24 +24,19 @@ export function WeekCard({ week, onOffset }: { week: Week; onOffset: (offset: nu
       <CardHeader
         title="Programmation"
         aside={
-          <span className="flex items-center gap-1.5">
-            <button className="rounded-md border border-line-strong px-2 py-0.5" onClick={() => onOffset(week.offset - 1)} aria-label="Semaine précédente">
-              ‹
+          <span className="flex items-center gap-1.5 font-semibold text-ink-2">
+            <button className="grid h-7 w-7 place-items-center rounded-[9px] border border-line" onClick={() => onOffset(week.offset - 1)} aria-label="Semaine précédente">
+              <Icon name="left" className="h-[18px] w-[18px]" />
             </button>
             {shortDate(week.start)} – {shortDate(week.end)}
-            <button className="rounded-md border border-line-strong px-2 py-0.5" onClick={() => onOffset(week.offset + 1)} aria-label="Semaine suivante">
-              ›
+            <button className="grid h-7 w-7 place-items-center rounded-[9px] border border-line" onClick={() => onOffset(week.offset + 1)} aria-label="Semaine suivante">
+              <Icon name="right" className="h-[18px] w-[18px]" />
             </button>
-            {week.offset !== 0 && (
-              <button className="btn btn-sm" onClick={() => onOffset(0)}>
-                Aujourd’hui
-              </button>
-            )}
           </span>
         }
       />
 
-      <div className="mb-2 flex justify-between" role="tablist" aria-label="Jours de la semaine">
+      <div className="mb-2 grid grid-cols-7 gap-1" role="tablist" aria-label="Jours de la semaine">
         {week.days.map((d) => {
           const active = d.date === selected.date;
           return (
@@ -50,33 +45,35 @@ export function WeekCard({ week, onOffset }: { week: Week; onOffset: (offset: nu
               role="tab"
               aria-selected={active}
               onClick={() => setPicked(d.date)}
-              className={`flex w-10 flex-col items-center gap-0.5 rounded-[10px] py-1.5 text-[11.5px] ${
-                active ? "bg-accent text-[#cfe8d9]" : "text-muted"
-              }`}
+              className={`flex flex-col items-center rounded-[14px] py-1.5 text-[11.5px] ${active ? "bg-side text-white" : "text-muted hover:bg-surface-2"}`}
             >
               <span>{dayLabel(d.date)}</span>
-              <b className={`text-[15px] font-semibold ${active ? "text-white" : "text-ink"}`}>{parseDate(d.date).getDate()}</b>
-              <i className={`h-1 w-1 rounded-full ${d.items.length ? (active ? "bg-white" : "bg-accent-2") : "bg-transparent"}`} />
+              <b className={`text-[15px] font-bold ${active ? "text-lime" : d.is_today ? "text-ink underline decoration-lime decoration-[3px] underline-offset-4" : "text-ink"}`}>
+                {parseDate(d.date).getDate()}
+              </b>
+              <i className={`mt-0.5 h-1 w-1 rounded-full ${d.items.length ? (active ? "bg-lime" : "bg-ink-2") : "bg-transparent"}`} />
             </button>
           );
         })}
       </div>
 
-      <ul className="flex flex-col">
-        {selected.items.length === 0 && <li className="border-t border-[#f1f3f5] py-4 text-sm text-muted">Rien de prévu ce jour.</li>}
-        {selected.items.map((item, i) => (
-          <li key={`${item.kind}-${i}`} className="flex gap-3 border-t border-[#f1f3f5] py-2.5">
-            <i className="w-[3px] shrink-0 rounded-sm" style={{ background: item.late ? "var(--bar-late)" : BAR[item.kind] }} />
-            <div className="min-w-0 flex-1">
-              <b className={`block text-[13.5px] font-medium leading-snug ${item.done ? "text-muted line-through" : ""}`}>{item.title}</b>
-              <small className="text-xs text-muted">
-                {item.time ? `${item.time} · ` : ""}
-                {item.subtitle}
-                {item.late ? " · en retard" : ""}
-              </small>
-            </div>
-          </li>
-        ))}
+      <ul>
+        {selected.items.length === 0 && <li className="py-4 text-[13px] text-muted">Rien de prévu ce jour.</li>}
+        {selected.items.map((item, i) => {
+          const k = KIND[item.kind];
+          return (
+            <li key={`${item.kind}-${i}`} className="flex items-center gap-3 py-2.5">
+              <Tile icon={item.late ? "clock" : k.icon} tone={item.late ? "rose" : k.tone} />
+              <div className="min-w-0 flex-1">
+                <b className={`block truncate text-[13.5px] font-bold ${item.done ? "text-muted line-through" : ""}`}>{item.title}</b>
+                <small className="block truncate text-[12px] text-muted">
+                  {[item.time, item.subtitle].filter(Boolean).join(" · ")}
+                  {item.late && <span className="text-late"> · en retard</span>}
+                </small>
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </section>
   );

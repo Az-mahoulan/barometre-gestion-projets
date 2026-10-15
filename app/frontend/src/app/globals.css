@@ -1,45 +1,54 @@
 @import "tailwindcss";
 
-/* Jetons de couleur de la charte (style blanc, un seul accent vert). */
+/*
+ * Charte v2 (maquette maquette/tableau-de-bord-v2.html) : fond clair, cartes blanches très arrondies,
+ * menu sombre avec accent vert-citron, pastilles pastel. Rouge / orange / vert gardent leur sens d'état.
+ */
 :root {
-  --bg: #ffffff;
+  --bg: #f4f4ef;
   --surface: #ffffff;
-  --surface-2: #fafbfc;
-  --ink: #111418;
-  --ink-2: #4a5160;
-  --muted: #6b7280;
-  --line: #e8eaee;
-  --line-strong: #dfe3e8;
-  --accent: #14532d;
-  --accent-2: #1f7a4d;
-  --ok: #1b6b43;
-  --ok-soft: #e6f4ec;
-  --risk: #9a6208;
-  --risk-soft: #fdf1dc;
-  --late: #b3321f;
-  --late-soft: #fde8e4;
-  --info: #2a56c6;
-  --info-soft: #e8effd;
-  --bar-ok: #1f7a4d;
-  --bar-risk: #d9a21b;
-  --bar-late: #d1432f;
-  --track: #e6ebe8;
-  --s-todo: #dfe5e1;
-  --s-doing: #a9d5bb;
-  --s-done: #5fb383;
-  --s-review: #2f8f5b;
-  --s-approved: #14532d;
+  --surface-2: #f3f3ee;
+  --side: #1c1d22;
+  --side-2: #2a2b31;
+  --ink: #1c1d22;
+  --ink-2: #4b4e57;
+  --muted: #7d808a;
+  --line: #ecece8;
+  --line-strong: #e1e1dc;
+  --lime: #d3f26a;
+  --accent: #1c1d22;
+  --accent-2: #2f8a46;
+  --ok: #2f7d3f;
+  --ok-soft: #e3f6cf;
+  --risk: #a36a00;
+  --risk-soft: #fdf0cf;
+  --late: #c0334d;
+  --late-soft: #fde1e6;
+  --info: #2563b8;
+  --info-soft: #dcecfd;
+  --lav: #5b48d6;
+  --lav-soft: #e6e2fd;
+  --peach: #c2561c;
+  --peach-soft: #fde3d2;
+  --bar-ok: #2f8a46;
+  --bar-risk: #e8901c;
+  --bar-late: #d9452f;
+  --track: #efefe9;
 }
 
 @theme inline {
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
+  --color-side: var(--side);
+  --color-side-2: var(--side-2);
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
   --color-muted: var(--muted);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
+  --color-lime: var(--lime);
+  --color-track: var(--track);
   --color-accent: var(--accent);
   --color-accent-2: var(--accent-2);
   --color-ok: var(--ok);
@@ -50,13 +59,17 @@
   --color-late-soft: var(--late-soft);
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
-  --font-sans: var(--font-geist-sans);
+  --color-lav: var(--lav);
+  --color-lav-soft: var(--lav-soft);
+  --color-peach: var(--peach);
+  --color-peach-soft: var(--peach-soft);
+  --font-sans: var(--font-app);
 }
 
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-geist-sans), "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-app), "Segoe UI", system-ui, sans-serif;
   font-size: 14px;
   font-variant-numeric: tabular-nums;
 }
@@ -68,30 +81,29 @@ body {
 
 .card {
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 20px 22px;
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  border-radius: 22px;
+  padding: 20px;
   min-width: 0;
 }
 .chip {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 12px;
-  font-weight: 500;
-  padding: 2px 9px;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 10px;
   border-radius: 999px;
   white-space: nowrap;
 }
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  border-radius: 10px;
-  padding: 9px 14px;
-  font-size: 13.5px;
-  font-weight: 500;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
   border: 1px solid var(--line-strong);
   background: var(--surface);
   cursor: pointer;
@@ -101,24 +113,25 @@ body {
   cursor: not-allowed;
 }
 .btn-dark {
-  background: var(--ink);
+  background: var(--side);
   color: #fff;
-  border-color: var(--ink);
+  border-color: var(--side);
 }
-.btn-green {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
+.btn-lime {
+  background: var(--lime);
+  color: var(--ink);
+  border-color: var(--lime);
+  font-weight: 700;
 }
 .btn-sm {
-  padding: 6px 12px;
-  font-size: 12.5px;
-  border-radius: 9px;
+  padding: 5px 12px;
+  font-size: 12px;
 }
 .field {
   background: var(--surface);
-  border: 1px solid var(--line-strong);
-  border-radius: 10px;
-  padding: 9px 12px;
-  font-size: 13.5px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
 }

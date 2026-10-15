@@ -1,8 +1,8 @@
 "use client";
 
-import type { GanttProject, Me } from "@/lib/types";
+import type { Me } from "@/lib/types";
 
-import { Avatar, HEALTH_BAR, Icon } from "./ui";
+import { Icon } from "./ui";
 
 const NAV = [
   { icon: "grid", label: "Tableau de bord", current: true },
@@ -10,61 +10,45 @@ const NAV = [
   { icon: "task", label: "Mes tâches" },
   { icon: "calendar", label: "Calendrier" },
   { icon: "users", label: "Équipes" },
+  { icon: "bell", label: "Notifications", badge: true },
   { icon: "chart", label: "Rapports" },
   { icon: "shield", label: "Administration", adminOnly: true },
 ];
 
-export function Sidebar({ me, projects, onLogout }: { me: Me; projects: GanttProject[]; onLogout: () => void }) {
+export function Sidebar({ me, alerts }: { me: Me; alerts: number }) {
   return (
-    <aside className="sticky top-0 hidden h-screen w-[236px] shrink-0 flex-col border-r border-line bg-surface px-3.5 py-5 lg:flex">
-      <div className="flex items-center gap-2.5 px-2 pb-5 text-[19px] font-bold tracking-tight">
-        <span className="grid h-7 w-7 place-items-center rounded-lg bg-ink text-white">
-          <Icon name="chart" className="h-[15px] w-[15px]" />
+    <aside className="sticky top-5 hidden h-[calc(100vh-40px)] w-[248px] shrink-0 flex-col rounded-[24px] bg-side px-4 py-[22px] text-white lg:flex">
+      <div className="flex items-center gap-2.5 px-2 pb-6 text-[20px] font-extrabold">
+        <span className="grid h-[34px] w-[34px] place-items-center rounded-[10px] bg-lime text-ink">
+          <Icon name="logo" className="h-5 w-5" />
         </span>
         Baromètre
       </div>
 
-      <nav aria-label="Navigation principale" className="flex flex-col gap-0.5">
+      <nav aria-label="Navigation principale" className="flex flex-col gap-1">
         {NAV.filter((n) => !n.adminOnly || me.role === "admin").map((n) => (
           <span
             key={n.label}
             aria-current={n.current ? "page" : undefined}
-            className={`flex items-center gap-2.5 rounded-[9px] px-3 py-2 text-sm font-medium ${
-              n.current ? "bg-[#eef1f4] text-ink" : "text-ink-2"
+            className={`flex items-center gap-3 rounded-[14px] px-3.5 py-[11px] text-[14px] ${
+              n.current ? "bg-lime font-bold text-ink" : "font-medium text-[#c9cad0]"
             }`}
           >
-            <Icon name={n.icon} />
+            <Icon name={n.icon} className="h-5 w-5" />
             {n.label}
+            {n.badge && alerts > 0 && (
+              <span className="ml-auto grid h-5 min-w-5 place-items-center rounded-full bg-peach-soft px-1 text-[11px] font-bold text-peach">{alerts}</span>
+            )}
           </span>
         ))}
       </nav>
 
-      <div className="mt-3.5 border-t border-line pt-3">
-        <div className="px-3 pb-1.5 text-[11.5px] font-medium tracking-wide text-muted">PROJETS EN COURS</div>
-        <ul className="flex flex-col">
-          {projects
-            .filter((p) => p.status === "active")
-            .slice(0, 6)
-            .map((p) => (
-              <li key={p.id} className="flex items-center gap-2.5 px-3 py-1.5 text-[13.5px] text-ink-2">
-                <i className="block h-[9px] w-[9px] shrink-0 rounded-[3px]" style={{ background: HEALTH_BAR[p.health] }} />
-                <span className="truncate">{p.name}</span>
-              </li>
-            ))}
-        </ul>
-      </div>
-
-      <div className="mt-auto border-t border-line pt-3">
-        <div className="flex items-center gap-2.5">
-          <Avatar initials={me.initials} />
-          <div className="min-w-0 leading-tight">
-            <b className="block truncate text-[13.5px] font-semibold">{me.name}</b>
-            <span className="text-xs text-muted">{me.role_label}</span>
-          </div>
-          <button onClick={onLogout} className="ml-auto rounded-lg p-1.5 text-muted hover:bg-surface-2" aria-label="Se déconnecter">
-            <Icon name="logout" />
-          </button>
-        </div>
+      <div className="mt-auto rounded-[20px] bg-lime p-[18px] text-ink">
+        <span className="mb-3 grid h-10 w-10 place-items-center rounded-full bg-side text-white">
+          <Icon name="sparkle" className="h-5 w-5" />
+        </span>
+        <b className="block text-[15px] leading-snug">Demandez à l’assistant</b>
+        <p className="mt-1.5 text-[12px] leading-snug opacity-75">« Qui est disponible demain ? », « Crée une tâche pour Koffi » : bientôt disponible.</p>
       </div>
     </aside>
   );

@@ -2,12 +2,12 @@
 
 import type { CriticalItem } from "@/lib/types";
 
-import { CardHeader, Icon } from "./ui";
+import { Tile, TONES, type Tone } from "./ui";
 
-const TONE: Record<CriticalItem["severity"], { box: string; icon: string }> = {
-  late: { box: "bg-late-soft text-late", icon: "clock" },
-  risk: { box: "bg-risk-soft text-risk", icon: "calendar" },
-  info: { box: "bg-ok-soft text-ok", icon: "check" },
+const SEVERITY: Record<CriticalItem["severity"], { tone: Tone; icon: string }> = {
+  late: { tone: "rose", icon: "clock" },
+  risk: { tone: "sand", icon: "event" },
+  info: { tone: "lav", icon: "review" },
 };
 
 const ACTION_LABEL: Record<NonNullable<CriticalItem["action"]>, string> = {
@@ -15,6 +15,19 @@ const ACTION_LABEL: Record<NonNullable<CriticalItem["action"]>, string> = {
   approve: "Approuver",
   reschedule: "Replanifier",
 };
+
+/** Le sous-titre serveur (« Projet · Personne · 5 jours de retard ») est découpé en contexte + échéance courte. */
+function split(subtitle: string) {
+  const parts = subtitle.split(" · ");
+  const due = parts.pop() ?? "";
+  const short = due
+    .replace(/^(\d+) jours? de retard$/, "$1 j de retard")
+    .replace(/^échéance aujourd'hui$/, "Aujourd’hui")
+    .replace(/^échéance demain$/, "Demain")
+    .replace(/^échéance dans (\d+) jours$/, "Dans $1 jours")
+    .replace(/^en revue, à approuver$/, "À approuver");
+  return { context: parts.join(" · "), due: short };
+}
 
 export function CriticalCard({
   total,
@@ -28,37 +41,41 @@ export function CriticalCard({
   onAction: (item: CriticalItem) => void;
 }) {
   return (
-    <section className="card" aria-label="Actions critiques">
-      <CardHeader title="Actions critiques" aside={`${total} à traiter`} />
-      {items.length === 0 && <p className="py-4 text-sm text-muted">Rien d’urgent : aucun retard ni échéance proche.</p>}
-      <ul>
+    <section aria-label="Actions critiques">
+      <div className="mb-3.5 flex items-center justify-between">
+        <h2 className="text-[17px] font-bold">Actions critiques</h2>
+        <span className="chip bg-lime text-ink">{total} à traiter</span>
+      </div>
+      {items.length === 0 && <p className="card text-[13px] text-muted">Rien d’urgent : aucun retard ni échéance proche.</p>}
+      <ul className="flex flex-col gap-3">
         {items.map((item) => {
-          const tone = item.severity === "late" && item.kind === "milestone_overdue" ? { ...TONE.late, icon: "flag" } : TONE[item.severity];
+          const sev = item.kind === "milestone_overdue" ? { tone: "rose" as Tone, icon: "flag" } : SEVERITY[item.severity];
           const key = `${item.kind}-${item.task_id ?? item.project_id}-${item.title}`;
+          const { context, due } = split(item.subtitle);
           return (
-            <li key={key} className="grid grid-cols-[34px_1fr_auto] items-center gap-3 border-t border-[#f1f3f5] py-2.5 first:border-t-0">
-              <span className={`grid h-[34px] w-[34px] place-items-center rounded-[10px] ${tone.box}`}>
-                <Icon name={tone.icon} />
-              </span>
-              <div className="min-w-0">
-                <b className="block truncate text-[13.5px] font-medium">{item.title}</b>
-                <small className="text-xs text-muted">{item.subtitle}</small>
+            <li key={key} className="flex gap-3 rounded-[18px] bg-surface p-3.5">
+              <Tile icon={sev.icon} tone={sev.tone} />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start justify-between gap-2">
+                  <b className="text-[13.5px] font-bold leading-snug">{item.title}</b>
+                  <span className={`chip shrink-0 ${TONES[sev.tone]}`}>{due}</span>
+                </div>
+                <small className="block truncate text-[12px] text-muted">{context}</small>
+                {item.action && (
+                  <button
+                    className="btn btn-sm mt-2"
+                    disabled={busy === key || item.action === "reschedule"}
+                    title={item.action === "reschedule" ? "La replanification arrive à l’étape suivante" : undefined}
+                    onClick={() => onAction(item)}
+                  >
+                    {ACTION_LABEL[item.action]}
+                  </button>
+                )}
               </div>
-              {item.action && (
-                <button
-                  className="btn btn-sm"
-                  disabled={busy === key || item.action === "reschedule"}
-                  title={item.action === "reschedule" ? "La replanification arrive à l’étape suivante" : undefined}
-                  onClick={() => onAction(item)}
-                >
-                  {ACTION_LABEL[item.action]}
-                </button>
-              )}
             </li>
           );
         })}
       </ul>
-      <p className="mt-2 text-xs text-muted">Retards et échéances des 3 prochains jours. Toutes les échéances sont dans « Programmation ».</p>
     </section>
   );
 }

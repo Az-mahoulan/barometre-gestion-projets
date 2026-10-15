@@ -1,5 +1,7 @@
 import type { GanttProject, TrendMonth } from "@/lib/types";
 
+import { Icon } from "./ui";
+
 const PLOT_H = 220;
 
 // Couleur d'une barre selon le taux de jalons atteints dans le mois.
@@ -35,18 +37,19 @@ export function TrendCard({
     .filter(({ m }) => m.pct !== null)
     .map(({ m, i }) => ({ x: i + 0.5, y: PLOT_H * (1 - (m.pct ?? 0) / 100), pct: m.pct as number, m }));
   const summary = points.map((p) => `${p.m.label} ${p.pct} %`).join(", ");
+  // Écart entre les deux derniers mois mesurés.
+  const last = points.at(-1);
+  const prev = points.at(-2);
+  const delta = last && prev ? last.pct - prev.pct : null;
 
   return (
     <section className="card" aria-label="Évolution mois par mois">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="text-base font-semibold">Évolution mois par mois</h2>
-          <p className="mt-0.5 text-[12.5px] text-muted">Jalons atteints, en % des jalons prévus chaque mois</p>
-        </div>
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="whitespace-nowrap text-[17px] font-bold">Évolution mois par mois</h2>
         <label className="sr-only" htmlFor="trend-project">
           Projet
         </label>
-        <select id="trend-project" className="field max-w-[210px] !py-1.5" value={value} onChange={(e) => onChange(e.target.value)}>
+        <select id="trend-project" className="field min-w-0 max-w-[150px] !py-1.5" value={value} onChange={(e) => onChange(e.target.value)}>
           <option value="">Tous les projets</option>
           {projects.map((p) => (
             <option key={p.id} value={p.id}>
@@ -55,8 +58,25 @@ export function TrendCard({
           ))}
         </select>
       </div>
+      <p className="mt-0.5 text-[12.5px] text-muted">Jalons atteints, en % des jalons prévus chaque mois</p>
+      {delta !== null && prev && (
+            <p className="mt-2.5 flex items-center gap-2 whitespace-nowrap text-[12.5px] text-muted">
+              <span
+                className={`grid h-[26px] w-[26px] place-items-center rounded-[8px] ${
+                  delta > 0 ? "bg-ok-soft text-ok" : delta < 0 ? "bg-late-soft text-late" : "bg-surface-2 text-ink-2"
+                }`}
+              >
+                <Icon name={delta > 0 ? "rise" : delta < 0 ? "down" : "flat"} className="h-4 w-4" />
+              </span>
+              <b className={delta > 0 ? "text-ok" : delta < 0 ? "text-late" : "text-ink-2"}>
+                {delta > 0 ? "+" : delta < 0 ? "−" : ""}
+                {Math.abs(delta)} pts
+              </b>
+              par rapport à {prev.m.label}
+            </p>
+          )}
 
-      <div className="mt-11 flex gap-2.5">
+      <div className="mt-10 flex gap-2.5">
         <div className="flex h-[220px] w-10 flex-col justify-between text-right text-[11.5px] text-muted" aria-hidden="true">
           <span>100 %</span>
           <span>50 %</span>
@@ -69,13 +89,12 @@ export function TrendCard({
               <div key={m.month} className="flex items-end justify-center">
                 {m.state === "future" ? (
                   <div
-                    className="h-[220px] w-[58px] rounded-full border border-[#e3e8e5]"
-                    style={{ background: "repeating-linear-gradient(135deg,#fff,#fff 4px,#e3e8e5 4px,#e3e8e5 5.5px)" }}
+                    className="h-[220px] w-3.5 rounded-full bg-track"
                     title={`${m.label} : à venir (${m.total} jalon${m.total > 1 ? "s" : ""} prévu${m.total > 1 ? "s" : ""})`}
                   />
                 ) : (
                   <div
-                    className="flex h-[220px] w-[58px] items-end overflow-hidden rounded-full bg-[#eef1f0]"
+                    className="flex h-[220px] w-3.5 items-end overflow-hidden rounded-full bg-track"
                     title={m.total ? `${m.label} : ${m.achieved}/${m.total} jalons atteints` : `${m.label} : aucun jalon prévu`}
                   >
                     <div
