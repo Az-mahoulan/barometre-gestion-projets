@@ -65,3 +65,4 @@
 - 15/10/2026 — Étiquettes d’état des projets (vue d’ensemble) : sablier dont le sable du haut = temps restant jusqu’à l’échéance (fin prévue), filet qui s’écoule, et décompte sem · j · h · min · s mis à jour chaque seconde (calculé dans le navigateur à partir de l’heure de référence du serveur) ; « Échéance dépassée de … » au-delà. Projet achevé : verre plein et immobile.
 - 15/10/2026 — Décompte sans les secondes ; sablier sorti de l’étiquette, posé juste à côté (couleur de l’état) ; bord du verre des livrables en pointillé.
 - 15/10/2026 — Verre des livrables revenu au trait plein ; décompte raccourci (« 2s 2j 10h59 ») ; fond doux de la teinte de l’état englobant étiquette, sablier et décompte.
+- 15/10/2026 — Sablier placé au début du décompte (sous l’étiquette) ; « sem » rétabli (« 2sem 2j 10h59 »).

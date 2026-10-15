@@ -46,7 +46,7 @@ function Hourglass({ elapsed, running }: { elapsed: number; running: boolean }) 
   const top = 1 - elapsed; // part restante
   const bulb = "M 4 2.5 L 12 2.5 C 12 6.5 9 9 8.7 11 C 9 13 12 15.5 12 19.5 L 4 19.5 C 4 15.5 7 13 7.3 11 C 7 9 4 6.5 4 2.5 Z";
   return (
-    <svg viewBox="0 0 16 22" className="h-[22px] w-4 shrink-0" aria-hidden="true">
+    <svg viewBox="0 0 16 22" className="h-[18px] w-[13px] shrink-0" aria-hidden="true">
       <defs>
         <clipPath id={clip}>
           <path d={bulb} />
@@ -66,14 +66,14 @@ function Hourglass({ elapsed, running }: { elapsed: number; running: boolean }) 
   );
 }
 
-/** Décompte court : semaines (s), jours (j), puis heures et minutes (« 10h59 ») ; semaines et jours nuls omis. */
+/** Décompte court : semaines (sem), jours (j), puis heures et minutes (« 10h59 ») ; semaines et jours nuls omis. */
 function Countdown({ ms }: { ms: number }) {
   const w = Math.floor(ms / WEEK);
   const d = Math.floor((ms % WEEK) / DAY);
   const h = Math.floor((ms % DAY) / HOUR);
   const m = Math.floor((ms % HOUR) / MIN);
   const parts: [string, string][] = [];
-  if (w > 0) parts.push([String(w), "s"]);
+  if (w > 0) parts.push([String(w), "sem"]);
   if (w > 0 || d > 0) parts.push([String(d), "j"]);
   return (
     <span className="tabular-nums">
@@ -109,13 +109,11 @@ export function Deadline({ health, start, end, now }: { health: Health; start: s
   const elapsed = Math.min(1, Math.max(0, (t - s) / Math.max(e - s, 1)));
   return (
     <div className="inline-flex flex-col items-start gap-1 rounded-[14px] p-1 pb-1.5" style={{ background: SOFT[health] }}>
-      <span className="flex items-center gap-1.5 pr-1">
-        <HealthChip health={health} />
+      <HealthChip health={health} />
+      <span className="flex items-center gap-1 whitespace-nowrap px-1 text-[11px] text-muted" title={`Échéance du projet : ${new Date(e).toLocaleDateString("fr-FR")}`}>
         <span className={TEXT[health]}>
           <Hourglass elapsed={elapsed} running={left > 0} />
         </span>
-      </span>
-      <span className="whitespace-nowrap px-1.5 text-[11px] text-muted" title={`Échéance du projet : ${new Date(e).toLocaleDateString("fr-FR")}`}>
         {left > 0 ? (
           <Countdown ms={left} />
         ) : (
