@@ -26,6 +26,7 @@ def user_payload(user) -> dict:
         "job_title": user.job_title,
         "avatar": user.avatar,
         "avatar_style": user.avatar_style,
+        "dashboard_layout": user.dashboard_layout or {},
     }
 
 
@@ -81,6 +82,31 @@ class MeAvatarView(APIView):
         serializer = AvatarSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         assign_avatar(request.user, serializer.validated_data.get("style"))
+        return Response(user_payload(request.user))
+
+
+CARD_ID = r"^[a-z][a-z0-9-]{0,39}$"
+
+
+class LayoutSerializer(serializers.Serializer):
+    """Ordre des cartes par colonne ; deux listes vides = disposition par défaut."""
+
+    main = serializers.ListField(child=serializers.RegexField(CARD_ID), max_length=30, required=False, default=list)
+    side = serializers.ListField(child=serializers.RegexField(CARD_ID), max_length=30, required=False, default=list)
+
+
+class MeLayoutView(APIView):
+    """Enregistre la disposition personnelle du tableau de bord (glisser-déposer des cartes)."""
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(request=LayoutSerializer, responses={200: serializers.DictField()})
+    def post(self, request):
+        serializer = LayoutSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        request.user.dashboard_layout = {"main": data["main"], "side": data["side"]} if data["main"] or data["side"] else {}
+        request.user.save(update_fields=["dashboard_layout"])
         return Response(user_payload(request.user))
 
 

@@ -19,6 +19,7 @@ import { TimelineCard } from "./TimelineCard";
 import { WeekActivitiesCard } from "./WeekActivitiesCard";
 import { KpiRow } from "./KpiRow";
 import { ProjectsTable } from "./ProjectsTable";
+import { orderCards, SortableColumn } from "./SortableColumn";
 import { Sidebar } from "./Sidebar";
 import { TaskProgressCard } from "./TaskProgressCard";
 import { TeamsTable } from "./TeamsTable";
@@ -49,6 +50,18 @@ export function DashboardView() {
   const [toast, setToast] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [confirmAll, setConfirmAll] = useState(false);
+
+  // Disposition personnelle des cartes (glisser-déposer) : appliquée tout de suite, puis enregistrée sur le profil.
+  const layout = me?.dashboard_layout ?? {};
+  async function saveLayout(next: Me["dashboard_layout"]) {
+    if (!me) return;
+    setMeUpdate({ ...me, dashboard_layout: next });
+    try {
+      setMeUpdate(await apiPost<Me>("/auth/me/layout/", next));
+    } catch {
+      setToast("La nouvelle disposition n’a pas pu être enregistrée.");
+    }
+  }
 
   useEffect(() => {
     if (meError?.status === 401 || meError?.status === 403)
@@ -202,46 +215,77 @@ export function DashboardView() {
             <div className="min-w-0 xl:col-span-2">
               <KpiRow kpis={data.kpis} />
             </div>
-            <div className="flex min-w-0 flex-col gap-4">
-              <TrendCard
-                trend={data.trend}
-                projects={data.gantt}
-                value={trendProject}
-                onChange={setTrendProject}
-              />
-              <TaskProgressCard
-                progress={data.task_progress}
-                projects={data.gantt}
-                value={tasksProject}
-                onChange={setTasksProject}
-              />
-              <TimelineCard projects={data.gantt} asOf={data.as_of} />
-              <GanttCard projects={data.gantt} asOf={data.as_of} />
-              {/* Progression des jalons et activités de la semaine côte à côte (même hauteur : celle des activités). */}
-              <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_316px]">
-                <MilestoneProgressCard projects={data.gantt} asOf={data.as_of} />
-                <WeekActivitiesCard projects={data.gantt} asOf={data.as_of} />
-              </div>
-              <ProjectsTable projects={data.projects} now={data.now} />
-              <TeamsTable teams={data.teams} />
-            </div>
+            <SortableColumn
+              className="flex min-w-0 flex-col gap-4"
+              cards={orderCards(
+                [
+                  {
+                    id: "trend",
+                    label: "Évolution",
+                    node: <TrendCard trend={data.trend} projects={data.gantt} value={trendProject} onChange={setTrendProject} />,
+                  },
+                  {
+                    id: "tasks",
+                    label: "Progression des tâches",
+                    node: (
+                      <TaskProgressCard progress={data.task_progress} projects={data.gantt} value={tasksProject} onChange={setTasksProject} />
+                    ),
+                  },
+                  { id: "timeline", label: "Chronologie des projets", node: <TimelineCard projects={data.gantt} asOf={data.as_of} /> },
+                  { id: "gantt", label: "Gantt des jalons", node: <GanttCard projects={data.gantt} asOf={data.as_of} /> },
+                  {
+                    id: "milestones",
+                    label: "Progression des jalons et activités de la semaine",
+                    node: (
+                      // Progression des jalons et activités de la semaine côte à côte (même hauteur : celle des activités).
+                      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_316px]">
+                        <MilestoneProgressCard projects={data.gantt} asOf={data.as_of} />
+                        <WeekActivitiesCard projects={data.gantt} asOf={data.as_of} />
+                      </div>
+                    ),
+                  },
+                  { id: "projects", label: "Vue d’ensemble des projets", node: <ProjectsTable projects={data.projects} now={data.now} /> },
+                  { id: "teams", label: "Vue d’ensemble des équipes", node: <TeamsTable teams={data.teams} /> },
+                ],
+                layout.main,
+              )}
+              onReorder={(ids) => saveLayout({ ...layout, main: ids })}
+            />
 
-            <div className="flex min-w-0 flex-col gap-4">
-              <AssistantCard
-                summary={buildSummary(data)}
-                canRemind={remindable.length > 0}
-                reminders={remindable.length}
-                onRemind={() => setConfirmAll(true)}
-              />
-              <WeekCard week={data.week} asOf={data.as_of} projects={data.gantt} onOffset={setWeek} />
-              <CriticalCard
-                total={data.critical_actions.total}
-                items={data.critical_actions.items}
-                busy={busy}
-                onAction={runAction}
-              />
-              <ActivityCard entries={data.recent_activity} now={data.now} />
-            </div>
+            <SortableColumn
+              className="flex min-w-0 flex-col gap-4"
+              cards={orderCards(
+                [
+                  {
+                    id: "assistant",
+                    label: "Synthèse",
+                    node: (
+                      <AssistantCard
+                        summary={buildSummary(data)}
+                        canRemind={remindable.length > 0}
+                        reminders={remindable.length}
+                        onRemind={() => setConfirmAll(true)}
+                      />
+                    ),
+                  },
+                  {
+                    id: "week",
+                    label: "Programmation",
+                    node: <WeekCard week={data.week} asOf={data.as_of} projects={data.gantt} onOffset={setWeek} />,
+                  },
+                  {
+                    id: "critical",
+                    label: "Actions critiques",
+                    node: (
+                      <CriticalCard total={data.critical_actions.total} items={data.critical_actions.items} busy={busy} onAction={runAction} />
+                    ),
+                  },
+                  { id: "activity", label: "Activité récente", node: <ActivityCard entries={data.recent_activity} now={data.now} /> },
+                ],
+                layout.side,
+              )}
+              onReorder={(ids) => saveLayout({ ...layout, side: ids })}
+            />
           </div>
         </main>
       </div>

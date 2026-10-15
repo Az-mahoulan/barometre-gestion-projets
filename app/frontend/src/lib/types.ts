@@ -15,6 +15,8 @@ export interface Me {
   /** Avatar illustré unique (combinaison de traits) et son style. */
   avatar: string | null;
   avatar_style: "neutral" | "masculine" | "feminine";
+  /** Disposition personnelle du tableau de bord : ordre des cartes par colonne (vide = par défaut). */
+  dashboard_layout: { main?: string[]; side?: string[] };
 }
 
 export interface Country {

@@ -158,6 +158,26 @@ function ProfileMenu({ me, onMeChange }: { me: Me; onMeChange: (me: Me) => void 
             {busy ? "Un instant…" : "Nouvel avatar"}
           </button>
           {error && <p className="mt-2 text-[11.5px] text-late">{error}</p>}
+
+          {(me.dashboard_layout?.main?.length || me.dashboard_layout?.side?.length) ? (
+            <button
+              onClick={async () => {
+                setBusy(true);
+                setError("");
+                try {
+                  onMeChange(await apiPost<Me>("/auth/me/layout/", {}));
+                } catch {
+                  setError("Le changement n’a pas abouti. Réessayez.");
+                } finally {
+                  setBusy(false);
+                }
+              }}
+              disabled={busy}
+              className="mt-3 w-full border-t border-line pt-3 text-left text-[12px] font-semibold text-ink-2 hover:text-ink disabled:opacity-60"
+            >
+              Rétablir la disposition des cartes
+            </button>
+          ) : null}
         </div>
       )}
     </div>

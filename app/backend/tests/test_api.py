@@ -241,3 +241,16 @@ def test_each_profile_gets_a_unique_avatar_and_can_change_it(admin, boss, worker
     assert "beard=none" in after["avatar"]
     data = client_for(admin).get("/api/v1/dashboard/").json()
     assert data["avatars"]["worker"] == after["avatar"]
+
+
+def test_dashboard_layout_is_saved_per_user_and_validated(worker, boss, client_for):
+    client = client_for(worker)
+    assert client.get("/api/v1/auth/me/").json()["dashboard_layout"] == {}
+    saved = client.post("/api/v1/auth/me/layout/", {"main": ["tasks", "trend"], "side": ["week"]}, format="json").json()
+    assert saved["dashboard_layout"] == {"main": ["tasks", "trend"], "side": ["week"]}
+    # Propre à chaque personne
+    assert client_for(boss).get("/api/v1/auth/me/").json()["dashboard_layout"] == {}
+    # Identifiants de carte contrôlés
+    assert client.post("/api/v1/auth/me/layout/", {"main": ["<script>"]}, format="json").status_code == 400
+    # Listes vides : retour à la disposition par défaut
+    assert client.post("/api/v1/auth/me/layout/", {}, format="json").json()["dashboard_layout"] == {}

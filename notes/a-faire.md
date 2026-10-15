@@ -4,7 +4,7 @@ Liste des évolutions demandées, à reprendre quand le tableau de bord sera sta
 
 ## Tableau de bord
 
-- [ ] **Sections déplaçables à volonté** : chaque utilisateur peut réorganiser les cartes du tableau de bord (glisser-déposer), et la disposition est mémorisée pour lui.
+- [x] **Sections déplaçables à volonté** : chaque utilisateur peut réorganiser les cartes du tableau de bord (glisser-déposer), et la disposition est mémorisée pour lui — fait le 15/10/2026 (dans chaque colonne ; enregistrée sur le profil ; « Rétablir la disposition des cartes » dans le menu du profil). Reste possible : déplacer une carte d'une colonne à l'autre.
 - [ ] **Icône « infos » devant le titre de chaque carte** : un clic ouvre une explication approfondie de la section (texte + vidéo) : l'idée derrière la carte, comment la lire et comment s'en servir.
 
 ## Modèle de données

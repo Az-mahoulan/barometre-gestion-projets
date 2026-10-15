@@ -33,6 +33,8 @@ class User(AbstractUser):
     # Avatar illustré par défaut (en attendant une photo) : combinaison de traits unique par profil (voir avatars.py).
     avatar_style = models.CharField("Style d'avatar", max_length=10, choices=AvatarStyle.choices, default=AvatarStyle.NEUTRAL)
     avatar = models.CharField("Avatar", max_length=200, null=True, blank=True, unique=True, editable=False)
+    # Disposition personnelle du tableau de bord : ordre des cartes par colonne ({"main": [...], "side": [...]}).
+    dashboard_layout = models.JSONField("Disposition du tableau de bord", default=dict, blank=True)
 
     class Meta:
         verbose_name = "utilisateur"
