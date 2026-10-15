@@ -85,13 +85,13 @@ export function TimelineCard({ projects, asOf }: { projects: GanttProject[]; asO
       </div>
 
       <div ref={area} className="relative overflow-clip rounded-[14px] border border-line bg-[#f7f7f3]">
-        <div className="relative z-20 grid border-b border-line bg-[#ebebe5]" style={{ gridTemplateColumns: `${NAME_W}px minmax(0,1fr)` }}>
+        <div className="relative z-20 grid border-b border-[#d6d6ce] bg-[#ebebe5]" style={{ gridTemplateColumns: `${NAME_W}px minmax(0,1fr)` }}>
           <div className="flex items-center px-4 text-[12px] font-semibold">Projets</div>
           <div className="grid" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}>
             {dates.map((d) => {
               const day = parseDate(d);
               return (
-                <div key={d} className="border-l border-line px-0.5 py-1.5 text-center" title={(notes.get(d) ?? []).join("\n")}>
+                <div key={d} className="border-l border-[#d6d6ce] px-0.5 py-1.5 text-center" title={(notes.get(d) ?? []).join("\n")}>
                   <div className="text-[12.5px] font-semibold leading-tight">{day.getDate()}</div>
                   <div className="text-[10px] text-muted">{MONTHS[day.getMonth()]}</div>
                 </div>
