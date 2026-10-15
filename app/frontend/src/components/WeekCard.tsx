@@ -90,7 +90,7 @@ export function WeekCard({
         </span>
       </div>
 
-      <table className="w-full border-separate border-spacing-y-[3px] text-center text-[11.5px]">
+      <table className="w-full border-separate border-spacing-y-[2px] text-center text-[11.5px]">
         <thead>
           <tr className="text-muted">
             {["L", "M", "M", "J", "V", "S", "D"].map((d, i) => (
@@ -111,7 +111,7 @@ export function WeekCard({
                   const active = shown && key === selected.date;
                   const tints = [...(marks.get(key) ?? [])];
                   return (
-                    <td key={key} className={`p-0 ${shown ? "bg-lime/35 first:rounded-l-full last:rounded-r-full" : ""}`}>
+                    <td key={key} className={`py-1 ${shown ? "bg-lime/35 first:rounded-l-full last:rounded-r-full" : ""}`}>
                       <button
                         onClick={() => pick(d)}
                         aria-pressed={active}
