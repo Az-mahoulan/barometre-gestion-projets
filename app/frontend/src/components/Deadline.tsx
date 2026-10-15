@@ -66,30 +66,37 @@ function Hourglass({ elapsed, running }: { elapsed: number; running: boolean }) 
   );
 }
 
-/** Décompte semaines · jours · heures · minutes (les semaines et jours nuls sont omis). */
+/** Décompte court : semaines (s), jours (j), puis heures et minutes (« 10h59 ») ; semaines et jours nuls omis. */
 function Countdown({ ms }: { ms: number }) {
   const w = Math.floor(ms / WEEK);
   const d = Math.floor((ms % WEEK) / DAY);
   const h = Math.floor((ms % DAY) / HOUR);
   const m = Math.floor((ms % HOUR) / MIN);
-  const pad = (n: number) => String(n).padStart(2, "0");
   const parts: [string, string][] = [];
-  if (w > 0) parts.push([String(w), "sem"]);
+  if (w > 0) parts.push([String(w), "s"]);
   if (w > 0 || d > 0) parts.push([String(d), "j"]);
-  parts.push([pad(h), "h"], [pad(m), "min"]);
   return (
     <span className="tabular-nums">
       {parts.map(([n, u]) => (
-        <span key={u} className="mr-[3px] last:mr-0">
+        <span key={u} className="mr-[4px]">
           <b className="font-semibold text-ink">{n}</b>
-          <span className="ml-[1px]">{u}</span>
+          {u}
         </span>
       ))}
+      <b className="font-semibold text-ink">{String(h).padStart(2, "0")}</b>h
+      <b className="font-semibold text-ink">{String(m).padStart(2, "0")}</b>
     </span>
   );
 }
 
 const TEXT: Record<Health, string> = { ok: "text-ok", risk: "text-risk", late: "text-late", completed: "text-ink-2" };
+// Fond englobant, plus doux que celui de l'étiquette (même teinte, très éclaircie).
+const SOFT: Record<Health, string> = {
+  ok: "color-mix(in srgb, var(--ok-soft) 45%, transparent)",
+  risk: "color-mix(in srgb, var(--risk-soft) 45%, transparent)",
+  late: "color-mix(in srgb, var(--late-soft) 45%, transparent)",
+  completed: "transparent",
+};
 
 /** Étiquette d'état du projet avec sablier et temps restant avant l'échéance, mis à jour en continu. */
 export function Deadline({ health, start, end, now }: { health: Health; start: string; end: string; now: string }) {
@@ -101,19 +108,19 @@ export function Deadline({ health, start, end, now }: { health: Health; start: s
   const left = e - t;
   const elapsed = Math.min(1, Math.max(0, (t - s) / Math.max(e - s, 1)));
   return (
-    <div className="flex flex-col items-start gap-1">
-      <span className="flex items-center gap-1.5">
+    <div className="inline-flex flex-col items-start gap-1 rounded-[14px] p-1 pb-1.5" style={{ background: SOFT[health] }}>
+      <span className="flex items-center gap-1.5 pr-1">
         <HealthChip health={health} />
         <span className={TEXT[health]}>
           <Hourglass elapsed={elapsed} running={left > 0} />
         </span>
       </span>
-      <span className="whitespace-nowrap text-[10.5px] text-muted" title={`Échéance du projet : ${new Date(e).toLocaleDateString("fr-FR")}`}>
+      <span className="whitespace-nowrap px-1.5 text-[11px] text-muted" title={`Échéance du projet : ${new Date(e).toLocaleDateString("fr-FR")}`}>
         {left > 0 ? (
           <Countdown ms={left} />
         ) : (
           <span className="font-semibold text-late">
-            Échéance dépassée de <Countdown ms={-left} />
+            Dépassée de <Countdown ms={-left} />
           </span>
         )}
       </span>
