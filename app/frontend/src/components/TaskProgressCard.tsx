@@ -1,7 +1,7 @@
 import type { Dashboard, GanttProject } from "@/lib/types";
 
 import { ProjectPicker } from "./ProjectPicker";
-import { CardHeader, TileIcon } from "./ui";
+import { CardHeader, Icon, TileIcon } from "./ui";
 
 // Couleur de chaque statut : libellé, icône et part dans la barre de répartition.
 // Fond pastel de chaque tuile.
@@ -61,7 +61,9 @@ export function TaskProgressCard({
             <span style={{ color: STATUS_COLOR[s.key] }}>
               <TileIcon name={s.key} className="h-7 w-7" />
             </span>
-            <b className="text-[21px] font-bold leading-none tracking-[-0.5px]">{s.count}</b>
+            <b className="text-[21px] font-bold leading-none tracking-[-0.5px]" style={{ color: STATUS_COLOR[s.key] }}>
+              {s.count}
+            </b>
           </li>
         ))}
       </ul>
@@ -102,9 +104,24 @@ export function TaskProgressCard({
           ))}
         </ul>
         {progress.overdue > 0 && (
-          <p className="mt-4 rounded-full bg-late-soft px-4 py-2 text-[12px] font-semibold text-late">
-            {progress.overdue} tâche{progress.overdue > 1 ? "s" : ""} en retard sur leur échéance
-          </p>
+          <div className="mt-4 flex items-center gap-3 rounded-[16px] bg-late-soft p-2.5 pr-3" role="status">
+            <span className="relative grid h-10 w-10 shrink-0 place-items-center rounded-[12px] bg-surface text-late shadow-[0_1px_2px_rgba(192,51,77,0.15)]">
+              <Icon name="alarm" className="h-5 w-5" />
+              <span className="absolute -right-0.5 -top-0.5 flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-late opacity-60 motion-safe:animate-ping" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-late ring-2 ring-surface" />
+              </span>
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-bold text-late">
+                {progress.overdue} tâche{progress.overdue > 1 ? "s" : ""} en retard
+              </p>
+              <p className="truncate text-[11.5px] text-ink-2">
+                Échéance dépassée · {Math.round((progress.overdue / total) * 100)} % des tâches
+              </p>
+            </div>
+            <span className="chip shrink-0 bg-late text-white">À relancer</span>
+          </div>
         )}
       </div>
     </section>

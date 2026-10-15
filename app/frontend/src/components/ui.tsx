@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import AlarmOutlined from "@mui/icons-material/AlarmOutlined";
 import AdminPanelSettingsOutlined from "@mui/icons-material/AdminPanelSettingsOutlined";
 import AutoAwesomeOutlined from "@mui/icons-material/AutoAwesomeOutlined";
 import BarChartOutlined from "@mui/icons-material/BarChartOutlined";
@@ -93,6 +94,7 @@ const ICONS: Record<string, typeof SvgIcon> = {
   caretdown: KeyboardArrowDown,
   caretup: KeyboardArrowUp,
   go: NorthEastRounded,
+  alarm: AlarmOutlined,
 };
 
 const TILE_ICONS: Record<string, typeof SvgIcon> = {
