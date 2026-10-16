@@ -20,6 +20,7 @@ import { WeekActivitiesCard } from "./WeekActivitiesCard";
 import { KpiRow } from "./KpiRow";
 import { ProjectsTable } from "./ProjectsTable";
 import { orderCards, SortableColumn } from "./SortableColumn";
+import { StickySide } from "./StickySide";
 import { Sidebar } from "./Sidebar";
 import { TaskProgressCard } from "./TaskProgressCard";
 import { TeamsTable } from "./TeamsTable";
@@ -258,6 +259,7 @@ export function DashboardView() {
               onReorder={(ids) => saveLayout({ ...layout, main: ids })}
             />
 
+            <StickySide>
             <SortableColumn
               className="flex min-w-0 flex-col gap-4"
               cards={orderCards(
@@ -292,6 +294,7 @@ export function DashboardView() {
               )}
               onReorder={(ids) => saveLayout({ ...layout, side: ids })}
             />
+            </StickySide>
           </div>
         </main>
       </div>
