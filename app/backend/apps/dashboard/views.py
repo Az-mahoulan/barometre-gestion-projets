@@ -10,7 +10,7 @@ from apps.accounts.models import Country
 
 from apps.projects.models import Project
 
-from .projects import build_my_tasks, build_project_detail, build_projects_list
+from .projects import build_calendar, build_my_tasks, build_project_detail, build_projects_list
 from .services import build_dashboard
 
 
@@ -98,6 +98,29 @@ class MyTasksView(APIView):
     @extend_schema(parameters=[OpenApiParameter("scope", str, enum=["mine", "projects"])], responses={200: serializers.DictField()})
     def get(self, request):
         return Response(build_my_tasks(request.user, request.query_params.get("scope", "mine")))
+
+
+class CalendarQuerySerializer(serializers.Serializer):
+    year = serializers.IntegerField(required=False, min_value=2000, max_value=2100)
+    month = serializers.IntegerField(required=False, min_value=1, max_value=12)
+    project = serializers.IntegerField(required=False, min_value=1)
+
+
+class CalendarView(APIView):
+    """Calendrier mensuel : réunions, jalons, échéances, dates clés, livrables (projets visibles)."""
+
+    @extend_schema(
+        parameters=[OpenApiParameter("year", int), OpenApiParameter("month", int), OpenApiParameter("project", int)],
+        responses={200: serializers.DictField()},
+    )
+    def get(self, request):
+        from .services import today_date
+
+        query = CalendarQuerySerializer(data=request.query_params)
+        query.is_valid(raise_exception=True)
+        d = query.validated_data
+        today = today_date()
+        return Response(build_calendar(request.user, d.get("year", today.year), d.get("month", today.month), d.get("project")))
 
 
 class CountriesView(APIView):

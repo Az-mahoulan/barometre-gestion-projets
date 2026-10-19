@@ -283,3 +283,12 @@ def test_my_tasks_mine_and_managed_projects(boss, worker, project, client_for):
     managed = client_for(boss).get("/api/v1/my-tasks/?scope=projects").json()
     assert managed["scope"] == "projects" and len(managed["tasks"]) == 1 and managed["tasks"][0]["can_approve"] is True
     assert client_for(boss).get("/api/v1/my-tasks/").json()["tasks"] == []
+
+
+def test_calendar_month_grid(worker, project, client_for):
+    data = client_for(worker).get("/api/v1/calendar/?year=2026&month=10").json()
+    assert data["month"] == 10 and len(data["days"]) % 7 == 0
+    assert data["days"][0]["date"] <= "2026-10-01" <= data["days"][6]["date"]
+    items = [i for d in data["days"] for i in d["items"]]
+    assert any(i["kind"] == "task" and i["title"] == "Tâche de worker" for i in items)
+    assert client_for(worker).get("/api/v1/calendar/?month=13").status_code == 400

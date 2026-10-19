@@ -204,17 +204,16 @@ def _people(users) -> list[dict]:
     return out
 
 
-def build_week(user, projects, today: date, offset: int) -> dict:
-    """Agenda de la semaine : réunions (bleu) et échéances (orange, rouge si dépassées) avec les personnes concernées."""
-    monday = today - timedelta(days=today.weekday()) + timedelta(weeks=offset)
-    sunday = monday + timedelta(days=6)
+def build_agenda(user, projects, today: date, start: date, end: date, *, extended: bool = False) -> dict:
+    """Éléments datés entre `start` et `end` (inclus), jour par jour : réunions, fins de projet, activités, jalons,
+    tâches (selon le rôle) et, en mode étendu (calendrier), dates clés et livrables."""
     visible_ids = {p.id for p in projects}
     tz = timezone.get_current_timezone()
-    start_dt = timezone.make_aware(datetime.combine(monday, time.min), tz)
-    end_dt = timezone.make_aware(datetime.combine(sunday + timedelta(days=1), time.min), tz)
+    start_dt = timezone.make_aware(datetime.combine(start, time.min), tz)
+    end_dt = timezone.make_aware(datetime.combine(end + timedelta(days=1), time.min), tz)
     events = CalendarEvent.objects.filter(starts_at__gte=start_dt, starts_at__lt=end_dt).prefetch_related("participants")
-    days = {monday + timedelta(days=i): [] for i in range(7)}
-    in_week = lambda d: monday <= d <= sunday
+    days = {start + timedelta(days=i): [] for i in range((end - start).days + 1)}
+    inside = lambda d: start <= d <= end
 
     for e in events:
         if e.project_id and e.project_id not in visible_ids:
@@ -222,36 +221,54 @@ def build_week(user, projects, today: date, offset: int) -> dict:
         local = timezone.localtime(e.starts_at, tz)
         days[local.date()].append(
             {"kind": "event", "title": e.title, "subtitle": e.get_kind_display(), "time": local.strftime("%H:%M"),
-             "people": _people(e.participants.all())}
+             "project_id": e.project_id, "people": _people(e.participants.all())}
         )
     scope_tasks = _scope_tasks(user, projects)
     for p in projects:
-        if in_week(p.end_date):
+        if inside(p.end_date):
             done = p.status != Project.Status.ACTIVE
             days[p.end_date].append(
-                {"kind": "project", "title": p.name, "subtitle": "Fin prévue", "done": done,
+                {"kind": "project", "title": p.name, "subtitle": "Fin prévue", "done": done, "project_id": p.id,
                  "late": not done and p.end_date < today, "people": _people([p.owner])}
             )
         for a in p.activities.all():
-            if in_week(a.end_date):
+            if inside(a.end_date):
                 ts = [t for t in p.tasks.all() if t.activity_id == a.id]
                 done = bool(ts) and all(t.is_complete for t in ts)
                 days[a.end_date].append(
-                    {"kind": "activity", "title": a.name, "subtitle": p.name, "done": done,
+                    {"kind": "activity", "title": a.name, "subtitle": p.name, "done": done, "project_id": p.id,
                      "late": not done and a.end_date < today, "people": _people(t.assignee for t in ts)}
                 )
         for m in p.milestones.all():
-            if in_week(m.due_date):
+            if inside(m.due_date):
                 days[m.due_date].append(
-                    {"kind": "milestone", "title": m.name, "subtitle": p.name, "done": m.is_achieved,
+                    {"kind": "milestone", "title": m.name, "subtitle": p.name, "done": m.is_achieved, "project_id": p.id,
                      "late": not m.is_achieved and m.due_date < today, "people": _people([p.owner])}
                 )
+        if extended:
+            for k in p.key_dates.all():
+                if inside(k.date):
+                    days[k.date].append({"kind": "keydate", "title": k.label, "subtitle": p.name, "project_id": p.id, "people": []})
+            for d in p.deliverables.all():
+                if inside(d.due_date):
+                    days[d.due_date].append(
+                        {"kind": "deliverable", "title": d.name, "subtitle": p.name, "done": d.is_delivered, "project_id": p.id,
+                         "late": not d.is_delivered and d.due_date < today, "people": []}
+                    )
     for t in scope_tasks:
-        if in_week(t.due_date):
+        if inside(t.due_date):
             days[t.due_date].append(
-                {"kind": "task", "title": t.title, "subtitle": f"{p_name(projects, t.project_id)}",
+                {"kind": "task", "title": t.title, "subtitle": f"{p_name(projects, t.project_id)}", "project_id": t.project_id,
                  "done": t.is_complete, "late": is_overdue(t, today), "task_id": t.id, "people": _people([t.assignee])}
             )
+    return days
+
+
+def build_week(user, projects, today: date, offset: int) -> dict:
+    """Agenda de la semaine : réunions (bleu) et échéances (orange, rouge si dépassées) avec les personnes concernées."""
+    monday = today - timedelta(days=today.weekday()) + timedelta(weeks=offset)
+    sunday = monday + timedelta(days=6)
+    days = build_agenda(user, projects, today, monday, sunday)
     return {
         "start": monday, "end": sunday, "offset": offset,
         "days": [{"date": d, "is_today": d == today, "items": items} for d, items in days.items()],

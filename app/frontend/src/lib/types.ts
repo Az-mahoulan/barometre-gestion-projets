@@ -86,13 +86,14 @@ export interface GanttProject {
 }
 
 export interface WeekItem {
-  kind: "event" | "project" | "activity" | "milestone" | "task";
+  kind: "event" | "project" | "activity" | "milestone" | "task" | "keydate" | "deliverable";
   title: string;
   subtitle: string;
   time?: string;
   done?: boolean;
   late?: boolean;
   task_id?: number;
+  project_id?: number | null;
   /** Participants d'une réunion ou personnes chargées de l'échéance (peut être vide). */
   people?: { initials: string; name: string }[];
 }
@@ -258,5 +259,15 @@ export interface MyTasks {
   mine_count: number;
   statuses: { key: string; label: string }[];
   tasks: MyTask[];
+  avatars: Record<string, string | null>;
+}
+
+/** Écran « Calendrier » : grille d'un mois. */
+export interface CalendarMonth {
+  as_of: string;
+  year: number;
+  month: number;
+  projects: { id: number; name: string }[];
+  days: { date: string; in_month: boolean; is_today: boolean; items: WeekItem[] }[];
   avatars: Record<string, string | null>;
 }

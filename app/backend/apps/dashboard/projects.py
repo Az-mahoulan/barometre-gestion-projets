@@ -145,3 +145,31 @@ def build_my_tasks(user, scope: str = "mine") -> dict:
         ],
         "avatars": _avatars({t.assignee for t in tasks if t.assignee}),
     }
+
+
+def build_calendar(user, year: int, month: int, project: int | None = None) -> dict:
+    """Calendrier d'un mois : grille du lundi précédant le 1er au dimanche suivant la fin du mois."""
+    from calendar import monthrange
+    from datetime import date, timedelta
+
+    from .services import build_agenda
+
+    today = today_date()
+    first = date(year, month, 1)
+    last = date(year, month, monthrange(year, month)[1])
+    start = first - timedelta(days=first.weekday())
+    end = last + timedelta(days=6 - last.weekday())
+    projects = list(_visible_projects(user, None).prefetch_related("deliverables"))
+    choices = [{"id": p.id, "name": p.name} for p in sorted(projects, key=lambda p: p.name)]
+    if project:
+        projects = [p for p in projects if p.id == project]
+    days = build_agenda(user, projects, today, start, end, extended=True)
+    people = {u for p in projects for u in [p.owner] + [t.assignee for t in p.tasks.all()] if u}
+    return {
+        "as_of": today,
+        "year": year,
+        "month": month,
+        "projects": choices,
+        "days": [{"date": d, "in_month": d.month == month, "is_today": d == today, "items": items} for d, items in days.items()],
+        "avatars": _avatars(people),
+    }

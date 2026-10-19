@@ -26,6 +26,8 @@ const KIND_LABEL: Record<WeekItem["kind"], string> = {
   activity: "Activité",
   milestone: "Jalon",
   task: "Tâche",
+  keydate: "Date clé",
+  deliverable: "Livrable",
 };
 
 /** Calendrier du mois (semaine affichée mise en évidence) puis les réunions et échéances du jour choisi. */
