@@ -272,3 +272,14 @@ def test_projects_list_and_detail_respect_scope(admin, boss, worker, stranger, p
     assert client_for(worker).get(f"/api/v1/projects/{project.id}/").json()["tasks"][0]["can_edit"] is True
     assert client_for(admin).get("/api/v1/projects/?status=completed").status_code == 200
     assert client_for(admin).get("/api/v1/projects/?status=bad").status_code == 400
+
+
+def test_my_tasks_mine_and_managed_projects(boss, worker, project, client_for):
+    mine = client_for(worker).get("/api/v1/my-tasks/").json()
+    assert mine["scope"] == "mine" and [t["title"] for t in mine["tasks"]] == ["Tâche de worker"]
+    assert mine["tasks"][0]["can_edit"] is True and mine["tasks"][0]["can_approve"] is False
+    # Un membre ne peut pas voir les tâches « de ses projets »
+    assert client_for(worker).get("/api/v1/my-tasks/?scope=projects").json()["scope"] == "mine"
+    managed = client_for(boss).get("/api/v1/my-tasks/?scope=projects").json()
+    assert managed["scope"] == "projects" and len(managed["tasks"]) == 1 and managed["tasks"][0]["can_approve"] is True
+    assert client_for(boss).get("/api/v1/my-tasks/").json()["tasks"] == []

@@ -10,7 +10,7 @@ from apps.accounts.models import Country
 
 from apps.projects.models import Project
 
-from .projects import build_project_detail, build_projects_list
+from .projects import build_my_tasks, build_project_detail, build_projects_list
 from .services import build_dashboard
 
 
@@ -90,6 +90,14 @@ class ProjectDetailView(APIView):
         if data is None:
             raise NotFound("Projet introuvable ou hors de votre périmètre.")
         return Response(data)
+
+
+class MyTasksView(APIView):
+    """Tâches de la personne connectée, ou des projets qu'elle gère (scope=projects, responsables et administrateurs)."""
+
+    @extend_schema(parameters=[OpenApiParameter("scope", str, enum=["mine", "projects"])], responses={200: serializers.DictField()})
+    def get(self, request):
+        return Response(build_my_tasks(request.user, request.query_params.get("scope", "mine")))
 
 
 class CountriesView(APIView):

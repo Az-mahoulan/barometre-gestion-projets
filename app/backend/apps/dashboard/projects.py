@@ -106,3 +106,42 @@ def build_project_detail(user, project_id: int) -> dict | None:
         ],
         "avatars": _avatars(people),
     }
+
+
+def build_my_tasks(user, scope: str = "mine") -> dict:
+    """Écran « Mes tâches » : les tâches de la personne (« mine ») ou, pour un responsable ou un administrateur,
+    celles des projets qu'il gère (« projects »). Le classement (en retard, aujourd'hui, semaine, plus tard) se fait
+    dans l'interface à partir de l'échéance."""
+    from apps.projects.models import Task
+
+    today = today_date()
+    projects = _visible_projects(user, None)
+    qs = Task.objects.filter(project__in=projects).select_related("project", "assignee", "activity")
+    can_see_projects = user.role in (User.Role.ADMIN, User.Role.RESPONSABLE)
+    if scope == "projects" and can_see_projects:
+        qs = qs.filter(project__in=[p for p in projects if can_manage_project(user, p)])
+    else:
+        scope = "mine"
+        qs = qs.filter(assignee=user)
+    tasks = list(qs.order_by("due_date", "id"))
+    return {
+        "as_of": today,
+        "now": now_reference(),
+        "scope": scope,
+        "can_see_projects": can_see_projects,
+        "mine_count": Task.objects.filter(project__in=projects, assignee=user).count(),
+        "statuses": [{"key": k, "label": label} for k, label in Task.Status.choices],
+        "tasks": [
+            {
+                "id": t.id, "title": t.title, "status": t.status, "status_label": t.get_status_display(),
+                "due": t.due_date, "overdue": is_overdue(t, today), "priority": t.priority,
+                "complete": t.is_complete, "assignee": _person(t.assignee),
+                "activity": t.activity.name if t.activity else "",
+                "project": {"id": t.project_id, "name": t.project.name},
+                "can_edit": can_update_task_status(user, t),
+                "can_approve": can_manage_project(user, t.project),
+            }
+            for t in tasks
+        ],
+        "avatars": _avatars({t.assignee for t in tasks if t.assignee}),
+    }

@@ -242,3 +242,21 @@ export interface ProjectDetail {
   log: { id: number; message: string; actor_name: string; actor_initials: string; created_at: string }[];
   avatars: Record<string, string | null>;
 }
+
+/** Écran « Mes tâches ». */
+export interface MyTask extends ProjectTask {
+  complete: boolean;
+  project: { id: number; name: string };
+  can_approve: boolean;
+}
+
+export interface MyTasks {
+  as_of: string;
+  now: string;
+  scope: "mine" | "projects";
+  can_see_projects: boolean;
+  mine_count: number;
+  statuses: { key: string; label: string }[];
+  tasks: MyTask[];
+  avatars: Record<string, string | null>;
+}
