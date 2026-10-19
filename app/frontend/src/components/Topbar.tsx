@@ -9,22 +9,23 @@ import { Avatar, Icon } from "./ui";
 
 export function Topbar({
   me,
-  countries,
-  country,
-  period,
-  alerts,
+  countries = [],
+  country = "",
+  period = "year",
+  alerts = 0,
   onCountry,
   onPeriod,
   onLogout,
   onMeChange,
 }: {
   me: Me;
-  countries: Country[];
-  country: string;
-  period: Period;
-  alerts: number;
-  onCountry: (code: string) => void;
-  onPeriod: (p: Period) => void;
+  countries?: Country[];
+  country?: string;
+  period?: Period;
+  alerts?: number;
+  /** Filtres du tableau de bord : affichés seulement s'ils sont fournis. */
+  onCountry?: (code: string) => void;
+  onPeriod?: (p: Period) => void;
   onLogout: () => void;
   onMeChange: (me: Me) => void;
 }) {
@@ -39,6 +40,8 @@ export function Topbar({
         </span>
       </label>
 
+      {onCountry && onPeriod && (
+        <>
       <label className="sr-only" htmlFor="f-country">
         Pays
       </label>
@@ -58,6 +61,9 @@ export function Topbar({
         <option value="quarter">Trimestre en cours</option>
         <option value="month">Mois en cours</option>
       </select>
+
+        </>
+      )}
 
       <span className="relative grid h-9 w-9 place-items-center rounded-full border border-line text-ink-2" role="img" aria-label={`${alerts} actions à traiter`}>
         <Icon name="bell" className="h-5 w-5" />

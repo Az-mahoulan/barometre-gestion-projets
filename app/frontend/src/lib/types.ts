@@ -195,3 +195,50 @@ export interface Dashboard {
   /** Avatars illustrés : nom affiché -> combinaison de traits. */
   avatars: Record<string, string>;
 }
+
+/** Écran « Projets ». */
+export interface ProjectsList {
+  as_of: string;
+  now: string;
+  projects: ProjectRow[];
+  avatars: Record<string, string | null>;
+}
+
+export interface ProjectTask {
+  id: number;
+  title: string;
+  status: string;
+  status_label: string;
+  due: string;
+  overdue: boolean;
+  priority: "n" | "h";
+  assignee: { name: string; initials: string } | null;
+  activity: string;
+  can_edit: boolean;
+}
+
+/** Écran de détail d'un projet. */
+export interface ProjectDetail {
+  as_of: string;
+  now: string;
+  project: ProjectRow & { description: string; status_label: string };
+  can_manage: boolean;
+  statuses: { key: string; label: string }[];
+  tasks: ProjectTask[];
+  milestones: GanttProject["milestones"];
+  activities: {
+    id: number;
+    name: string;
+    start: string;
+    end: string;
+    milestone: string;
+    tasks_total: number;
+    tasks_complete: number;
+    progress: number;
+  }[];
+  deliverables: { id: number; name: string; due: string; delivered_on: string | null; late: boolean }[];
+  key_dates: { label: string; date: string }[];
+  team: { name: string; initials: string; job_title: string; is_owner: boolean; open_tasks: number; overdue_tasks: number }[];
+  log: { id: number; message: string; actor_name: string; actor_initials: string; created_at: string }[];
+  avatars: Record<string, string | null>;
+}

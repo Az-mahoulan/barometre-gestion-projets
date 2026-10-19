@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { shortDate } from "@/lib/format";
 import type { ProjectRow } from "@/lib/types";
 
@@ -11,7 +13,7 @@ function perfClass(v: number) {
 }
 
 /** Anneau d'avancement (part des tâches avancées). */
-function Ring({ value, color }: { value: number; color: string }) {
+export function Ring({ value, color }: { value: number; color: string }) {
   const c = 2 * Math.PI * 15;
   return (
     <svg viewBox="0 0 36 36" className="h-9 w-9 shrink-0" aria-hidden="true">
@@ -35,7 +37,7 @@ function Ring({ value, color }: { value: number; color: string }) {
 const WAVE = `M -16 0 ${Array.from({ length: 6 }, () => "q 4 -1.6 8 0 t 8 0").join(" ")} L 80 44 L -16 44 Z`;
 
 /** Verre de livrables : le niveau du liquide suit la part des livrables remis ; le liquide, à la couleur de l'état du projet, tangue doucement. */
-function Glass({ done, total, id, color, still }: { done: number; total: number; id: number; color: string; still: boolean }) {
+export function Glass({ done, total, id, color, still }: { done: number; total: number; id: number; color: string; still: boolean }) {
   // Projet achevé : verre plein jusqu'au bord, liquide immobile.
   const ratio = still ? 1 : total > 0 ? done / total : 0;
   const y = 38 - ratio * 30; // fond du verre à 38, bord utile à 8
@@ -99,21 +101,27 @@ function Team({ team }: { team: ProjectRow["team"] }) {
   );
 }
 
-export function ProjectsTable({ projects, now }: { projects: ProjectRow[]; now: string }) {
+export function ProjectsTable({ projects, now, title = true }: { projects: ProjectRow[]; now: string; title?: boolean }) {
   return (
     <section aria-label="Vue d’ensemble des projets">
-      <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-[15px] font-bold">Vue d’ensemble des projets</h2>
-        <span className="text-[12px] text-muted" title="Performance = avancement réel ÷ avancement attendu à cette date">
-          {projects.length} projets · performance = avancement réel ÷ attendu
-        </span>
-      </div>
+      {title && (
+        <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-[15px] font-bold">Vue d’ensemble des projets</h2>
+          <span className="text-[12px] text-muted" title="Performance = avancement réel ÷ avancement attendu à cette date">
+            {projects.length} projets · performance = avancement réel ÷ attendu
+          </span>
+        </div>
+      )}
 
       {projects.length === 0 && <p className="card text-muted">Aucun projet pour ces filtres.</p>}
 
       <ul className="flex flex-col gap-3">
         {projects.map((p, i) => (
-          <li key={p.id} className="flex flex-wrap items-center gap-x-3 gap-y-3 rounded-[18px] bg-surface px-[18px] py-3.5">
+          <li key={p.id}>
+            <Link
+              href={`/projets/${p.id}`}
+              className="flex flex-wrap items-center gap-x-3 gap-y-3 rounded-[18px] bg-surface px-[18px] py-3.5 outline-offset-2 transition-shadow hover:shadow-[0_6px_20px_-12px_rgba(28,29,34,0.35)]"
+            >
             <div className="flex min-w-[170px] flex-1 items-center gap-3">
               <Tile icon="project" tone={TILE_TONES[i % TILE_TONES.length]} />
               <div className="min-w-0">
@@ -167,6 +175,7 @@ export function ProjectsTable({ projects, now }: { projects: ProjectRow[]; now: 
             <div className="w-[150px]">
               <Deadline health={p.health} start={p.start} end={p.end} now={now} />
             </div>
+            </Link>
           </li>
         ))}
       </ul>

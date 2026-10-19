@@ -10,7 +10,7 @@ import { CardHeader, Icon, TileIcon } from "./ui";
 
 // Couleur de chaque statut : libellé, icône et part dans la barre de répartition.
 // Fond pastel de chaque tuile.
-const STATUS_BG: Record<string, string> = {
+export const STATUS_BG: Record<string, string> = {
   todo: "#f3f3ee",
   doing: "#dcecfd",
   done: "#d9f1ec",
@@ -18,7 +18,7 @@ const STATUS_BG: Record<string, string> = {
   approved: "#e3f6cf",
 };
 
-const STATUS_COLOR: Record<string, string> = {
+export const STATUS_COLOR: Record<string, string> = {
   todo: "#6b7280",
   doing: "#2a56c6",
   done: "#0f766e",

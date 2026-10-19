@@ -78,3 +78,27 @@ export function useDashboard(params: DashboardParams, enabled: boolean) {
   const refresh = useCallback(() => setVersion((v) => v + 1), []);
   return { data, error, loading, refresh };
 }
+
+/** Lecture d'un point de l'API (avec relance pendant le réveil du serveur) ; `refresh` recharge. */
+export function useApi<T>(path: string | null) {
+  const [data, setData] = useState<T | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
+  const [version, setVersion] = useState(0);
+
+  useEffect(() => {
+    if (!path) return;
+    const controller = new AbortController();
+    retryWhileWaking(() => apiGet<T>(path, controller.signal), () => undefined, controller.signal)
+      .then((d) => {
+        setData(d);
+        setError(null);
+      })
+      .catch((e) => {
+        if (e.name !== "AbortError") setError(e as ApiError);
+      });
+    return () => controller.abort();
+  }, [path, version]);
+
+  const refresh = useCallback(() => setVersion((v) => v + 1), []);
+  return { data, error, refresh };
+}

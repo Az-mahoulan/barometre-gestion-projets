@@ -254,3 +254,21 @@ def test_dashboard_layout_is_saved_per_user_and_validated(worker, boss, client_f
     assert client.post("/api/v1/auth/me/layout/", {"main": ["<script>"]}, format="json").status_code == 400
     # Listes vides : retour à la disposition par défaut
     assert client.post("/api/v1/auth/me/layout/", {}, format="json").json()["dashboard_layout"] == {}
+
+
+def test_projects_list_and_detail_respect_scope(admin, boss, worker, stranger, project, make_project, client_for):
+    hidden = make_project(boss, name="Projet sans worker")
+    listed = client_for(admin).get("/api/v1/projects/").json()["projects"]
+    assert listed and {"id", "name", "health", "team"} <= set(listed[0])
+    pid = listed[0]["id"]
+    detail = client_for(admin).get(f"/api/v1/projects/{pid}/").json()
+    assert detail["project"]["id"] == pid and detail["can_manage"] is True
+    assert {"tasks", "milestones", "activities", "deliverables", "team", "log"} <= set(detail)
+    # Hors périmètre : un membre ne voit que les projets où il a une tâche
+    assert [p["id"] for p in client_for(worker).get("/api/v1/projects/").json()["projects"]] == [project.id]
+    assert client_for(worker).get(f"/api/v1/projects/{hidden.id}/").status_code == 404
+    assert client_for(stranger).get(f"/api/v1/projects/{project.id}/").status_code == 404
+    # Le membre peut changer le statut de sa propre tâche
+    assert client_for(worker).get(f"/api/v1/projects/{project.id}/").json()["tasks"][0]["can_edit"] is True
+    assert client_for(admin).get("/api/v1/projects/?status=completed").status_code == 200
+    assert client_for(admin).get("/api/v1/projects/?status=bad").status_code == 400

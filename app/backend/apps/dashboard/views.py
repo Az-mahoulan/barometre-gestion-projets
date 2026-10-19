@@ -1,12 +1,16 @@
 from django.db import connection
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import serializers
+from rest_framework.exceptions import NotFound
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.accounts.models import Country
 
+from apps.projects.models import Project
+
+from .projects import build_project_detail, build_projects_list
 from .services import build_dashboard
 
 
@@ -48,6 +52,44 @@ class DashboardView(APIView):
                 tasks_project=query.validated_data.get("tasks_project"),
             )
         )
+
+
+class ProjectsQuerySerializer(serializers.Serializer):
+    country = serializers.CharField(required=False, allow_blank=True, max_length=2)
+    status = serializers.ChoiceField(choices=[c[0] for c in Project.Status.choices], required=False, allow_blank=True)
+    q = serializers.CharField(required=False, allow_blank=True, max_length=80)
+
+    def validate_country(self, value):
+        return DashboardQuerySerializer().validate_country(value)
+
+
+class ProjectsView(APIView):
+    """Liste des projets visibles (filtres : pays, statut, recherche par nom)."""
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("country", str, description="Code pays ISO (ex. BJ)"),
+            OpenApiParameter("status", str, enum=[c[0] for c in Project.Status.choices]),
+            OpenApiParameter("q", str, description="Recherche dans le nom du projet"),
+        ],
+        responses={200: serializers.DictField()},
+    )
+    def get(self, request):
+        query = ProjectsQuerySerializer(data=request.query_params)
+        query.is_valid(raise_exception=True)
+        d = query.validated_data
+        return Response(build_projects_list(request.user, country=d.get("country"), status=d.get("status") or None, q=d.get("q", "")))
+
+
+class ProjectDetailView(APIView):
+    """Détail d'un projet visible : en-tête, tâches, jalons, activités, livrables, équipe, journal."""
+
+    @extend_schema(responses={200: serializers.DictField()})
+    def get(self, request, pk):
+        data = build_project_detail(request.user, pk)
+        if data is None:
+            raise NotFound("Projet introuvable ou hors de votre périmètre.")
+        return Response(data)
 
 
 class CountriesView(APIView):

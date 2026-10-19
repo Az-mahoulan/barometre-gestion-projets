@@ -2,7 +2,7 @@ import type { ActivityEntry } from "@/lib/types";
 
 import { Avatar, CardHeader } from "./ui";
 
-function relative(iso: string, now: Date): string {
+export function relative(iso: string, now: Date): string {
   const minutes = Math.round((now.getTime() - new Date(iso).getTime()) / 60_000);
   if (minutes < 60) return `il y a ${Math.max(minutes, 1)} min`;
   const hours = Math.round(minutes / 60);

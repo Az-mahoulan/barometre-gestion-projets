@@ -1,31 +1,35 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
 import type { Me, Member } from "@/lib/types";
 
 import { Avatar, Icon } from "./ui";
 
 const NAV = [
-  { icon: "grid", label: "Tableau de bord", current: true },
-  { icon: "folder", label: "Projets" },
-  { icon: "task", label: "Mes tâches" },
-  { icon: "calendar", label: "Calendrier" },
-  { icon: "users", label: "Équipes" },
-  { icon: "bell", label: "Notifications", badge: true },
-  { icon: "chart", label: "Rapports" },
-  { icon: "shield", label: "Administration", adminOnly: true },
+  { href: "/", icon: "grid", label: "Tableau de bord" },
+  { href: "/projets", icon: "folder", label: "Projets" },
+  { href: "/taches", icon: "task", label: "Mes tâches" },
+  { href: "/calendrier", icon: "calendar", label: "Calendrier" },
+  { href: "/equipes", icon: "users", label: "Équipes" },
+  { href: "/notifications", icon: "bell", label: "Notifications", badge: true },
+  { href: "/rapports", icon: "chart", label: "Rapports" },
+  { href: "/administration", icon: "shield", label: "Administration", adminOnly: true },
 ];
 
 export function Sidebar({
   me,
-  alerts,
-  members,
+  alerts = 0,
+  members = [],
   subtitle,
 }: {
   me: Me;
-  alerts: number;
-  members: Member[];
+  alerts?: number;
+  members?: Member[];
   subtitle: string;
 }) {
+  const pathname = usePathname();
   const first = me.name.split(" ")[0];
   const shown = members.slice(0, 4);
   return (
@@ -52,30 +56,33 @@ export function Sidebar({
         aria-label="Navigation principale"
         className="mt-2 flex flex-col gap-1"
       >
-        {NAV.filter((n) => !n.adminOnly || me.role === "admin").map((n) => (
-          <span
-            key={n.label}
-            aria-current={n.current ? "page" : undefined}
-            className={`flex items-center gap-3 rounded-full py-[7px] pl-3 pr-2 text-[13px] ${
-              n.current
-                ? "bg-side font-semibold text-white"
-                : "font-medium text-ink-2"
-            }`}
-          >
-            <Icon name={n.icon} className="h-[18px] w-[18px]" />
-            {n.label}
-            {n.current && (
-              <span className="ml-auto grid h-6 w-6 place-items-center rounded-full bg-white/15">
-                <Icon name="go" className="h-3.5 w-3.5" />
-              </span>
-            )}
-            {n.badge && alerts > 0 && (
-              <span className="ml-auto grid h-5 min-w-5 place-items-center rounded-full bg-[#f26b3a] px-1 text-[10.5px] font-bold text-white">
-                {alerts}
-              </span>
-            )}
-          </span>
-        ))}
+        {NAV.filter((n) => !n.adminOnly || me.role === "admin").map((n) => {
+          // Page courante : l'adresse exacte, ou une sous-page (ex. /projets/3 pour « Projets »).
+          const current = n.href === "/" ? pathname === "/" : pathname === n.href || pathname.startsWith(`${n.href}/`);
+          return (
+            <Link
+              key={n.label}
+              href={n.href}
+              aria-current={current ? "page" : undefined}
+              className={`flex items-center gap-3 rounded-full py-[7px] pl-3 pr-2 text-[13px] transition-colors ${
+                current ? "bg-side font-semibold text-white" : "font-medium text-ink-2 hover:bg-surface-2 hover:text-ink"
+              }`}
+            >
+              <Icon name={n.icon} className="h-[18px] w-[18px]" />
+              {n.label}
+              {current && (
+                <span className="ml-auto grid h-6 w-6 place-items-center rounded-full bg-white/15">
+                  <Icon name="go" className="h-3.5 w-3.5" />
+                </span>
+              )}
+              {n.badge && alerts > 0 && !current && (
+                <span className="ml-auto grid h-5 min-w-5 place-items-center rounded-full bg-[#f26b3a] px-1 text-[10.5px] font-bold text-white">
+                  {alerts}
+                </span>
+              )}
+            </Link>
+          );
+        })}
       </nav>
 
       <div className="mt-6 flex items-center px-1">
