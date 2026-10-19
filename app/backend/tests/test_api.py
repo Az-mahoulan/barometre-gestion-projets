@@ -319,3 +319,29 @@ def test_report_json_and_csv_export(admin, project, client_for):
     assert csv.status_code == 200 and csv["Content-Type"].startswith("text/csv")
     text = csv.content.decode("utf-8")
     assert text.startswith("﻿Projet;Pays") and "Projet test;Bénin" in text
+
+
+def test_administration_is_admin_only_and_manages_accounts(admin, boss, worker, country, client_for):
+    from rest_framework.test import APIClient
+
+    assert client_for(boss).get("/api/v1/admin/overview/").status_code == 403
+    assert client_for(worker).post("/api/v1/admin/users/", {"username": "x"}, format="json").status_code == 403
+    c = client_for(admin)
+    created = c.post("/api/v1/admin/users/", {"username": "nouvelle", "first_name": "Ama", "role": "responsable", "country": "BJ"}, format="json")
+    assert created.status_code == 201
+    password = created.json()["password"]
+    fresh = APIClient()
+    assert fresh.post("/api/v1/auth/login/", {"username": "nouvelle", "password": password}, format="json").status_code == 200
+    assert c.post("/api/v1/admin/users/", {"username": "Nouvelle"}, format="json").status_code == 400  # déjà pris
+    # Pas de suppression de ses propres droits
+    assert c.patch(f"/api/v1/admin/users/{admin.id}/", {"role": "membre"}, format="json").status_code == 400
+    assert c.patch(f"/api/v1/admin/users/{worker.id}/", {"is_active": False}, format="json").status_code == 200
+    # Projet : dates et responsable contrôlés
+    bad = c.post("/api/v1/admin/projects/", {"name": "P", "country": "BJ", "owner": boss.id, "start_date": "2026-11-01", "end_date": "2026-10-01"}, format="json")
+    assert bad.status_code == 400
+    ok = c.post("/api/v1/admin/projects/", {"name": "P", "country": "BJ", "owner": boss.id, "start_date": "2026-10-01", "end_date": "2026-12-01"}, format="json")
+    assert ok.status_code == 201
+    pid = ok.json()["project"]["id"]
+    assert c.patch(f"/api/v1/admin/projects/{pid}/", {"status": "completed"}, format="json").status_code == 200
+    assert c.post("/api/v1/admin/countries/", {"code": "ml", "name": "Mali"}, format="json").status_code == 201
+    assert c.post("/api/v1/admin/countries/", {"code": "ML", "name": "Mali"}, format="json").status_code == 400

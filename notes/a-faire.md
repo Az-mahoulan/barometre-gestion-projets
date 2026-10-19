@@ -10,7 +10,7 @@ Liste des évolutions demandées, à reprendre quand le tableau de bord sera sta
 ## Modèle de données
 
 - [x] Rattacher les activités à un jalon (projet > jalons > activités > tâches), lien facultatif — fait le 15/10/2026 (champ « Jalon » de l’activité, saisi dans l’admin).
-- [ ] Écrans de saisie dans l'application (aujourd'hui dans l'admin Django) : dates clés des projets, dépendances entre jalons, jalon de chaque activité, livrables, participants des réunions, photo de profil.
+- [ ] Écrans de saisie dans l'application (aujourd'hui dans l'admin Django) : jalons et leurs dépendances, activités et leur jalon, tâches (création), livrables, dates clés, réunions et participants, photo de profil. Fait le 19/10/2026 : comptes, rôles, pays, création et modification des projets (écran Administration).
 
 ## Démo en ligne (Render)
 

@@ -335,3 +335,42 @@ export interface Report {
   }[];
   trend: TrendMonth[];
 }
+
+/** Écran « Administration ». */
+export interface AdminUser {
+  id: number;
+  username: string;
+  first_name: string;
+  last_name: string;
+  name: string;
+  initials: string;
+  email: string;
+  role: Role;
+  role_label: string;
+  job_title: string;
+  country: string;
+  is_active: boolean;
+  last_login: string | null;
+  avatar: string | null;
+}
+
+export interface AdminProject {
+  id: number;
+  name: string;
+  description: string;
+  country: string;
+  owner: number;
+  owner_name: string;
+  start_date: string;
+  end_date: string;
+  status: string;
+  status_label: string;
+}
+
+export interface AdminOverview {
+  users: AdminUser[];
+  projects: AdminProject[];
+  countries: { code: string; name: string; users: number; projects: number }[];
+  roles: { key: Role; label: string }[];
+  statuses: { key: string; label: string }[];
+}

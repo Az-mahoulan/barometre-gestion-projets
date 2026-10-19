@@ -70,14 +70,18 @@ export async function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> 
   return (await res.json()) as T;
 }
 
-export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
+export async function apiPost<T>(path: string, body?: unknown, method: "POST" | "PATCH" = "POST"): Promise<T> {
   const csrf = await ensureCsrf();
   const res = await fetch(`/api/v1${path}`, {
-    method: "POST",
+    method,
     credentials: "same-origin",
     headers: { "Content-Type": "application/json", "X-CSRFToken": csrf },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   if (!res.ok) throw await parseError(res);
   return res.status === 204 ? (undefined as T) : ((await res.json()) as T);
+}
+
+export function apiPatch<T>(path: string, body: unknown): Promise<T> {
+  return apiPost<T>(path, body, "PATCH");
 }
