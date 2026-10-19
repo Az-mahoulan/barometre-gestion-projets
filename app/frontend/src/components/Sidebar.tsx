@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import type { Me, Member } from "@/lib/types";
+import type { Me } from "@/lib/types";
 
 import { Avatar, Icon } from "./ui";
 
@@ -21,17 +21,14 @@ const NAV = [
 export function Sidebar({
   me,
   alerts = 0,
-  members = [],
   subtitle,
 }: {
   me: Me;
   alerts?: number;
-  members?: Member[];
   subtitle: string;
 }) {
   const pathname = usePathname();
   const first = me.name.split(" ")[0];
-  const shown = members.slice(0, 4);
   return (
     <aside className="sticky top-3 hidden print:!hidden h-[calc(100vh-24px)] w-[216px] shrink-0 flex-col overflow-y-auto px-2 py-3 [scrollbar-width:none] lg:flex [&::-webkit-scrollbar]:hidden">
       <div className="flex items-center gap-2.5 px-1 text-[17px] font-bold">
@@ -84,23 +81,6 @@ export function Sidebar({
           );
         })}
       </nav>
-
-      <div className="mt-6 flex items-center px-1">
-        {shown.map((m) => (
-          <span
-            key={m.id}
-            className="-mr-2 rounded-full ring-2 ring-surface"
-            title={m.name}
-          >
-            <Avatar initials={m.initials} seed={m.name} size="h-9 w-9 text-[10.5px]" />
-          </span>
-        ))}
-        {members.length > shown.length && (
-          <span className="grid h-9 w-9 place-items-center rounded-full bg-surface-2 text-[10.5px] font-bold ring-2 ring-surface">
-            +{members.length - shown.length}
-          </span>
-        )}
-      </div>
 
       <div className="mt-auto rounded-[20px] bg-surface-2 p-4">
         <div className="flex items-center justify-between">

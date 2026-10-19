@@ -188,7 +188,6 @@ export function DashboardView() {
         <Sidebar
           me={me}
           alerts={data.critical_actions.total}
-          members={data.teams.members}
           subtitle={`${longDate(data.as_of).replace(/^./, (c) => c.toUpperCase())} · ${SCOPE_LABEL[data.scope]}`}
         />
         <main className="flex min-w-0 flex-1 flex-col">
