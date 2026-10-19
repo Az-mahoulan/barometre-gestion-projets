@@ -173,3 +173,31 @@ def build_calendar(user, year: int, month: int, project: int | None = None) -> d
         "days": [{"date": d, "in_month": d.month == month, "is_today": d == today, "items": items} for d, items in days.items()],
         "avatars": _avatars(people),
     }
+
+
+def build_team_screen(user, country: str | None = None) -> dict:
+    """Écran « Équipes » : disponibilité et charge de chacun, avec ses projets (parmi ceux visibles) et ses échéances
+    des 7 prochains jours."""
+    from datetime import timedelta
+
+    from .services import build_teams
+
+    today = today_date()
+    teams = build_teams(country, today)
+    projects = list(_visible_projects(user, None))
+    soon = today + timedelta(days=7)
+    users = {u.id: u for u in User.objects.filter(id__in=[m["id"] for m in teams["members"]]).select_related("presence")}
+    for m in teams["members"]:
+        # Projets en cours seulement (les projets achevés ne comptent plus dans la charge).
+        mine = [
+            p for p in projects
+            if p.status == Project.Status.ACTIVE and (p.owner_id == m["id"] or any(t.assignee_id == m["id"] for t in p.tasks.all()))
+        ]
+        m["projects"] = [{"id": p.id, "name": p.name, "owner": p.owner_id == m["id"]} for p in mine]
+        m["due_soon"] = sum(
+            1 for p in projects for t in p.tasks.all() if t.assignee_id == m["id"] and not t.is_complete and today <= t.due_date <= soon
+        )
+        pres = getattr(users.get(m["id"]), "presence", None)
+        m["until"] = pres.until if pres else None
+        m["role_label"] = users[m["id"]].get_role_display() if m["id"] in users else ""
+    return {"as_of": today, **teams, "avatars": _avatars(users.values())}

@@ -10,4 +10,5 @@ urlpatterns = [
     path("projects/<int:pk>/", views.ProjectDetailView.as_view(), name="project-detail"),
     path("my-tasks/", views.MyTasksView.as_view(), name="my-tasks"),
     path("calendar/", views.CalendarView.as_view(), name="calendar"),
+    path("teams/", views.TeamsView.as_view(), name="teams"),
 ]

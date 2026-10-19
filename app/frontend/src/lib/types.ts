@@ -271,3 +271,19 @@ export interface CalendarMonth {
   days: { date: string; in_month: boolean; is_today: boolean; items: WeekItem[] }[];
   avatars: Record<string, string | null>;
 }
+
+/** Écran « Équipes ». */
+export interface TeamMember extends Member {
+  projects: { id: number; name: string; owner: boolean }[];
+  due_soon: number;
+  until: string | null;
+  role_label: string;
+}
+
+export interface TeamScreen {
+  as_of: string;
+  available: number;
+  total: number;
+  members: TeamMember[];
+  avatars: Record<string, string | null>;
+}

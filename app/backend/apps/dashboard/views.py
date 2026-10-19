@@ -10,7 +10,7 @@ from apps.accounts.models import Country
 
 from apps.projects.models import Project
 
-from .projects import build_calendar, build_my_tasks, build_project_detail, build_projects_list
+from .projects import build_calendar, build_my_tasks, build_project_detail, build_projects_list, build_team_screen
 from .services import build_dashboard
 
 
@@ -121,6 +121,16 @@ class CalendarView(APIView):
         d = query.validated_data
         today = today_date()
         return Response(build_calendar(request.user, d.get("year", today.year), d.get("month", today.month), d.get("project")))
+
+
+class TeamsView(APIView):
+    """Écran « Équipes » : disponibilité, charge et projets de chacun (filtre pays)."""
+
+    @extend_schema(parameters=[OpenApiParameter("country", str)], responses={200: serializers.DictField()})
+    def get(self, request):
+        query = ProjectsQuerySerializer(data={"country": request.query_params.get("country", "")})
+        query.is_valid(raise_exception=True)
+        return Response(build_team_screen(request.user, query.validated_data.get("country")))
 
 
 class CountriesView(APIView):

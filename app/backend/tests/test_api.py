@@ -292,3 +292,11 @@ def test_calendar_month_grid(worker, project, client_for):
     items = [i for d in data["days"] for i in d["items"]]
     assert any(i["kind"] == "task" and i["title"] == "Tâche de worker" for i in items)
     assert client_for(worker).get("/api/v1/calendar/?month=13").status_code == 400
+
+
+def test_team_screen_lists_members_with_their_projects(admin, worker, project, client_for):
+    data = client_for(admin).get("/api/v1/teams/").json()
+    w = next(m for m in data["members"] if m["name"] == "worker")
+    assert [p["name"] for p in w["projects"]] == ["Projet test"] and w["open_tasks"] == 1
+    assert all(m["name"] != "admin" for m in data["members"])
+    assert client_for(admin).get("/api/v1/teams/?country=ZZ").status_code == 400
