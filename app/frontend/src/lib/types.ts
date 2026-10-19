@@ -314,3 +314,24 @@ export interface Notifications {
   unread: number;
   avatars: Record<string, string | null>;
 }
+
+/** Écran « Rapports ». */
+export interface Report {
+  as_of: string;
+  period: { key: Period; start: string; end: string };
+  kpis: Omit<Kpis, "overdue_tasks">;
+  projects: (ProjectRow & { tasks_overdue: number })[];
+  by_country: {
+    country: string;
+    projects: number;
+    active: number;
+    late: number;
+    risk: number;
+    completed: number;
+    tasks_total: number;
+    tasks_complete: number;
+    tasks_overdue: number;
+    progress: number;
+  }[];
+  trend: TrendMonth[];
+}

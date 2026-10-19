@@ -233,3 +233,73 @@ def build_notifications(user) -> dict:
         "unread": sum(1 for f in feed if f["unread"] and not f["mine"]),
         "avatars": _avatars({e.actor for e in logs if e.actor}),
     }
+
+
+def build_report(user, *, country: str | None = None, period: str = "year") -> dict:
+    """Écran « Rapports » : chiffres clés de la période, synthèse par projet et par pays, évolution mensuelle."""
+    from .services import build_kpis, build_trend, period_range
+
+    today = today_date()
+    p_start, p_end = period_range(period, today)
+    base = list(_visible_projects(user, country).prefetch_related("deliverables"))
+    stats = {p.id: project_stats(p, today) for p in base}
+    in_period = [p for p in base if p.end_date >= p_start and p.start_date < p_end]
+    rows = build_projects_overview(in_period, stats)
+    for r in rows:
+        r["tasks_overdue"] = stats[r["id"]]["tasks_overdue"]
+    by_country: dict[str, dict] = {}
+    for p in in_period:
+        c = by_country.setdefault(p.country.name, {"country": p.country.name, "projects": 0, "active": 0, "late": 0, "risk": 0,
+                                                   "completed": 0, "tasks_total": 0, "tasks_complete": 0, "tasks_overdue": 0})
+        s = stats[p.id]
+        c["projects"] += 1
+        c["active"] += p.status == Project.Status.ACTIVE
+        c["late"] += s["health"] == "late"
+        c["risk"] += s["health"] == "risk"
+        c["completed"] += s["health"] == "completed"
+        c["tasks_total"] += s["tasks_total"]
+        c["tasks_complete"] += s["tasks_complete"]
+        c["tasks_overdue"] += s["tasks_overdue"]
+    for c in by_country.values():
+        c["progress"] = c["tasks_complete"] / c["tasks_total"] if c["tasks_total"] else 0.0
+    return {
+        "as_of": today,
+        "period": {"key": period, "start": p_start, "end": p_end},
+        "kpis": build_kpis(in_period, stats, p_start, p_end),
+        "projects": rows,
+        "by_country": sorted(by_country.values(), key=lambda c: -c["projects"]),
+        "trend": build_trend([p for p in base if p.status == Project.Status.ACTIVE], today),
+    }
+
+
+REPORT_COLUMNS = [
+    ("Projet", "name"), ("Pays", "country"), ("Responsable", "owner"), ("Début", "start"), ("Fin prévue", "end"),
+    ("État", "health_label"), ("Avancement (%)", "progress_pct"), ("Performance (%)", "performance"),
+    ("Jalons atteints", "milestones"), ("Livrables remis", "deliverables"), ("Tâches terminées", "tasks"),
+    ("Tâches en retard", "tasks_overdue"), ("Prochain jalon", "next"),
+]
+HEALTH_LABEL = {"ok": "Dans les temps", "risk": "À surveiller", "late": "En retard", "completed": "Achevé"}
+
+
+def report_csv(report: dict) -> str:
+    """Synthèse par projet au format CSV (séparateur « ; », lisible directement par Excel en français)."""
+    import csv
+    import io
+
+    out = io.StringIO()
+    writer = csv.writer(out, delimiter=";")
+    writer.writerow([label for label, _ in REPORT_COLUMNS])
+    for r in report["projects"]:
+        nm = r["next_milestone"]
+        values = {
+            **r,
+            "health_label": HEALTH_LABEL[r["health"]],
+            "progress_pct": round(r["progress"] * 100),
+            "performance": "" if r["performance"] is None else r["performance"],
+            "milestones": f"{r['milestones_achieved']}/{r['milestones_total']}",
+            "deliverables": f"{r['deliverables_done']}/{r['deliverables_total']}",
+            "tasks": f"{r['tasks_complete']}/{r['tasks_total']}",
+            "next": f"{nm['name']} ({nm['date']})" if nm else "",
+        }
+        writer.writerow([values[key] for _, key in REPORT_COLUMNS])
+    return "﻿" + out.getvalue()  # BOM : Excel reconnaît l'UTF-8 (accents)

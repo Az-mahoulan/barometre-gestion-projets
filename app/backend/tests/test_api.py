@@ -310,3 +310,12 @@ def test_notifications_unread_and_reminders_for_me(boss, worker, project, client
     assert {"total", "counts", "items"} <= set(data["to_handle"])
     after = client_for(worker).post("/api/v1/notifications/seen/").json()
     assert after["unread"] == 0 and not any(f["unread"] for f in after["feed"])
+
+
+def test_report_json_and_csv_export(admin, project, client_for):
+    data = client_for(admin).get("/api/v1/reports/?period=year").json()
+    assert data["projects"][0]["name"] == "Projet test" and data["by_country"][0]["country"] == "Bénin"
+    csv = client_for(admin).get("/api/v1/reports/?export=csv")
+    assert csv.status_code == 200 and csv["Content-Type"].startswith("text/csv")
+    text = csv.content.decode("utf-8")
+    assert text.startswith("﻿Projet;Pays") and "Projet test;Bénin" in text

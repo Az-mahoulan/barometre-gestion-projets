@@ -33,7 +33,7 @@ export function Sidebar({
   const first = me.name.split(" ")[0];
   const shown = members.slice(0, 4);
   return (
-    <aside className="sticky top-3 hidden h-[calc(100vh-24px)] w-[216px] shrink-0 flex-col overflow-y-auto px-2 py-3 [scrollbar-width:none] lg:flex [&::-webkit-scrollbar]:hidden">
+    <aside className="sticky top-3 hidden print:!hidden h-[calc(100vh-24px)] w-[216px] shrink-0 flex-col overflow-y-auto px-2 py-3 [scrollbar-width:none] lg:flex [&::-webkit-scrollbar]:hidden">
       <div className="flex items-center gap-2.5 px-1 text-[17px] font-bold">
         <span className="grid h-[34px] w-[34px] place-items-center rounded-[10px] bg-side text-lime">
           <Icon name="logo" className="h-5 w-5" />

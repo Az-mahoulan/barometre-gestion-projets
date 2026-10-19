@@ -16,7 +16,9 @@ from .projects import (
     build_notifications,
     build_project_detail,
     build_projects_list,
+    build_report,
     build_team_screen,
+    report_csv,
 )
 from .services import build_dashboard
 
@@ -158,6 +160,30 @@ class NotificationsSeenView(APIView):
         request.user.notifications_seen_at = timezone.now()
         request.user.save(update_fields=["notifications_seen_at"])
         return Response(build_notifications(request.user))
+
+
+class ReportView(APIView):
+    """Rapport de la période (chiffres clés, synthèse par projet et par pays, évolution) ; ?format=csv pour l'export."""
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("country", str),
+            OpenApiParameter("period", str, enum=["month", "quarter", "year"]),
+            OpenApiParameter("export", str, enum=["csv"], description="csv : télécharge la synthèse par projet"),
+        ],
+        responses={200: serializers.DictField()},
+    )
+    def get(self, request):
+        from django.http import HttpResponse
+
+        query = DashboardQuerySerializer(data=request.query_params)
+        query.is_valid(raise_exception=True)
+        report = build_report(request.user, country=query.validated_data.get("country"), period=query.validated_data["period"])
+        if request.query_params.get("export") == "csv":
+            response = HttpResponse(report_csv(report), content_type="text/csv; charset=utf-8")
+            response["Content-Disposition"] = f'attachment; filename="rapport-projets-{report["as_of"]}.csv"'
+            return response
+        return Response(report)
 
 
 class CountriesView(APIView):
