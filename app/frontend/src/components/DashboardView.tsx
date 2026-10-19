@@ -280,7 +280,7 @@ export function DashboardView() {
                     id: "critical",
                     label: "Actions critiques",
                     node: (
-                      <CriticalCard total={data.critical_actions.total} items={data.critical_actions.items} busy={busy} onAction={runAction} />
+                      <CriticalCard total={data.critical_actions.total} counts={data.critical_actions.counts} items={data.critical_actions.items} busy={busy} onAction={runAction} />
                     ),
                   },
                   {

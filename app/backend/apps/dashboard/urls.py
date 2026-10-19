@@ -11,4 +11,6 @@ urlpatterns = [
     path("my-tasks/", views.MyTasksView.as_view(), name="my-tasks"),
     path("calendar/", views.CalendarView.as_view(), name="calendar"),
     path("teams/", views.TeamsView.as_view(), name="teams"),
+    path("notifications/", views.NotificationsView.as_view(), name="notifications"),
+    path("notifications/seen/", views.NotificationsSeenView.as_view(), name="notifications-seen"),
 ]

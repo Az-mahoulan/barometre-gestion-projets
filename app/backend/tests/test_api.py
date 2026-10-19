@@ -300,3 +300,13 @@ def test_team_screen_lists_members_with_their_projects(admin, worker, project, c
     assert [p["name"] for p in w["projects"]] == ["Projet test"] and w["open_tasks"] == 1
     assert all(m["name"] != "admin" for m in data["members"])
     assert client_for(admin).get("/api/v1/teams/?country=ZZ").status_code == 400
+
+
+def test_notifications_unread_and_reminders_for_me(boss, worker, project, client_for):
+    task = project.tasks.first()
+    client_for(boss).post(f"/api/v1/tasks/{task.id}/remind/")
+    data = client_for(worker).get("/api/v1/notifications/").json()
+    assert data["unread"] == 1 and data["feed"][0]["for_me"] is True
+    assert {"total", "counts", "items"} <= set(data["to_handle"])
+    after = client_for(worker).post("/api/v1/notifications/seen/").json()
+    assert after["unread"] == 0 and not any(f["unread"] for f in after["feed"])

@@ -35,6 +35,8 @@ class User(AbstractUser):
     avatar = models.CharField("Avatar", max_length=200, null=True, blank=True, unique=True, editable=False)
     # Disposition personnelle du tableau de bord : ordre des cartes par colonne ({"main": [...], "side": [...]}).
     dashboard_layout = models.JSONField("Disposition du tableau de bord", default=dict, blank=True)
+    # Dernière consultation des notifications : ce qui est plus récent est « non lu ».
+    notifications_seen_at = models.DateTimeField("Notifications lues jusqu'au", null=True, blank=True)
 
     class Meta:
         verbose_name = "utilisateur"

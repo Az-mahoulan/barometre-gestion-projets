@@ -42,11 +42,13 @@ function split(subtitle: string) {
 
 export function CriticalCard({
   total,
+  counts,
   items,
   busy,
   onAction,
 }: {
   total: number;
+  counts?: Record<CriticalItem["severity"], number>;
   items: CriticalItem[];
   busy: string | null;
   onAction: (item: CriticalItem) => void;
@@ -91,7 +93,7 @@ export function CriticalCard({
       {collapsed && items.length > 0 && (
         <button onClick={toggle} className="card flex w-full flex-wrap items-center gap-2 text-left hover:bg-surface-2/40">
           {SUMMARY.map((g) => {
-            const n = items.filter((i) => i.severity === g.key).length;
+            const n = counts ? counts[g.key] : items.filter((i) => i.severity === g.key).length;
             return n > 0 ? (
               <span key={g.key} className={`chip ${TONES[g.tone]}`}>
                 {n} {n > 1 ? g.many : g.one}

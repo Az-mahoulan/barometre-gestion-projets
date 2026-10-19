@@ -317,7 +317,7 @@ def build_task_progress(tasks) -> dict:
     }
 
 
-def build_critical(user, projects, stats, today: date) -> dict:
+def build_critical(user, projects, stats, today: date, limit: int | None = 8) -> dict:
     items: list[dict] = []
     active = [p for p in projects if p.status == Project.Status.ACTIVE]
     if user.role != User.Role.MEMBRE:
@@ -350,7 +350,8 @@ def build_critical(user, projects, stats, today: date) -> dict:
                  "subtitle": f"{t.project.name} · en revue, à approuver", "action": "approve", "task_id": t.id, "days": 0}
             )
     items.sort(key=lambda i: (SEVERITY_RANK[i["severity"]], -i["days"]))
-    return {"total": len(items), "items": items[:8]}
+    counts = {k: sum(1 for i in items if i["severity"] == k) for k in SEVERITY_RANK}
+    return {"total": len(items), "counts": counts, "items": items[:limit] if limit else items}
 
 
 def build_activity(projects) -> list[dict]:

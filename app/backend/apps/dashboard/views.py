@@ -10,7 +10,14 @@ from apps.accounts.models import Country
 
 from apps.projects.models import Project
 
-from .projects import build_calendar, build_my_tasks, build_project_detail, build_projects_list, build_team_screen
+from .projects import (
+    build_calendar,
+    build_my_tasks,
+    build_notifications,
+    build_project_detail,
+    build_projects_list,
+    build_team_screen,
+)
 from .services import build_dashboard
 
 
@@ -131,6 +138,26 @@ class TeamsView(APIView):
         query = ProjectsQuerySerializer(data={"country": request.query_params.get("country", "")})
         query.is_valid(raise_exception=True)
         return Response(build_team_screen(request.user, query.validated_data.get("country")))
+
+
+class NotificationsView(APIView):
+    """À traiter (retards, échéances proches, approbations) et fil des projets, avec les non-lus."""
+
+    @extend_schema(responses={200: serializers.DictField()})
+    def get(self, request):
+        return Response(build_notifications(request.user))
+
+
+class NotificationsSeenView(APIView):
+    """Marque toutes les notifications comme lues (jusqu'à maintenant)."""
+
+    @extend_schema(request=None, responses={200: serializers.DictField()})
+    def post(self, request):
+        from django.utils import timezone
+
+        request.user.notifications_seen_at = timezone.now()
+        request.user.save(update_fields=["notifications_seen_at"])
+        return Response(build_notifications(request.user))
 
 
 class CountriesView(APIView):

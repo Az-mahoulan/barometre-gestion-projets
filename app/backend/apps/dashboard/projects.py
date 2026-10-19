@@ -201,3 +201,35 @@ def build_team_screen(user, country: str | None = None) -> dict:
         m["until"] = pres.until if pres else None
         m["role_label"] = users[m["id"]].get_role_display() if m["id"] in users else ""
     return {"as_of": today, **teams, "avatars": _avatars(users.values())}
+
+
+def build_notifications(user) -> dict:
+    """Écran « Notifications » : ce qui est à traiter maintenant (retards, échéances proches, approbations) et le fil
+    des projets visibles, avec les éléments non lus depuis la dernière consultation et les relances qui visent la
+    personne."""
+    from .services import build_critical
+
+    today = today_date()
+    projects = list(_visible_projects(user, None))
+    stats = {p.id: project_stats(p, today) for p in projects}
+    critical = build_critical(user, projects, stats, today, limit=None)
+    seen = user.notifications_seen_at
+    logs = ActivityLog.objects.filter(project__in=[p.id for p in projects]).select_related("actor", "project")[:40]
+    feed = []
+    for e in logs:
+        # Les relances sont enregistrées au journal sous la forme « X a relancé Y pour « tâche » ».
+        for_me = " a relancé " in e.message and f" a relancé {user.display_name} " in e.message
+        feed.append(
+            {"id": e.id, "message": e.message, "actor_name": e.actor.display_name if e.actor else "",
+             "actor_initials": e.actor.initials if e.actor else "", "project": {"id": e.project_id, "name": e.project.name},
+             "created_at": e.created_at, "unread": seen is None or e.created_at > seen, "for_me": for_me,
+             "mine": e.actor_id == user.id}
+        )
+    return {
+        "as_of": today,
+        "now": now_reference(),
+        "to_handle": critical,
+        "feed": feed,
+        "unread": sum(1 for f in feed if f["unread"] and not f["mine"]),
+        "avatars": _avatars({e.actor for e in logs if e.actor}),
+    }

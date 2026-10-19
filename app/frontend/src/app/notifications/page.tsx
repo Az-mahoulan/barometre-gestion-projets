@@ -1,15 +1,5 @@
-import { ComingSoon } from "@/components/screens/ComingSoon";
+import { NotificationsScreen } from "@/components/screens/NotificationsScreen";
 
 export default function NotificationsPage() {
-  return (
-    <ComingSoon
-      title="Notifications"
-      icon="bell"
-      items={[
-        "Échéances proches et retards",
-        "Relances reçues et tâches à approuver",
-        "Marquer comme lu",
-      ]}
-    />
-  );
+  return <NotificationsScreen />;
 }

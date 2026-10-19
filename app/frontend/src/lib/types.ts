@@ -131,6 +131,13 @@ export interface CriticalItem {
   project_id?: number;
 }
 
+/** Actions à traiter : total, décompte par gravité (toutes) et liste (éventuellement limitée). */
+export interface CriticalActions {
+  total: number;
+  counts: Record<CriticalItem["severity"], number>;
+  items: CriticalItem[];
+}
+
 export interface ActivityEntry {
   id: number;
   message: string;
@@ -189,7 +196,7 @@ export interface Dashboard {
   week: Week;
   trend: TrendMonth[];
   task_progress: { total: number; overdue: number; in_review: number; statuses: TaskStatusCount[] };
-  critical_actions: { total: number; items: CriticalItem[] };
+  critical_actions: CriticalActions;
   recent_activity: ActivityEntry[];
   projects: ProjectRow[];
   teams: { available: number; total: number; members: Member[] };
@@ -285,5 +292,25 @@ export interface TeamScreen {
   available: number;
   total: number;
   members: TeamMember[];
+  avatars: Record<string, string | null>;
+}
+
+/** Écran « Notifications ». */
+export interface Notifications {
+  as_of: string;
+  now: string;
+  to_handle: CriticalActions;
+  feed: {
+    id: number;
+    message: string;
+    actor_name: string;
+    actor_initials: string;
+    project: { id: number; name: string };
+    created_at: string;
+    unread: boolean;
+    for_me: boolean;
+    mine: boolean;
+  }[];
+  unread: number;
   avatars: Record<string, string | null>;
 }
