@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import AlarmOutlined from "@mui/icons-material/AlarmOutlined";
+import DeleteOutlined from "@mui/icons-material/DeleteOutlined";
 import DonutLargeOutlined from "@mui/icons-material/DonutLargeOutlined";
+import EditOutlined from "@mui/icons-material/EditOutlined";
 import DragIndicatorOutlined from "@mui/icons-material/DragIndicatorOutlined";
 import ViewStreamOutlined from "@mui/icons-material/ViewStreamOutlined";
 import ShuffleOutlined from "@mui/icons-material/ShuffleOutlined";
@@ -100,6 +102,8 @@ const ICONS: Record<string, typeof SvgIcon> = {
   go: NorthEastRounded,
   alarm: AlarmOutlined,
   donut: DonutLargeOutlined,
+  edit: EditOutlined,
+  trash: DeleteOutlined,
   drag: DragIndicatorOutlined,
   rowsview: ViewStreamOutlined,
   shuffle: ShuffleOutlined,

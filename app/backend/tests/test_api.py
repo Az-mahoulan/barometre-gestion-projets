@@ -345,3 +345,25 @@ def test_administration_is_admin_only_and_manages_accounts(admin, boss, worker, 
     assert c.patch(f"/api/v1/admin/projects/{pid}/", {"status": "completed"}, format="json").status_code == 200
     assert c.post("/api/v1/admin/countries/", {"code": "ml", "name": "Mali"}, format="json").status_code == 201
     assert c.post("/api/v1/admin/countries/", {"code": "ML", "name": "Mali"}, format="json").status_code == 400
+
+
+def test_milestone_and_deliverable_entry(boss, other_boss, worker, project, client_for):
+    c = client_for(boss)
+    # Création, dates contrôlées
+    assert c.post(f"/api/v1/projects/{project.id}/milestones/", {"name": "Hors projet", "due_date": "2027-01-10"}, format="json").status_code == 400
+    a = c.post(f"/api/v1/projects/{project.id}/milestones/", {"name": "Cadrage", "due_date": "2026-09-20"}, format="json").json()["id"]
+    b = c.post(f"/api/v1/projects/{project.id}/milestones/", {"name": "Livraison", "due_date": "2026-11-20", "depends_on": [a]}, format="json").json()["id"]
+    # Pas de boucle de dépendances
+    assert c.patch(f"/api/v1/milestones/{a}/", {"depends_on": [b]}, format="json").status_code == 400
+    assert c.patch(f"/api/v1/milestones/{a}/", {"achieved_on": "2026-09-19"}, format="json").status_code == 200
+    # Droits : ni un membre ni un autre responsable
+    assert client_for(worker).patch(f"/api/v1/milestones/{a}/", {"name": "x"}, format="json").status_code == 403
+    assert client_for(other_boss).delete(f"/api/v1/milestones/{a}/").status_code == 404
+    # Livrables
+    d = c.post(f"/api/v1/projects/{project.id}/deliverables/", {"name": "Rapport", "due_date": "2026-11-15"}, format="json").json()["id"]
+    assert c.patch(f"/api/v1/deliverables/{d}/", {"delivered_on": "2026-10-14"}, format="json").status_code == 200
+    detail = c.get(f"/api/v1/projects/{project.id}/").json()
+    assert [x["name"] for x in detail["milestones"]] == ["Cadrage", "Livraison"] and detail["milestones"][1]["depends_on"] == [a]
+    assert detail["deliverables"][0]["delivered_on"] == "2026-10-14"
+    assert c.delete(f"/api/v1/deliverables/{d}/").status_code == 204
+    assert c.delete(f"/api/v1/milestones/{b}/").status_code == 204

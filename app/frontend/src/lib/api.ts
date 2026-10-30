@@ -70,7 +70,7 @@ export async function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> 
   return (await res.json()) as T;
 }
 
-export async function apiPost<T>(path: string, body?: unknown, method: "POST" | "PATCH" = "POST"): Promise<T> {
+export async function apiPost<T>(path: string, body?: unknown, method: "POST" | "PATCH" | "DELETE" = "POST"): Promise<T> {
   const csrf = await ensureCsrf();
   const res = await fetch(`/api/v1${path}`, {
     method,
@@ -84,4 +84,8 @@ export async function apiPost<T>(path: string, body?: unknown, method: "POST" | 
 
 export function apiPatch<T>(path: string, body: unknown): Promise<T> {
   return apiPost<T>(path, body, "PATCH");
+}
+
+export function apiDelete(path: string): Promise<void> {
+  return apiPost<void>(path, undefined, "DELETE");
 }

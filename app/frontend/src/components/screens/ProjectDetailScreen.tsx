@@ -9,6 +9,7 @@ import { useApi } from "@/lib/hooks";
 import type { ProjectDetail, ProjectTask } from "@/lib/types";
 
 import { relative } from "../ActivityCard";
+import { DeliverablesSection, MilestonesSection } from "../ProjectEntry";
 import { AppFrame } from "../AppFrame";
 import { Deadline } from "../Deadline";
 import { Glass, Ring } from "../ProjectsTable";
@@ -20,6 +21,11 @@ export function ProjectDetailScreen({ id }: { id: string }) {
   const { data, error, refresh } = useApi<ProjectDetail>(`/projects/${id}/`);
   const [toast, setToast] = useState<string | null>(null);
   const [busy, setBusy] = useState<number | null>(null);
+
+  const say = (message: string) => {
+    setToast(message);
+    setTimeout(() => setToast(null), 3500);
+  };
 
   async function move(task: ProjectTask, status: string) {
     setBusy(task.id);
@@ -51,7 +57,7 @@ export function ProjectDetailScreen({ id }: { id: string }) {
             Chargement…
           </p>
         ) : (
-          <Detail data={data} busy={busy} onMove={move} toast={toast} />
+          <Detail data={data} busy={busy} onMove={move} toast={toast} refresh={refresh} say={say} />
         )
       }
     </AppFrame>
@@ -63,11 +69,15 @@ function Detail({
   busy,
   onMove,
   toast,
+  refresh,
+  say,
 }: {
   data: ProjectDetail;
   busy: number | null;
   onMove: (t: ProjectTask, status: string) => void;
   toast: string | null;
+  refresh: () => void;
+  say: (message: string) => void;
 }) {
   const p = data.project;
   const overdue = data.tasks.filter((t) => t.overdue).length;
@@ -153,32 +163,8 @@ function Detail({
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_316px]">
         <div className="flex min-w-0 flex-col gap-4">
-          {/* Jalons */}
-          <section className="card" aria-label="Jalons">
-            <CardHeader title="Jalons" aside={`${p.milestones_achieved} atteint${p.milestones_achieved > 1 ? "s" : ""} sur ${p.milestones_total}`} />
-            <ul className="flex flex-col divide-y divide-line">
-              {data.milestones.map((m) => {
-                const state = m.achieved ? { label: "Atteint", cls: "bg-ok-soft text-ok" } : m.overdue ? { label: "Dépassé", cls: "bg-late-soft text-late" } : { label: "À venir", cls: "bg-surface-2 text-ink-2" };
-                return (
-                  <li key={m.id} className="flex flex-wrap items-center gap-x-4 gap-y-1 py-2.5">
-                    <Icon name="flag" className={`h-4 w-4 ${m.achieved ? "text-ok" : m.overdue ? "text-late" : "text-muted"}`} />
-                    <b className="min-w-[160px] flex-1 text-[13px] font-semibold">{m.name}</b>
-                    <span className="w-[150px]">
-                      <span className="block h-1.5 overflow-hidden rounded-full bg-track">
-                        <span className="block h-full rounded-full" style={{ width: `${Math.round(m.progress * 100)}%`, background: m.achieved ? "var(--bar-ok)" : color }} />
-                      </span>
-                      <small className="text-[11px] text-muted">
-                        {Math.round(m.progress * 100)} % · {m.tasks_complete}/{m.tasks_total} tâches
-                      </small>
-                    </span>
-                    <span className="w-[64px] text-right text-[12px] text-ink-2">{shortDate(m.date)}</span>
-                    <span className={`chip w-[72px] justify-center ${state.cls}`}>{state.label}</span>
-                  </li>
-                );
-              })}
-              {data.milestones.length === 0 && <li className="py-2 text-[12.5px] text-muted">Aucun jalon.</li>}
-            </ul>
-          </section>
+          {/* Jalons (saisie pour le responsable du projet) */}
+          <MilestonesSection data={data} color={color} refresh={refresh} say={say} />
 
           {/* Activités */}
           <section className="card" aria-label="Activités">
@@ -232,24 +218,8 @@ function Detail({
             </ul>
           </section>
 
-          {/* Livrables */}
-          <section className="card" aria-label="Livrables">
-            <CardHeader title="Livrables" aside={`${p.deliverables_done}/${p.deliverables_total} remis`} />
-            <ul className="flex flex-col gap-2">
-              {data.deliverables.map((d) => (
-                <li key={d.id} className="flex items-center gap-2.5 text-[12.5px]">
-                  <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full ${d.delivered_on ? "bg-ok-soft text-ok" : d.late ? "bg-late-soft text-late" : "bg-surface-2 text-muted"}`}>
-                    <Icon name={d.delivered_on ? "check" : "clock"} className="h-3.5 w-3.5" />
-                  </span>
-                  <span className="min-w-0 flex-1 truncate font-medium">{d.name}</span>
-                  <small className={`shrink-0 text-[11px] ${d.late ? "font-semibold text-late" : "text-muted"}`}>
-                    {d.delivered_on ? `remis le ${shortDate(d.delivered_on)}` : `pour le ${shortDate(d.due)}`}
-                  </small>
-                </li>
-              ))}
-              {data.deliverables.length === 0 && <li className="text-[12.5px] text-muted">Aucun livrable.</li>}
-            </ul>
-          </section>
+          {/* Livrables (saisie pour le responsable du projet) */}
+          <DeliverablesSection data={data} refresh={refresh} say={say} />
 
           {/* Dates clés */}
           {data.key_dates.length > 0 && (

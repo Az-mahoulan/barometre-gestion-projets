@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 import type { Me } from "@/lib/types";
 
-import { Avatar, Icon } from "./ui";
+import { Icon } from "./ui";
 
 const NAV = [
   { href: "/", icon: "grid", label: "Tableau de bord" },
